@@ -1,0 +1,204 @@
+{%extends "base.html" %}
+{%block content%}
+
+    <div class="content">
+        <div class="election-details">
+            <div class="election-details-title">{{election.name}}</div>
+            {% if election.is_stopped %} 
+                <button class="election-details-votebtn" disabled style="background-color: #a1a0a0;">Vote</button>
+            {% else %}
+                <button onclick="window.location.href='/vote/{{ election.eid }}';" class="election-details-votebtn">Vote</button>
+            {% endif %}
+            <button onclick="shareOptions()" class="election-details-sharebtn">Share</button>
+
+            <div class="sep"></div>
+
+            <div class="election-details-body">
+                <div class="election-details-description">
+                    <p>
+                        {% for line in election.description.split("\n") %}
+                        {{line}}<br>
+                        {% endfor %}
+                    </p>
+                </div>
+
+                <div class="sep"></div>
+
+                <div class="section-caption">
+                    <span>Candidates</span>
+                </div>
+
+                <div class="sep"></div>
+
+                <div>
+                    {% for candidate in election.candidates %}
+                    <div class="is-candidate">
+                        {{candidate}}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="sep"></div>
+
+                <div class="section-caption">
+                    <span>Committee Size</span>
+                </div>
+
+                <div class="sep"></div>
+
+
+                <div>
+                    <input type="range" id="committeesize" name="committeesize" min="2" max="10" class="slider" list="ticks" value="{{election.K}}" style="width: 100%;" disabled>
+                    <datalist id="ticks" style="width: 100%; margin-left: 0;">
+                        <option value="2" label="2"></option>
+                        <option value="3"></option>
+                        <option value="4" label="4"></option>
+                        <option value="5"></option>
+                        <option value="6" label="6"></option>
+                        <option value="7"></option>
+                        <option value="8" label="8"></option>
+                        <option value="9"></option>
+                        <option value="10" label="10"></option>
+                    </datalist>
+                </div>
+
+                {% if election.is_finished %}
+                    <div class="sep"></div>
+                    <div class="sep"></div>
+                    <div class="sep"></div>
+                    <div class="section-caption">
+                        <span>Election Result</span>
+                    </div>
+                    <div class="sep"></div>
+                    The following committee is the winner of this election:
+
+                    <div>
+                        {% for candidate in election.winner %}
+                        <div class="is-candidate">
+                            {{candidate}}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% if admin %}
+                    <div class="sep"></div>
+                    <div class="sep"></div>
+                    <div class="sep"></div>
+                    <div class="section-caption">
+                        <span>Admin Space</span>
+                    </div>
+                    <div class="sep"></div>
+                    Currently <b>{{election.votecount}} voters</b> participated.
+                    <div class="sep"></div>
+                    The current best committee(s) is (are) the following:
+                    <ul>
+                    {% for id in bestcommittees.keys() %}
+                        <li>{% for candidate in bestcommittees[id] %}{{candidate}}, {% endfor %} </li>
+                    {% endfor %}
+                    </ul>
+
+                    <div style="padding-top: 25px;">
+                        <form method="post">
+                            <input type="hidden" id="token" name="token" value="{{election.evaluation_token}}">
+                            <input type="submit" value="Refresh" class="election-details-refreshbtn" formaction="/admin/{{ election.eid }}">
+                            {% if election.is_finished %} 
+                                <input type="submit" value="Stop and Evaluate" class="election-details-resultbtn" disabled style="background-color: #a1a0a0;">
+                            {% else %}
+                                <input type="submit" value="Stop and Evaluate" class="election-details-resultbtn" formaction="/evaluate/{{ election.eid }}" onclick="return confirm('By evaluating the election, it will be closed for further votes. Do you want to continue evaluation?')">
+                            {% endif %}
+                            <input type="submit" value="Delete" class="election-details-deletebtn" formaction="/delete/{{ election.eid }}">
+                        </form>
+                    </div>
+                {% else %}
+                    <div class="sep"></div>
+                    <div class="sep"></div>
+                    <div class="sep"></div>
+
+                    <div style="padding-top: 25px;">
+                        <form method="post">
+                            <input type="text" id="token" name="token" class="tokenentry" placeholder="Access Token" required>
+                            <input type="submit" value="Admin Details" class="election-details-adminbtn" formaction="/admin/{{ election.eid }}">
+                        </form>
+                    </div>
+                {% endif %}
+
+                <div class="sep"></div>
+            </div>
+        </div>
+    </div>
+
+    {% if justcreated %}
+        <div class="blurred-background" id="token-window-bg"></div>
+        <div class="infowindow" id="token-window-fg">
+            <div class="infowindow-title">
+                Access Token
+            </div>
+            <div class="window-content">
+                <p>
+                    Your election was created <span style="color: green;">successfully.</span>
+                    To evaluate or delete the election, you need the following access token.
+                    Please save your token, and don't share it with anyone.
+                </p>
+                <div class="center">
+                    <input type="text" value="{{election.evaluation_token}}" id="evaltoken" class="textfield" style="width: 50%;" readonly>
+                    <br><br>
+                    <button class="copybutton" onclick="copyEvalToClipboard()">Copy and Close</button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="blurred-background" id="share-window-bg" style="display: none;"></div>
+        <div class="infowindow" id="share-window-fg" style="display: none;">
+            <div class="infowindow-title">
+                Share Link
+            </div>
+            <div class="window-content">
+                <p>
+                    Share this link with other voters.
+                </p>
+                <div class="center">
+                    <input type="text" value="/details/{{ election.eid }}" id="sharelink" class="textfield" style="width: 50%;" readonly>
+                    <br><br>
+                    <button class="copybutton" onclick="copyShareToClipboard()">Copy and Close</button>
+                </div>
+            </div>
+        </div>
+
+{% endblock %}
+
+{%block scripts%}
+  <script>
+    // Copy the evaluation token.
+    function copyEvalToClipboard() {
+        var copyText = document.getElementById("evaltoken");
+        // Select the text field
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); // For mobile devices
+        // Copy the text inside the text field
+        navigator.clipboard.writeText(copyText.value);
+        
+        // Hide info window
+        document.getElementById("token-window-bg").style.display = "none";
+        document.getElementById("token-window-fg").style.display = "none";
+    }
+
+    function shareOptions() {        
+        // Show info window
+        document.getElementById("share-window-bg").style.display = "block";
+        document.getElementById("share-window-fg").style.display = "block";
+    }
+
+    function copyShareToClipboard() {
+        var copyText = document.getElementById("sharelink");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(copyText.value);
+        
+        // Hide info window
+        document.getElementById("share-window-bg").style.display = "none";
+        document.getElementById("share-window-fg").style.display = "none";
+    }
+  </script>
+{% endblock %}

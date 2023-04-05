@@ -1,0 +1,244 @@
+{%extends "base.html" %}
+{%block content%}
+
+<div class="content">
+  <div class="election-details">
+      <div class="election-details-title">{{election.name}}</div>
+      <div class="election-details-body">
+
+        {% if election.is_stopped %} 
+          <p>
+            It seems that this election is already closed for further votes.
+          </p>
+        {% else %}
+
+        <h2>How it works:</h2>
+        <p>
+          <b>It is simple.</b>
+          Voting works in two steps.
+          <ol>
+            <li><b>Select all candidates you approve.</b> More precisely: Select each candidate for which you think there exists a committee (of size {{election.K}}) where this candidate is part of, and you find it good that the candidate is part of it.</li>
+            <br>
+            <li>
+              <b>Refine your ballot</b> by stating under which conditions you like each candidate.
+              <ul>
+                <li><i>Unconditional approval:</i> The candidates are good regardless of other candidates in the committee.</li>
+                <li><i>Substitution:</i> Having one of these candidates is good, but having more than one is just as good as having only one.</li>
+                <li><i>Dependency:</i> These candidates only make sense when they are together in the committee. Any subset of them is useless.</li>
+                <li><i>Incompatibility:</i> Having exactly one of these candidates is good, but there shouldn't be more than one of them.</li>
+              </ul>
+            </li>
+          </ol>
+        </p>
+        <div class="sep"></div>
+        <div class="sep"></div>
+
+        <!-- Step 1 -->
+        <h3>Step 1: Drag and drop all candidates you approve.</h3>
+        <div id="step1">
+          <div class="sep"></div>
+          <div>
+            {% for candidate in election.candidates %}
+            <div id="{{candidate}}" class="is-candidate" draggable="true" ondragstart="onDragStart(event);">
+              {{candidate}}
+            </div>
+            {% endfor %}
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="bin" style="width: 80%; margin-left: 10%; margin-right: 10%;">
+            <div id="bin-init" class="bin-dropzone" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+              Drop approved items here.
+            </div>
+            <div id="bin-inititems" class="bin-items"></div>
+          </div>
+
+          <div class="sep"></div>
+          <button class="votebutton" onclick="finishApproval()">Continue with Step 2</button>
+          <div class="sep"></div>
+        </div>
+        <hr>
+        <!-- End Step 1 -->
+
+        <!-- Step 2 -->
+        <div id="step2" style="display: none;">
+          <h3>Step 2: If you want, you can specify your preference further.</h3>
+          <div class="sep"></div>
+          <div class="bin" style="width: 80%; margin-left: 10%; margin-right: 10%;">
+            <div id="bin0" class="bin-dropzone" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+              Items here are unconditionally approved.
+            </div>
+            <div id="bin0items" class="bin-items"></div>
+          </div>
+
+          <div class="sep"></div>
+          <div class="sep"></div>
+
+          <div style="position: relative;">
+            <!-- Bin 1 -->
+            <div class="bin" style="width: 26%; margin-left: 3%; margin-right: 3%;">
+              <div id="bin1" class="bin-dropzone" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+                Drop here.
+              </div>
+              <div id="bin1items" class="bin-items"></div>
+              <hr style="background-color: #c9c9c9;">
+              <div class="bin-settings">
+                <form>
+                  <input type="radio" id="bin1substitution" name="bin1type" checked="checked"> Substitution<br>
+                  <input type="radio" id="bin1incompatibility" name="bin1type"> Incompatibility<br>
+                  <input type="radio" id="bin1dependency" name="bin1type"> Dependency
+                </form>
+              </div>
+            </div>
+
+            <!-- Bin 2 -->
+            <div class="bin" style="width: 26%; margin-left: 3%; margin-right: 3%;">
+              <div id="bin2" class="bin-dropzone" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+                Drop here.
+              </div>
+              <div id="bin2items" class="bin-items"></div>
+              <hr style="background-color: #c9c9c9;">
+              <div class="bin-settings">
+                <form>
+                  <input type="radio" id="bin2substitution" name="bin2type" checked="checked"> Substitution<br>
+                  <input type="radio" id="bin2incompatibility" name="bin2type"> Incompatibility<br>
+                  <input type="radio" id="bin2dependency" name="bin2type"> Dependency
+                </form>
+              </div>
+            </div>
+
+            <!-- Bin 3 -->
+            <div class="bin" style="width: 26%; margin-left: 3%; margin-right: 3%;">
+              <div id="bin3" class="bin-dropzone" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+                Drop here.
+              </div>
+              <div id="bin3items" class="bin-items"></div>
+              <hr style="background-color: #c9c9c9;">
+              <div class="bin-settings">
+                <form>
+                  <input type="radio" id="bin3substitution" name="bin3type" checked="checked"> Substitution<br>
+                  <input type="radio" id="bin3incompatibility" name="bin3type"> Incompatibility<br>
+                  <input type="radio" id="bin3dependency" name="bin3type"> Dependency
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+          <div class="sep"></div>
+          <button class="votebutton" onclick="sendBallot()">Vote!</button>
+          <div class="sep"></div>
+        </div>
+        <!-- End Step 2 -->
+
+        {% endif %} 
+      </div>
+    </div>
+  </div>
+
+
+    
+{% endblock %}
+
+
+
+
+{%block scripts%}
+  <!-- This is the required script for drag and drop actions, and the form filling and sending. -->
+  <script>
+    var url = "/vote/{{election.eid}}";
+
+    var bins = ["bin0", "bin1", "bin2", "bin3"];
+    var sets = {"bin-init" : []};
+    var bounds = {};
+    bins.forEach ((id) => {sets[id] = []});
+    var tmp = Array.prototype.slice.call(document.getElementsByClassName('is-alternative'))
+    var items = tmp.map(function(e) {return e.id;});
+
+    function sendBallot(){
+      computeBounds()
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onreadystatechange = function() { 
+        if (this.readyState == 4) {
+          if(this.status == 200){
+            window.location.href = '/done';
+          }
+          else{
+            alert("Something went wrong. Please reload the page and try again.");
+          }
+        } 
+      };
+      xhr.send(JSON.stringify({
+          "sets" : sets,
+          "bounds" : bounds
+      }));
+    }
+
+    function computeBounds(){
+      bins.forEach ((id) => {
+        if (id == "bin0"){
+          bounds[id] = [1, sets[id].length, sets[id].length]
+        }
+        else if (document.getElementById(id + "substitution").checked){
+          bounds[id] = [1, 1, sets[id].length]
+        }
+        else if (document.getElementById(id + "dependency").checked){
+          bounds[id] = [sets[id].length, sets[id].length, sets[id].length]
+        }
+        else if (document.getElementById(id + "incompatibility").checked){
+          bounds[id] = [1, 1, 1]
+        }
+        else{
+          bounds[id] = [1, sets[id].length, sets[id].length]
+        }
+      });
+    }
+
+    function removeCandidateFromAllSets(candidate){
+      bins.forEach ((binID) => {
+        sets[binID] = sets[binID].filter(c => c !== candidate)
+      });
+    }
+
+    function finishApproval(){
+      $("#step1").slideToggle();
+      $("#step2").slideToggle();
+      sets["bin0"] = sets["bin-init"];
+      delete sets["bin-init"];
+      sets["bin0"].forEach ((candidateid) => {
+        var candidate = document.getElementById(candidateid);
+        document.getElementById("bin0items").appendChild(candidate);
+      });
+    }
+
+
+    /*
+        Drag and Drop Listeners
+    */
+    function onDragStart(event){
+        event.dataTransfer.setData('text/plain', event.target.id); //store id of element
+    }
+
+    function onDragOver(event){
+        event.preventDefault();
+    }
+
+    function onDrop(event){
+        var cid = event.dataTransfer.getData('text'); //Get the id of dropped element
+        var candidate = document.getElementById(cid);
+        // candidate.style.width = "5vw"
+        // candidate.style.height = "2vw"
+        // candidate.style.fontSize = "0.8vw"
+        // candidate.style.paddingTop = "1vw"
+        var bin = event.target;
+        var bin_itemzone = document.getElementById(bin.id + "items");
+        bin_itemzone.appendChild(candidate);
+        event.dataTransfer.clearData();
+        removeCandidateFromAllSets(cid)
+        sets[bin.id].push(cid);
+    }
+  </script>
+{% endblock %}
