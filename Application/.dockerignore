@@ -1,0 +1,7 @@
+**.pyc
+Server/Tests.py
+Server/.pytest_cache
+.dockerignore
+Dockerfile
+DB/*
+!DB/851a.json
