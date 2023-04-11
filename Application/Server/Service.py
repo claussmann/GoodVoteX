@@ -238,6 +238,7 @@ class BoundedSet(frozenset):
 class Election():
     def __init__(self, eid, name, description, candidates, K):
         if len(name) > 60: raise Exception("Name is too long.")
+        if len(name) < 3: raise Exception("Name is too short.")
         if len(description) > 500: raise Exception("Description is too long.")
         if len(candidates) > 12: raise Exception("Too many candidates.")
         for c in candidates:
@@ -250,10 +251,11 @@ class Election():
         self.K = K
         self.evaluation_token = "%08x" % random.randint(0, 0xFFFFFFFF)
         self.__ballots__ = list()
-        keywords = name.lower() + " " + description.lower()
+        keywords = name.lower() + " " + description.lower() + " " + self.eid
         keywords = re.sub('[^a-zA-Z0-9äöüß]', ' ', keywords)
         keywords = re.sub(r'\b\w{1,3}\b', '', keywords) # Remove short words.
         self.keywords = set(keywords.split())
+        self.keywords.add(name.lower())
         self.is_finished = False
         self.is_stopped = False
         self.winner = None
