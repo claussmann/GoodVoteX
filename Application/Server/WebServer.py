@@ -29,6 +29,7 @@ def create_new_election():
         candidates,
         int(request.form.get('committeesize'))
     )
+    app.logger.info("Election registered: %s, %d candidates, committee size: %d" %(election.name, len(election.candidates), election.K))
     return render_template('details.html', election = election, admin=False, justcreated=True)
 
 @app.route('/searchforelection')
@@ -57,6 +58,9 @@ def add_vote(electionID):
             if len(items_in_set) == 0:
                 continue
             bounded_sets.append(Service.BoundedSet(bounds[s][0],bounds[s][1],bounds[s][2], items_in_set))
+        
+        votesstring = ("%s  "*len(bounded_sets)) %tuple([str(s) for s in bounded_sets])
+        app.logger.debug("New vote received: " + votesstring)
         Service.add_vote(electionID, bounded_sets)
     except Exception as e:
         app.logger.warn(e)
@@ -71,6 +75,7 @@ def evaluation_page(electionID):
     election = Service.get_election(electionID)
     if len(best_committees) > 10:
         best_committees = best_committees[:11]
+    app.logger.info("Results stopped by creator: %s (%s)" %(election.eid, election.name))
     return render_template('eval.html', election = election, bestcommittees = best_committees)
 
 @app.route('/admin/<electionID>', methods=['POST'])
@@ -87,12 +92,14 @@ def publish_successful_page(electionID):
     token = request.form['token']
     winner_id = request.form['winner']
     Service.select_winner(electionID, token, winner_id)
+    app.logger.info("Results published by creator: %s (%s)" %(election.eid, election.name))
     return render_template('done.html')
 
 @app.route('/delete/<electionID>', methods=['POST'])
 def deletion_successful_page(electionID):
     token = request.form['token']
     Service.delete(electionID, token)
+    app.logger.info("Results deleted by creator: %s" %election.eid)
     return render_template('done.html')
 
 @app.errorhandler(404)
