@@ -219,6 +219,7 @@
         Drag and Drop Listeners
     */
     function onDragStart(event){
+        event.dataTransfer.clearData();
         event.dataTransfer.setData('text/plain', event.target.id); //store id of element
     }
 
@@ -236,7 +237,6 @@
         var bin = event.target;
         var bin_itemzone = document.getElementById(bin.id + "items");
         bin_itemzone.appendChild(candidate);
-        event.dataTransfer.clearData();
         removeCandidateFromAllSets(cid)
         sets[bin.id].push(cid);
     }
