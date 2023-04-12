@@ -12,30 +12,33 @@
           </p>
         {% else %}
 
-        <h2>How it works:</h2>
-        <p>
-          <b>It is simple.</b>
-          Voting works in two steps.
-          <ol>
-            <li><b>Select all candidates you approve.</b> More precisely: Select each candidate for which you think there exists a committee (of size {{election.K}}) where this candidate is part of, and you find it good that the candidate is part of it.</li>
-            <br>
-            <li>
-              <b>Refine your ballot</b> by stating under which conditions you like each candidate.
-              <ul>
-                <li><i>Unconditional approval:</i> The candidates are good regardless of other candidates in the committee.</li>
-                <li><i>Substitution:</i> Having one of these candidates is good, but having more than one is just as good as having only one.</li>
-                <li><i>Dependency:</i> These candidates only make sense when they are together in the committee. Any subset of them is useless.</li>
-                <li><i>Incompatibility:</i> Having exactly one of these candidates is good, but there shouldn't be more than one of them.</li>
-              </ul>
-            </li>
-          </ol>
-        </p>
-        <div class="sep"></div>
-        <div class="sep"></div>
+        <div id="step0">
+          <h2>How it works:</h2>
+          <p>
+            <b>It is simple.</b>
+            Voting works in two steps.
+            <ol>
+              <li><b>Select all candidates you approve.</b> More precisely: Select each candidate for which you think there exists a committee (of size {{election.K}}) where this candidate is part of, and you find it good that the candidate is part of it.</li>
+              <br>
+              <li>
+                <b>Refine your ballot</b> by stating under which conditions you like each candidate.
+                <ul>
+                  <li><i>Unconditional approval:</i> The candidates are good regardless of other candidates in the committee.</li>
+                  <li><i>Substitution:</i> Having one of these candidates is good, but having more than one is just as good as having only one.</li>
+                  <li><i>Dependency:</i> These candidates only make sense when they are together in the committee. Any subset of them is useless.</li>
+                  <li><i>Incompatibility:</i> Having exactly one of these candidates is good, but there shouldn't be more than one of them.</li>
+                </ul>
+              </li>
+            </ol>
+          </p>
+          <div class="sep"></div>
+          <button class="votebutton" onclick="finishExplain()">Got it!</button>
+          <div class="sep"></div>
+        </div>
 
         <!-- Step 1 -->
-        <h3>Step 1: Drag and drop all candidates you approve.</h3>
-        <div id="step1">
+        <div id="step1" style="display: none;">
+          <h3>Step 1: Drag and drop all candidates you approve.</h3>
           <div class="sep"></div>
           <div>
             {% for candidate in election.candidates %}
@@ -47,7 +50,7 @@
 
           <div class="sep"></div>
 
-          <div class="bin" style="width: 80%; margin-left: 10%; margin-right: 10%;">
+          <div class="bin" style="width: 90%; margin-left: 5%; margin-right: 5%;">
             <div id="bin-init" class="bin-dropzone" ondragover="onDragOver(event);" ondrop="onDrop(event);">
               Drop approved items here.
             </div>
@@ -77,7 +80,7 @@
 
           <div style="position: relative;">
             <!-- Bin 1 -->
-            <div class="bin" style="width: 26%; margin-left: 3%; margin-right: 3%;">
+            <div class="bin" style="width: 27%; margin-left: 3%; margin-right: 3%;">
               <div id="bin1" class="bin-dropzone" ondragover="onDragOver(event);" ondrop="onDrop(event);">
                 Drop here.
               </div>
@@ -93,7 +96,7 @@
             </div>
 
             <!-- Bin 2 -->
-            <div class="bin" style="width: 26%; margin-left: 3%; margin-right: 3%;">
+            <div class="bin" style="width: 27%; margin-left: 3%; margin-right: 3%;">
               <div id="bin2" class="bin-dropzone" ondragover="onDragOver(event);" ondrop="onDrop(event);">
                 Drop here.
               </div>
@@ -109,7 +112,7 @@
             </div>
 
             <!-- Bin 3 -->
-            <div class="bin" style="width: 26%; margin-left: 3%; margin-right: 3%;">
+            <div class="bin" style="width: 27%; margin-left: 3%; margin-right: 3%;">
               <div id="bin3" class="bin-dropzone" ondragover="onDragOver(event);" ondrop="onDrop(event);">
                 Drop here.
               </div>
@@ -153,8 +156,9 @@
     var sets = {"bin-init" : []};
     var bounds = {};
     bins.forEach ((id) => {sets[id] = []});
-    var tmp = Array.prototype.slice.call(document.getElementsByClassName('is-alternative'))
-    var items = tmp.map(function(e) {return e.id;});
+    var tmp = Array.prototype.slice.call(document.getElementsByClassName('is-candidate'))
+    var candidates = tmp.map(function(e) {return e.id;});
+    
 
     function sendBallot(){
       computeBounds()
@@ -214,6 +218,11 @@
       });
     }
 
+    function finishExplain(){
+      $("#step0").slideToggle();
+      $("#step1").slideToggle();
+    }
+
 
     /*
         Drag and Drop Listeners
@@ -228,17 +237,64 @@
     }
 
     function onDrop(event){
+        event.preventDefault();
         var cid = event.dataTransfer.getData('text'); //Get the id of dropped element
         var candidate = document.getElementById(cid);
-        // candidate.style.width = "5vw"
-        // candidate.style.height = "2vw"
-        // candidate.style.fontSize = "0.8vw"
-        // candidate.style.paddingTop = "1vw"
         var bin = event.target;
         var bin_itemzone = document.getElementById(bin.id + "items");
         bin_itemzone.appendChild(candidate);
         removeCandidateFromAllSets(cid)
         sets[bin.id].push(cid);
     }
+
+    /*
+        Touch support for drag & drop
+    */
+
+    var current_dragged_candidate = 0;
+
+    window.onload = function() {
+      for(i=0; i < candidates.length; i++) {
+        var candidate = document.getElementById(candidates[i]);
+        
+        candidate.addEventListener('touchmove', function(gesture) {
+          var fingerXY = gesture.targetTouches[0];
+          var posX = fingerXY.pageX;
+          var posY = fingerXY.pageY;
+          if(current_dragged_candidate == 0){
+            current_dragged_candidate = document.elementFromPoint(posX, posY);
+            if(current_dragged_candidate.className != "is-candidate"){
+              current_dragged_candidate = 0;
+              return;
+            }
+            current_dragged_candidate.style.position = "fixed";
+          }
+          current_dragged_candidate.style.left = posX + "px";
+          current_dragged_candidate.style.top = posY + "px";
+        });
+
+        candidate.addEventListener('touchend', function(gesture) {
+          if(current_dragged_candidate == 0){
+              return;
+            }
+          var posX = current_dragged_candidate.style.left.slice(0,-2);
+          var posY = current_dragged_candidate.style.top.slice(0,-2);
+          var binAtPos = document.elementFromPoint(posX, posY);
+
+          current_dragged_candidate.style.removeProperty('position');
+          current_dragged_candidate.style.removeProperty('top');
+          current_dragged_candidate.style.removeProperty('left');
+
+          if(binAtPos.className == "bin-dropzone"){
+            var bin_itemzone = document.getElementById(binAtPos.id + "items");
+            bin_itemzone.appendChild(current_dragged_candidate);
+            removeCandidateFromAllSets(current_dragged_candidate.id)
+            sets[binAtPos.id].push(current_dragged_candidate.id);
+          }
+          current_dragged_candidate = 0;
+        });
+      }
+    }  
+  
   </script>
 {% endblock %}
