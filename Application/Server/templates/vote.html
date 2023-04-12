@@ -40,7 +40,7 @@
         <div id="step1" style="display: none;">
           <h3>Step 1: Drag and drop all candidates you approve.</h3>
           <div class="sep"></div>
-          <div>
+          <div id="not-approved-zone">
             {% for candidate in election.candidates %}
             <div id="{{candidate}}" class="is-candidate" draggable="true" ondragstart="onDragStart(event);">
               {{candidate}}
@@ -57,6 +57,8 @@
             <div id="bin-inititems" class="bin-items"></div>
           </div>
 
+          <div class="sep"></div>
+          <button class="resetbutton" onclick="resetApproval()">Reset</button>
           <div class="sep"></div>
           <button class="votebutton" onclick="finishApproval()">Continue with Step 2</button>
           <div class="sep"></div>
@@ -130,6 +132,8 @@
 
           <div class="sep"></div>
           <div class="sep"></div>
+          <button class="resetbutton" onclick="resetAll()">Reset All</button>
+          <div class="sep"></div>
           <button class="votebutton" onclick="sendBallot()">Vote!</button>
           <div class="sep"></div>
         </div>
@@ -153,9 +157,8 @@
     var url = "/vote/{{election.eid}}";
 
     var bins = ["bin0", "bin1", "bin2", "bin3"];
-    var sets = {"bin-init" : []};
+    var sets = {"bin-init" : [], "bin0" : [], "bin1" : [], "bin2" : [], "bin3" : []};
     var bounds = {};
-    bins.forEach ((id) => {sets[id] = []});
     var tmp = Array.prototype.slice.call(document.getElementsByClassName('is-candidate'))
     var candidates = tmp.map(function(e) {return e.id;});
     
@@ -221,6 +224,20 @@
     function finishExplain(){
       $("#step0").slideToggle();
       $("#step1").slideToggle();
+    }
+
+    function resetApproval(){
+      for(i=0; i < candidates.length; i++) {
+        candidate = document.getElementById(candidates[i]);
+        document.getElementById("not-approved-zone").appendChild(candidate);
+      }
+      sets = {"bin-init" : [], "bin0" : [], "bin1" : [], "bin2" : [], "bin3" : []};
+    }
+
+    function resetAll(){
+      $("#step2").slideToggle();
+      $("#step1").slideToggle();
+      resetApproval()
     }
 
 
