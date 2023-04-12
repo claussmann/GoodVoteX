@@ -158,13 +158,12 @@
 
     var bins = ["bin0", "bin1", "bin2", "bin3"];
     var sets = {"bin-init" : [], "bin0" : [], "bin1" : [], "bin2" : [], "bin3" : []};
-    var bounds = {};
     var tmp = Array.prototype.slice.call(document.getElementsByClassName('is-candidate'))
     var candidates = tmp.map(function(e) {return e.id;});
     
 
     function sendBallot(){
-      computeBounds()
+      var bounds = computeBounds();
       var xhr = new XMLHttpRequest();
       xhr.open("POST", url, true);
       xhr.setRequestHeader('Content-Type', 'application/json');
@@ -185,29 +184,33 @@
     }
 
     function computeBounds(){
-      bins.forEach ((id) => {
-        if (id == "bin0"){
-          bounds[id] = [1, sets[id].length, sets[id].length]
+      var bounds = {};
+      for(i = 0; i < bins.length; i++){
+        bID = bins[i];
+        if (bID == "bin0"){
+          bounds[bID] = [1, sets[bID].length, sets[bID].length];
         }
-        else if (document.getElementById(id + "substitution").checked){
-          bounds[id] = [1, 1, sets[id].length]
+        else if (document.getElementById(bID + "substitution").checked){
+          bounds[bID] = [1, 1, sets[bID].length];
         }
-        else if (document.getElementById(id + "dependency").checked){
-          bounds[id] = [sets[id].length, sets[id].length, sets[id].length]
+        else if (document.getElementById(bID + "dependency").checked){
+          bounds[bID] = [sets[bID].length, sets[bID].length, sets[bID].length];
         }
-        else if (document.getElementById(id + "incompatibility").checked){
-          bounds[id] = [1, 1, 1]
+        else if (document.getElementById(bID + "incompatibility").checked){
+          bounds[bID] = [1, 1, 1];
         }
         else{
-          bounds[id] = [1, sets[id].length, sets[id].length]
+          bounds[bID] = [1, sets[bID].length, sets[bID].length];
         }
-      });
+      }
+      return bounds;
     }
 
     function removeCandidateFromAllSets(candidate){
-      bins.forEach ((binID) => {
-        sets[binID] = sets[binID].filter(c => c !== candidate)
-      });
+      for(i = 0; i < bins.length; i++){
+        binID = bins[i];
+        sets[binID] = sets[binID].filter(c => c !== candidate);
+      }
     }
 
     function finishApproval(){
@@ -215,10 +218,10 @@
       $("#step2").slideToggle();
       sets["bin0"] = sets["bin-init"];
       delete sets["bin-init"];
-      sets["bin0"].forEach ((candidateid) => {
-        var candidate = document.getElementById(candidateid);
+      for(i = 0; i < sets["bin0"].length; i++){
+        var candidate = document.getElementById(sets["bin0"][i]);
         document.getElementById("bin0items").appendChild(candidate);
-      });
+      }
     }
 
     function finishExplain(){
@@ -227,7 +230,7 @@
     }
 
     function resetApproval(){
-      for(i=0; i < candidates.length; i++) {
+      for(i=0; i < candidates.length; i++){
         candidate = document.getElementById(candidates[i]);
         document.getElementById("not-approved-zone").appendChild(candidate);
       }
@@ -260,7 +263,7 @@
         var bin = event.target;
         var bin_itemzone = document.getElementById(bin.id + "items");
         bin_itemzone.appendChild(candidate);
-        removeCandidateFromAllSets(cid)
+        removeCandidateFromAllSets(cid);
         sets[bin.id].push(cid);
     }
 
@@ -270,11 +273,11 @@
 
     var current_dragged_candidate = 0;
 
-    window.onload = function() {
+    window.onload = function(){
       for(i=0; i < candidates.length; i++) {
         var candidate = document.getElementById(candidates[i]);
         
-        candidate.addEventListener('touchmove', function(gesture) {
+        candidate.addEventListener('touchmove', function(gesture){
           var fingerXY = gesture.targetTouches[0];
           var posX = fingerXY.pageX;
           var posY = fingerXY.pageY;
@@ -290,7 +293,7 @@
           current_dragged_candidate.style.top = posY + "px";
         });
 
-        candidate.addEventListener('touchend', function(gesture) {
+        candidate.addEventListener('touchend', function(gesture){
           if(current_dragged_candidate == 0){
               return;
             }

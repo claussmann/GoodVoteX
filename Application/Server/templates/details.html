@@ -170,13 +170,11 @@
 
 {%block scripts%}
   <script>
-    // Copy the evaluation token.
-    function copyEvalToClipboard() {
+
+    function copyEvalToClipboard(){
         var copyText = document.getElementById("evaltoken");
-        // Select the text field
         copyText.select();
-        copyText.setSelectionRange(0, 99999); // For mobile devices
-        // Copy the text inside the text field
+        copyText.setSelectionRange(0, 200);
         navigator.clipboard.writeText(copyText.value);
         
         // Hide info window
@@ -184,16 +182,16 @@
         document.getElementById("token-window-fg").style.display = "none";
     }
 
-    function shareOptions() {        
+    function shareOptions(){
         // Show info window
         document.getElementById("share-window-bg").style.display = "block";
         document.getElementById("share-window-fg").style.display = "block";
     }
 
-    function copyShareToClipboard() {
+    function copyShareToClipboard(){
         var copyText = document.getElementById("sharelink");
         copyText.select();
-        copyText.setSelectionRange(0, 99999);
+        copyText.setSelectionRange(0, 200);
         navigator.clipboard.writeText(copyText.value);
         
         // Hide info window
