@@ -245,7 +245,7 @@ class Election():
             if len(c) > 30: raise Exception("Candidate name too long: %s."%c)
         if K >= len(candidates): raise Exception("Committe size too large.")
         self.name = name
-        self.eid = eid
+        self.eid = str(eid)
         self.description = description
         self.candidates = candidates
         self.K = K
