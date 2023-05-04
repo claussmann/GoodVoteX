@@ -91,6 +91,7 @@ def publish_successful_page(electionID):
     token = request.form['token']
     winner_id = request.form['winner']
     Service.select_winner(electionID, token, winner_id)
+    election = Service.get_election(electionID)
     app.logger.info("Results published by creator: %s (%s)" %(election.eid, election.name))
     return render_template('done.html')
 
