@@ -20,16 +20,6 @@ elections = dict()
 # ========================    Service Functions   ================================
 # ================================================================================
 
-
-"""
-Adds a ballot to the given election.
-"""
-def add_vote(election_id, ballot):
-    if election_id not in elections:
-        raise Exception("This election doesn't exist: %s" % str(election_id))
-    elections[election_id].add_ballot(ballot)
-    save(election_id)
-
 """
 Registers a new election.
 
@@ -44,6 +34,49 @@ def register_election(name, description, candidates, K):
     elections[new_id] = Election(new_id, name, description, candidates, K)
     save(new_id)
     return elections[new_id]
+
+"""
+@return: The election object with the given ID (if exists).
+"""
+def get_election(election_id):
+    if election_id not in elections:
+        raise Exception("This election doesn't exist: %s" % str(election_id))
+    return elections[election_id]
+
+"""
+Searches the database for elections which match the search string. The results are
+ordered by relevance.
+
+@return: A list of election objects.
+"""
+def search(search_string):
+    if len(search_string) > 60: raise Exception("Search is too long.")
+    ret = list()
+    for election in elections.values():
+        search_relevance = election.search_relevance(search_string)
+        if search_relevance > 0:
+            ret.append((search_relevance, election))
+    return [x[1] for x in sorted(ret, key = lambda e : e[0], reverse=True)] # Sort results by relevance
+
+"""
+Adds a ballot to the given election.
+"""
+def add_vote(election_id, ballot):
+    if election_id not in elections:
+        raise Exception("This election doesn't exist: %s" % str(election_id))
+    elections[election_id].add_ballot(ballot)
+    save(election_id)
+
+"""
+Deletes the given election. This will also delete it from the persistent storage!
+"""
+def delete(election_id, token):
+    if election_id not in elections:
+        raise Exception("This election doesn't exist: %s" % str(election_id))
+    if token != elections[election_id].evaluation_token:
+        raise Exception("Incorrect Token.")
+    elections.pop(election_id)
+    os.remove(storage_path + election_id + ".json")
 
 """
 Evaluates an election, i.e. computes the current winners.
@@ -97,40 +130,6 @@ def select_winner(election_id, token, committee_id):
         raise Exception("Incorrect Token.")
     elections[election_id].set_winner(committee_id)
     save(election_id)
-
-"""
-@return: The election object with the given ID (if exists).
-"""
-def get_election(election_id):
-    if election_id not in elections:
-        raise Exception("This election doesn't exist: %s" % str(election_id))
-    return elections[election_id]
-
-"""
-Searches the database for elections which match the search string. The results are
-ordered by relevance.
-
-@return: A list of election objects.
-"""
-def search(search_string):
-    if len(search_string) > 60: raise Exception("Search is too long.")
-    ret = list()
-    for election in elections.values():
-        search_relevance = election.search_relevance(search_string)
-        if search_relevance > 0:
-            ret.append((search_relevance, election))
-    return [x[1] for x in sorted(ret, key = lambda e : e[0], reverse=True)] # Sort results by relevance
-
-"""
-Deletes the given election. This will also delete it from the persistent storage!
-"""
-def delete(election_id, token):
-    if election_id not in elections:
-        raise Exception("This election doesn't exist: %s" % str(election_id))
-    if token != elections[election_id].evaluation_token:
-        raise Exception("Incorrect Token.")
-    elections.pop(election_id)
-    os.remove(storage_path + election_id + ".json")
 
 """
 Saves an election is JSON format to a file.
