@@ -83,6 +83,7 @@ def test_search_relevance():
     assert e.search_relevance("Food Selection?") == 2
     assert e.search_relevance("You be or Banana") == 1
     assert e.search_relevance("Apple") == 0
+    assert e.search_relevance("be") == 0 # short words are ignored
     assert e.search_relevance("döner") == 1
     assert e.search_relevance("What should be served? Banana or Fish?") == 5
     assert e.search_relevance("42") == 100
@@ -109,6 +110,16 @@ def test_score():
     assert e.score({"a", "b", "y", "e"}) == 2
     assert e.score({"a", "w", "x", "y"}) == 3
     assert e.score({"a", "w", "x", "y", "z"}) == 1
+
+def test_stop_election():
+    e = Election(42, "Test", "Testo", {"a", "b", "c", "d"}, 2)
+    b1 = BoundedSet(1,1,2,{"a", "b"})
+    b2 = BoundedSet(1,2,2,{"c", "d"})
+    e.add_ballot([b1, b2])
+    e.stop()
+
+    with pytest.raises(Exception):
+        e.add_ballot([b1, b2])
 
 
 """
