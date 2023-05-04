@@ -130,9 +130,9 @@ def test_import_export():
     e = Election(42, "This Year Food Selection: What should be served?", "You decide on Food: Banana, or Fish? Döner?", {"a", "b", "c", "d", "e", "f", "g"}, 3)
     e.add_ballot([BoundedSet(1,2,4,{"a", "b", "c", "f"}), BoundedSet(1,1,2,{"d", "g"})])
     e.add_ballot([BoundedSet(1,1,1,{"a", "b", "c"})])
-    save_to_file(e, "test_1212.json")
-    e2 = load_from_file("test_1212.json")
-    os.remove("test_1212.json")
+    save_to_file(e)
+    e2 = load_from_file(storage_path + "42.json")
+    os.remove(storage_path + "42.json")
     assert e2.name == e.name
     assert e2.eid == e.eid
     assert e2.description == e.description

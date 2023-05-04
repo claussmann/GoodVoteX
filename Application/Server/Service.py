@@ -31,9 +31,10 @@ def register_election(name, description, candidates, K):
     new_id = "%04x" % random.randint(0, 0xFFFF)
     while new_id in elections:
         new_id = "%04x" % random.randint(0, 0xFFFF)
-    elections[new_id] = Election(new_id, name, description, candidates, K)
-    save(new_id)
-    return elections[new_id]
+    e = Election(new_id, name, description, candidates, K)
+    elections[new_id] = e
+    save_to_file(e)
+    return e
 
 """
 @return: The election object with the given ID (if exists).
@@ -71,7 +72,7 @@ Adds a ballot to the given election.
 def add_vote(election_id, ballot):
     e = get_election(election_id)
     e.add_ballot(ballot)
-    save(election_id)
+    save_to_file(e)
 
 """
 Deletes the given election. This will also delete it from the persistent storage!
@@ -97,7 +98,7 @@ def evaluate_current_winners(election_id, token):
     e.stop()
     ret = e.evaluate()
     e.restart()
-    save(election_id)
+    save_to_file(e)
     return ret
 
 """
@@ -114,7 +115,7 @@ def evaluate_final_winners(election_id, token):
     verify_token(e, token)
     e.stop()
     ret = e.evaluate()
-    save(election_id)
+    save_to_file(e)
     return ret
 
 """
@@ -127,12 +128,13 @@ def select_winner(election_id, token, committee_id):
     e = get_election(election_id)
     verify_token(e, token)
     e.set_winner(committee_id)
-    save(election_id)
+    save_to_file(e)
 
 """
 Saves an election is JSON format to a file.
 """
-def save_to_file(election, filename):
+def save_to_file(election):
+    filename = storage_path + election.eid + ".json"
     json_str = json.dumps(election.serialize())
     f = open(filename, "w")
     f.write(json_str)
@@ -157,15 +159,6 @@ def load_from_file(filename):
         e.winner = raw_obj["winner"]        
     f.close()
     return e
-
-"""
-Saves the election with given ID to persistent storage in a format which can
-be read after application restarts.
-"""
-def save(election_id):
-    if election_id not in elections:
-        raise Exception("This election doesn't exist: %s" % str(election_id))
-    save_to_file(elections[election_id], storage_path + election_id + ".json")
 
 """
 Loads all election files from the storage path to election objects in the
