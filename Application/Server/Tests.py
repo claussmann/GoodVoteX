@@ -138,3 +138,41 @@ def test_import_export():
     assert e2.description == e.description
     assert e2.K == e.K
     assert e2.candidates == e.candidates
+
+def test_register_delete():
+    e1 = register_election("Test 42", "A test election.", ["a", "b", "c", "d"], 3)
+    assert str(e1.eid) + ".json" in [f for f in os.listdir(storage_path) if f.endswith(".json")]
+
+    with pytest.raises(Exception):
+        e2 = register_election("Test 43", "A second test election.", ["a", "b", "c"], 3) # should fail because too small K
+    
+    delete(e1.eid, e1.evaluation_token)
+    assert str(e1.eid) + ".json" not in [f for f in os.listdir(storage_path) if f.endswith(".json")]
+
+def test_election_not_exists():
+    with pytest.raises(Exception):
+        e = get_election("abcdef")
+
+def test_wrong_token():
+    e1 = register_election("Test 42", "A test election.", ["a", "b", "c", "d"], 3)
+    with pytest.raises(Exception):
+        verify_token(e1, "379289ehj")
+    delete(e1.eid, e1.evaluation_token)
+
+def test_search():
+    e1 = register_election("Test Election Major 2023", "A test election for who will become major!", ["a", "b", "c", "d"], 2)
+    e2 = register_election("Election Junior", "Who will become junior in our test?", ["a", "b", "c", "d"], 2)
+    e3 = register_election("Is Gollum an animal?", "New date received: DNA Test positive!", ["a", "b", "c", "d"], 2)
+    e4 = register_election("What to take on mars", "New Mars mission!", ["a", "b", "c", "d"], 2)
+
+    search_res = search("Major test election")
+    assert len(search_res) == 3
+    assert search_res[0] == e1 # Keywords: "Major", "Test", "Election"
+    assert search_res[1] == e2 # Keywords: "Election", "Test"
+    assert search_res[2] == e3 # Keyword: "Test"
+    assert e4 not in search_res # No keywords
+    
+    delete(e1.eid, e1.evaluation_token)
+    delete(e2.eid, e2.evaluation_token)
+    delete(e3.eid, e3.evaluation_token)
+    delete(e4.eid, e4.evaluation_token)
