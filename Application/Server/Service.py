@@ -44,6 +44,13 @@ def get_election(election_id):
     return elections[election_id]
 
 """
+Raises an exception if token is incorrect.
+"""
+def verify_token(election, token):
+    if token != election.evaluation_token:
+        raise Exception("Incorrect Token.")
+
+"""
 Searches the database for elections which match the search string. The results are
 ordered by relevance.
 
@@ -62,19 +69,16 @@ def search(search_string):
 Adds a ballot to the given election.
 """
 def add_vote(election_id, ballot):
-    if election_id not in elections:
-        raise Exception("This election doesn't exist: %s" % str(election_id))
-    elections[election_id].add_ballot(ballot)
+    e = get_election(election_id)
+    e.add_ballot(ballot)
     save(election_id)
 
 """
 Deletes the given election. This will also delete it from the persistent storage!
 """
 def delete(election_id, token):
-    if election_id not in elections:
-        raise Exception("This election doesn't exist: %s" % str(election_id))
-    if token != elections[election_id].evaluation_token:
-        raise Exception("Incorrect Token.")
+    e = get_election(election_id)
+    verify_token(e, token)
     elections.pop(election_id)
     os.remove(storage_path + election_id + ".json")
 
@@ -88,13 +92,11 @@ Evaluates an election, i.e. computes the current winners.
          outcome.
 """
 def evaluate_current_winners(election_id, token):
-    if election_id not in elections:
-        raise Exception("This election doesn't exist: %s" % str(election_id))
-    if token != elections[election_id].evaluation_token:
-        raise Exception("Incorrect Token.")
-    elections[election_id].stop()
-    ret = elections[election_id].evaluate()
-    elections[election_id].restart()
+    e = get_election(election_id)
+    verify_token(e, token)
+    e.stop()
+    ret = e.evaluate()
+    e.restart()
     save(election_id)
     return ret
 
@@ -108,12 +110,10 @@ Evaluates an election, i.e. computes the final possible winners.
          outcome.
 """
 def evaluate_final_winners(election_id, token):
-    if election_id not in elections:
-        raise Exception("This election doesn't exist: %s" % str(election_id))
-    if token != elections[election_id].evaluation_token:
-        raise Exception("Incorrect Token.")
-    elections[election_id].stop()
-    ret = elections[election_id].evaluate()
+    e = get_election(election_id)
+    verify_token(e, token)
+    e.stop()
+    ret = e.evaluate()
     save(election_id)
     return ret
 
@@ -124,11 +124,9 @@ from the "evaluate" function.
 Note that this function also stops the election.
 """
 def select_winner(election_id, token, committee_id):
-    if election_id not in elections:
-        raise Exception("This election doesn't exist: %s" % str(election_id))
-    if token != elections[election_id].evaluation_token:
-        raise Exception("Incorrect Token.")
-    elections[election_id].set_winner(committee_id)
+    e = get_election(election_id)
+    verify_token(e, token)
+    e.set_winner(committee_id)
     save(election_id)
 
 """
