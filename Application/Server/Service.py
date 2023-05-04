@@ -54,25 +54,35 @@ Evaluates an election, i.e. computes the current winners.
          system, and can be referenced e.g. for tie-breaking in the final
          outcome.
 """
-def evaluate(election_id, token):
-    if election_id not in elections:
-        raise Exception("This election doesn't exist: %s" % str(election_id))
-    if token != elections[election_id].evaluation_token:
-        raise Exception("Incorrect Token.")
-    ret = elections[election_id].evaluate()
-    save(election_id)
-    return ret
-
-"""
-Prevents further votes from being submitted for this election.
-"""
-def stop(election_id, token):
+def evaluate_current_winners(election_id, token):
     if election_id not in elections:
         raise Exception("This election doesn't exist: %s" % str(election_id))
     if token != elections[election_id].evaluation_token:
         raise Exception("Incorrect Token.")
     elections[election_id].stop()
+    ret = elections[election_id].evaluate()
+    elections[election_id].restart()
     save(election_id)
+    return ret
+
+"""
+Evaluates an election, i.e. computes the final possible winners.
+
+@return: A dict mapping a committee-ID to committee members. Each committee
+         in the dict is a winner committee (due to ties we do not always
+         have a unique winner committee). The committee-IDs are known to the
+         system, and can be referenced e.g. for tie-breaking in the final
+         outcome.
+"""
+def evaluate_final_winners(election_id, token):
+    if election_id not in elections:
+        raise Exception("This election doesn't exist: %s" % str(election_id))
+    if token != elections[election_id].evaluation_token:
+        raise Exception("Incorrect Token.")
+    elections[election_id].stop()
+    ret = elections[election_id].evaluate()
+    save(election_id)
+    return ret
 
 """
 After evaluating the election, we can break potential ties between multiple winner-
@@ -282,6 +292,9 @@ class Election():
     
     def stop(self):
         self.is_stopped = True
+    
+    def restart(self):
+        self.is_stopped = False
     
     def compute_winners(self):
         best_score = 0

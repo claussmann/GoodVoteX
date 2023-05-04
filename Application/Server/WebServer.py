@@ -70,8 +70,7 @@ def add_vote(electionID):
 @app.route('/evaluate/<electionID>', methods=['POST'])
 def evaluation_page(electionID):
     token = request.form['token']
-    Service.stop(electionID, token)
-    best_committees = Service.evaluate(electionID, token)
+    best_committees = Service.evaluate_final_winners(electionID, token)
     election = Service.get_election(electionID)
     if len(best_committees) > 10:
         best_committees = best_committees[:11]
@@ -81,7 +80,7 @@ def evaluation_page(electionID):
 @app.route('/admin/<electionID>', methods=['POST'])
 def admin_details_page(electionID):
     token = request.form['token']
-    best_committees = Service.evaluate(electionID, token)
+    best_committees = Service.evaluate_current_winners(electionID, token)
     election = Service.get_election(electionID)
     if len(best_committees) > 10:
         best_committees = best_committees[:11]
