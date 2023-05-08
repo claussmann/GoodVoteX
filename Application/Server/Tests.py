@@ -177,7 +177,6 @@ def test_register_delete_election():
 
 def test_register_delete_user():
     u1 = register_user("aDmin", "Testosaurus", "adminiissttr")
-    register_user("administrator", "Armin Admin", "administrator")
 
     with pytest.raises(Exception):
         u2 = register_user("admin", "Mr Smith", "kjfhnasdjjnj") # should fail because same username
