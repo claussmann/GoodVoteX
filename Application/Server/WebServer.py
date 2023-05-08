@@ -98,7 +98,7 @@ def publish_successful_page(electionID):
 @app.route('/delete/<electionID>', methods=['POST'])
 def deletion_successful_page(electionID):
     token = request.form['token']
-    Service.delete(electionID, token)
+    Service.delete_election(electionID, token)
     app.logger.info("Results deleted by creator: %s" %election.eid)
     return render_template('done.html')
 

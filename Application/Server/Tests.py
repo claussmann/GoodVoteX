@@ -123,31 +123,69 @@ def test_stop_election():
 
 
 """
+    Tests for User
+"""
+
+def test_password_auth():
+    u = User("admin", "Administrator Rex", "admin123")
+    assert u.check_password("admin123")
+    assert not u.check_password("armin1234")
+
+def test_password_length():
+    with pytest.raises(Exception):
+        u = User("admin", "Administrator Rex", "n123") # too short
+    with pytest.raises(Exception):
+        u = User("admin", "Administrator Rex", "1234567890a1234567890a1234567890a1234567890a") # too long
+
+
+"""
     Tests for Service
 """
 
-def test_import_export():
+def test_import_export_election():
     e = Election(42, "This Year Food Selection: What should be served?", "You decide on Food: Banana, or Fish? Döner?", {"a", "b", "c", "d", "e", "f", "g"}, 3)
     e.add_ballot([BoundedSet(1,2,4,{"a", "b", "c", "f"}), BoundedSet(1,1,2,{"d", "g"})])
     e.add_ballot([BoundedSet(1,1,1,{"a", "b", "c"})])
-    save_to_file(e)
-    e2 = load_from_file(storage_path + "42.json")
-    os.remove(storage_path + "42.json")
+    save_election_to_file(e)
+    e2 = load_election_from_file(election_storage_path + "42.json")
+    os.remove(election_storage_path + "42.json")
     assert e2.name == e.name
     assert e2.eid == e.eid
     assert e2.description == e.description
     assert e2.K == e.K
     assert e2.candidates == e.candidates
 
-def test_register_delete():
+def test_import_export_user():
+    u = User("admin", "Administrator Rex", "admin123")
+    save_user_to_file(u)
+    u2 = load_user_from_file(user_storage_path + "admin.json")
+    os.remove(user_storage_path + "admin.json")
+    assert u2.name == u.name
+    assert u2.username == u.username
+    assert u2.password_hash == u.password_hash
+    assert u2.salt == u.salt
+
+def test_register_delete_election():
     e1 = register_election("Test 42", "A test election.", ["a", "b", "c", "d"], 3)
-    assert str(e1.eid) + ".json" in [f for f in os.listdir(storage_path) if f.endswith(".json")]
+    assert str(e1.eid) + ".json" in [f for f in os.listdir(election_storage_path) if f.endswith(".json")]
 
     with pytest.raises(Exception):
         e2 = register_election("Test 43", "A second test election.", ["a", "b", "c"], 3) # should fail because too small K
     
-    delete(e1.eid, e1.evaluation_token)
-    assert str(e1.eid) + ".json" not in [f for f in os.listdir(storage_path) if f.endswith(".json")]
+    delete_election(e1.eid, e1.evaluation_token)
+    assert str(e1.eid) + ".json" not in [f for f in os.listdir(election_storage_path) if f.endswith(".json")]
+
+def test_register_delete_user():
+    u1 = register_user("aDmin", "Testosaurus", "adminiissttr")
+    register_user("administrator", "Armin Admin", "administrator")
+
+    with pytest.raises(Exception):
+        u2 = register_user("admin", "Mr Smith", "kjfhnasdjjnj") # should fail because same username
+    
+    assert u1 == get_user("AdMIN") # lower/upper case doesn't matter
+    
+    delete_user("admin")
+    assert "admin.json" not in [f for f in os.listdir(user_storage_path) if f.endswith(".json")]
 
 def test_election_not_exists():
     with pytest.raises(Exception):
@@ -157,7 +195,7 @@ def test_wrong_token():
     e1 = register_election("Test 42", "A test election.", ["a", "b", "c", "d"], 3)
     with pytest.raises(Exception):
         verify_token(e1, "379289ehj")
-    delete(e1.eid, e1.evaluation_token)
+    delete_election(e1.eid, e1.evaluation_token)
 
 def test_search():
     e1 = register_election("Test Election Major 2023", "A test election for who will become major!", ["a", "b", "c", "d"], 2)
@@ -172,7 +210,7 @@ def test_search():
     assert search_res[2] == e3 # Keyword: "Test"
     assert e4 not in search_res # No keywords
     
-    delete(e1.eid, e1.evaluation_token)
-    delete(e2.eid, e2.evaluation_token)
-    delete(e3.eid, e3.evaluation_token)
-    delete(e4.eid, e4.evaluation_token)
+    delete_election(e1.eid, e1.evaluation_token)
+    delete_election(e2.eid, e2.evaluation_token)
+    delete_election(e3.eid, e3.evaluation_token)
+    delete_election(e4.eid, e4.evaluation_token)
