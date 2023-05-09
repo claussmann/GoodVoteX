@@ -13,6 +13,7 @@ user_storage_path = "../DB/users/"
 election_storage_path = "../DB/elections/"
 elections = dict()
 users = dict()
+sessions = dict()
 
 
 
@@ -72,6 +73,34 @@ def get_user(username):
     if username not in users:
         raise Exception("This user doesn't exist: %s" % str(username))
     return users[username]
+
+"""
+@return: The user object with the given session token. If it doesn't exist, returns False.
+"""
+def get_user_by_session(token):
+    if token not in sessions:
+        return False
+    return sessions[token]
+
+"""
+@return: True if the user exists and passowrd is correct.
+"""
+def verify_password(username, password):
+    username = username.lower()
+    if username not in users:
+        return false
+    return users[username].check_password(password)
+
+"""
+@return: Temporary access token if the user exists and passowrd is correct.
+"""
+def get_session_token(username, password):
+    user = get_user(username)
+    if not user.check_password(password):
+        raise Exception("Incorrect password!")
+    token = "%08x" % random.randint(0, 0xFFFFFFFFFFFF)
+    sessions[token] = user
+    return token
 
 """
 Raises an exception if token is incorrect.

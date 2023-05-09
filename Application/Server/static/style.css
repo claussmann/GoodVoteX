@@ -262,6 +262,80 @@ input[type="radio"] {
   font-weight: 600;
 }
 
+.loginbtn {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  height: 1.5em;
+  background-color: #10a816;
+  border: none;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 2vw;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  box-shadow: 0px 0px 3px #333333;
+  font-weight: 600;
+}
+
+.login-submitbtn {
+  width: 100%;
+  height: 1.5em;
+  background-color: #10a816;
+  border: none;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 40px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.userbtn {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  height: 1.5em;
+  background-color: #7d10a8;
+  border: none;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 2vw;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  box-shadow: 0px 0px 3px #333333;
+  font-weight: 600;
+}
+
+.closebtn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  height: 1.25em;
+  background-color: #a81010;
+  border: none;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 1.5vw;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  box-shadow: 0px 0px 3px #333333;
+  font-weight: 600;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
 @media only screen and (orientation: portrait) {
   .votebutton {
     font-size: 5vw;

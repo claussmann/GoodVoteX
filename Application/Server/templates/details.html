@@ -129,7 +129,6 @@
     </div>
 
     {% if justcreated %}
-        <div class="blurred-background" id="token-window-bg"></div>
         <div class="infowindow" id="token-window-fg">
             <div class="infowindow-title">
                 Access Token
@@ -149,22 +148,21 @@
         </div>
     {% endif %}
 
-    <div class="blurred-background" id="share-window-bg" style="display: none;"></div>
-        <div class="infowindow" id="share-window-fg" style="display: none;">
-            <div class="infowindow-title">
-                Share Link
-            </div>
-            <div class="window-content">
-                <p>
-                    Share this link with other voters.
-                </p>
-                <div class="center">
-                    <input type="text" value="/details/{{ election.eid }}" id="sharelink" class="textfield" style="width: 50%;" readonly>
-                    <br><br>
-                    <button class="copybutton" onclick="copyShareToClipboard()">Copy and Close</button>
-                </div>
+    <div class="infowindow" id="share-window-fg" style="display: none;">
+        <div class="infowindow-title">
+            Share Link
+        </div>
+        <div class="window-content">
+            <p>
+                Share this link with other voters.
+            </p>
+            <div class="center">
+                <input type="text" value="/details/{{ election.eid }}" id="sharelink" class="textfield" style="width: 50%;" readonly>
+                <br><br>
+                <button class="copybutton" onclick="copyShareToClipboard()">Copy and Close</button>
             </div>
         </div>
+    </div>
 
 {% endblock %}
 
@@ -178,13 +176,13 @@
         navigator.clipboard.writeText(copyText.value);
         
         // Hide info window
-        document.getElementById("token-window-bg").style.display = "none";
+        document.getElementById("blurred-background").style.display = "none";
         document.getElementById("token-window-fg").style.display = "none";
     }
 
     function shareOptions(){
         // Show info window
-        document.getElementById("share-window-bg").style.display = "block";
+        document.getElementById("blurred-background").style.display = "block";
         document.getElementById("share-window-fg").style.display = "block";
     }
 
@@ -195,7 +193,7 @@
         navigator.clipboard.writeText(copyText.value);
         
         // Hide info window
-        document.getElementById("share-window-bg").style.display = "none";
+        document.getElementById("blurred-background").style.display = "none";
         document.getElementById("share-window-fg").style.display = "none";
     }
   </script>

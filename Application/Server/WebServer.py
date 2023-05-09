@@ -10,14 +10,28 @@ def initialization_code():
 
 @app.route('/')
 def start_page():
-    return render_template('start.html')
+    user = check_user()
+    return render_template('start.html', user=user)
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form.get('username')
+    password = request.form.get('passwd')
+
+    token = Service.get_session_token(username, password)
+    response = make_response(render_template('done.html'))
+    response.set_cookie('token', value=token, secure=True, httponly=True)
+    return response
 
 @app.route('/done')
 def voted_successfully_page():
-    return render_template('done.html')
+    user = check_user()
+    return render_template('done.html', user=user)
 
 @app.route('/createnew', methods=['POST'])
 def create_new_election():
+    user = check_user()
     candidates = set()
     for i in range(1,13):
         c = request.form.get('candidate%d'%i)
@@ -30,21 +44,24 @@ def create_new_election():
         int(request.form.get('committeesize'))
     )
     app.logger.info("Election registered: %s, %d candidates, committee size: %d" %(election.name, len(election.candidates), election.K))
-    return render_template('details.html', election = election, admin=False, justcreated=True)
+    return render_template('details.html', election = election, admin=False, justcreated=True, user=user)
 
 @app.route('/searchforelection')
 def search_election():
+    user = check_user()
     keyword = request.args.get('keyword')
     matching_elections = Service.search(keyword)
-    return render_template('search_results.html', keyword = keyword, elections = matching_elections)
+    return render_template('search_results.html', keyword = keyword, elections = matching_elections, user=user)
 
 @app.route('/details/<electionID>')
 def details_page(electionID):
-    return render_template('details.html', election = Service.get_election(electionID), admin =False, justcreated=False)
+    user = check_user()
+    return render_template('details.html', election = Service.get_election(electionID), admin =False, justcreated=False, user=user)
 
 @app.route('/vote/<electionID>')
 def voting_page(electionID):
-    return render_template('vote.html', election = Service.get_election(electionID))
+    user = check_user()
+    return render_template('vote.html', election = Service.get_election(electionID), user=user)
 
 @app.route('/vote/<electionID>', methods=['POST'])
 def add_vote(electionID):
@@ -69,38 +86,42 @@ def add_vote(electionID):
 
 @app.route('/evaluate/<electionID>', methods=['POST'])
 def evaluation_page(electionID):
+    user = check_user()
     token = request.form['token']
     best_committees = Service.evaluate_final_winners(electionID, token)
     election = Service.get_election(electionID)
     if len(best_committees) > 10:
         best_committees = best_committees[:11]
     app.logger.info("Results stopped by creator: %s (%s)" %(election.eid, election.name))
-    return render_template('eval.html', election = election, bestcommittees = best_committees)
+    return render_template('eval.html', election = election, bestcommittees = best_committees, user=user)
 
 @app.route('/admin/<electionID>', methods=['POST'])
 def admin_details_page(electionID):
+    user = check_user()
     token = request.form['token']
     best_committees = Service.evaluate_current_winners(electionID, token)
     election = Service.get_election(electionID)
     if len(best_committees) > 10:
         best_committees = best_committees[:11]
-    return render_template('details.html', election = election, bestcommittees = best_committees, admin = True, justcreated=False)
+    return render_template('details.html', election = election, bestcommittees = best_committees, admin = True, justcreated=False, user=user)
 
 @app.route('/publish/<electionID>', methods=['POST'])
 def publish_successful_page(electionID):
+    user = check_user()
     token = request.form['token']
     winner_id = request.form['winner']
     Service.select_winner(electionID, token, winner_id)
     election = Service.get_election(electionID)
-    app.logger.info("Results published by creator: %s (%s)" %(election.eid, election.name))
+    app.logger.info("Results published by creator: %s (%s)" %(election.eid, election.name), user=user)
     return render_template('done.html')
 
 @app.route('/delete/<electionID>', methods=['POST'])
 def deletion_successful_page(electionID):
+    user = check_user()
     token = request.form['token']
     Service.delete_election(electionID, token)
     app.logger.info("Results deleted by creator: %s" %election.eid)
-    return render_template('done.html')
+    return render_template('done.html', user=user)
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -115,3 +136,11 @@ def handle_exception(e):
     if isinstance(e, HTTPException):
         return e
     return render_template("errors/500.html", exception=e), 500
+
+
+
+def check_user():
+    user = False
+    if 'token' in request.cookies:
+        user = Service.get_user_by_session(request.cookies.get('token'))
+    return user
