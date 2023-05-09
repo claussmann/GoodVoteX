@@ -41,10 +41,11 @@ def create_new_election():
         request.form.get('name'), 
         request.form.get('description'),
         candidates,
-        int(request.form.get('committeesize'))
+        int(request.form.get('committeesize')),
+        user
     )
     app.logger.info("Election registered: %s, %d candidates, committee size: %d" %(election.name, len(election.candidates), election.K))
-    return render_template('details.html', election = election, admin=False, justcreated=True, user=user)
+    return render_template('details.html', election = election, admin=True, user=user)
 
 @app.route('/searchforelection')
 def search_election():
@@ -56,7 +57,13 @@ def search_election():
 @app.route('/details/<electionID>')
 def details_page(electionID):
     user = check_user()
-    return render_template('details.html', election = Service.get_election(electionID), admin =False, justcreated=False, user=user)
+    election = Service.get_election(electionID)
+    if user and electionID in user.elections:
+        best_committees = Service.evaluate_current_winners(electionID)
+        if len(best_committees) > 10:
+            best_committees = best_committees[:11]
+        return render_template('details.html', election = Service.get_election(electionID), admin = True, user=user, bestcommittees=best_committees)
+    return render_template('details.html', election = election, admin = False, user=user)
 
 @app.route('/vote/<electionID>')
 def voting_page(electionID):
@@ -87,39 +94,26 @@ def add_vote(electionID):
 @app.route('/evaluate/<electionID>', methods=['POST'])
 def evaluation_page(electionID):
     user = check_user()
-    token = request.form['token']
-    best_committees = Service.evaluate_final_winners(electionID, token)
     election = Service.get_election(electionID)
+    best_committees = Service.evaluate_final_winners(electionID, user)
     if len(best_committees) > 10:
         best_committees = best_committees[:11]
-    app.logger.info("Results stopped by creator: %s (%s)" %(election.eid, election.name))
+    app.logger.info("Election stopped by creator: %s (%s)" %(election.eid, election.name))
     return render_template('eval.html', election = election, bestcommittees = best_committees, user=user)
-
-@app.route('/admin/<electionID>', methods=['POST'])
-def admin_details_page(electionID):
-    user = check_user()
-    token = request.form['token']
-    best_committees = Service.evaluate_current_winners(electionID, token)
-    election = Service.get_election(electionID)
-    if len(best_committees) > 10:
-        best_committees = best_committees[:11]
-    return render_template('details.html', election = election, bestcommittees = best_committees, admin = True, justcreated=False, user=user)
 
 @app.route('/publish/<electionID>', methods=['POST'])
 def publish_successful_page(electionID):
     user = check_user()
-    token = request.form['token']
-    winner_id = request.form['winner']
-    Service.select_winner(electionID, token, winner_id)
     election = Service.get_election(electionID)
-    app.logger.info("Results published by creator: %s (%s)" %(election.eid, election.name), user=user)
-    return render_template('done.html')
+    winner_id = request.form['winner']
+    Service.select_winner(electionID, user, winner_id)
+    app.logger.info("Results published by creator: %s (%s)" %(election.eid, election.name))
+    return render_template('done.html', user = user)
 
 @app.route('/delete/<electionID>', methods=['POST'])
 def deletion_successful_page(electionID):
     user = check_user()
-    token = request.form['token']
-    Service.delete_election(electionID, token)
+    Service.delete_election(electionID, user)
     app.logger.info("Results deleted by creator: %s" %election.eid)
     return render_template('done.html', user=user)
 

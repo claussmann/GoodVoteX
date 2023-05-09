@@ -166,13 +166,15 @@ def test_import_export_user():
     assert u2.salt == u.salt
 
 def test_register_delete_election():
-    e1 = register_election("Test 42", "A test election.", ["a", "b", "c", "d"], 3)
+    u = User("admin", "Administrator Rex", "admin123")
+    e1 = register_election("Test 42", "A test election.", ["a", "b", "c", "d"], 3, u)
     assert str(e1.eid) + ".json" in [f for f in os.listdir(election_storage_path) if f.endswith(".json")]
 
     with pytest.raises(Exception):
-        e2 = register_election("Test 43", "A second test election.", ["a", "b", "c"], 3) # should fail because too small K
+        e2 = register_election("Test 43", "A second test election.", ["a", "b", "c"], 3, u) # should fail because too small K
     
-    delete_election(e1.eid, e1.evaluation_token)
+    delete_election(e1.eid, u)
+    os.remove(user_storage_path + "admin.json")
     assert str(e1.eid) + ".json" not in [f for f in os.listdir(election_storage_path) if f.endswith(".json")]
 
 def test_register_delete_user():
@@ -190,17 +192,23 @@ def test_election_not_exists():
     with pytest.raises(Exception):
         e = get_election("abcdef")
 
-def test_wrong_token():
-    e1 = register_election("Test 42", "A test election.", ["a", "b", "c", "d"], 3)
+def test_wrong_user():
+    u1 = register_user("aDmin", "Testosaurus", "adminiissttr")
+    u2 = register_user("peter", "Testosaurus", "adminiissttr")
+    e1 = register_election("Test 42", "A test election.", ["a", "b", "c", "d"], 3, u1)
     with pytest.raises(Exception):
-        verify_token(e1, "379289ehj")
-    delete_election(e1.eid, e1.evaluation_token)
+        delete_election(e1.eid, u2)
+    delete_election(e1.eid, u1)
+    delete_user("admin")
+    delete_user("peter")
+
 
 def test_search():
-    e1 = register_election("Test Election Major 2023", "A test election for who will become major!", ["a", "b", "c", "d"], 2)
-    e2 = register_election("Election Junior", "Who will become junior in our test?", ["a", "b", "c", "d"], 2)
-    e3 = register_election("Is Gollum an animal?", "New date received: DNA Test positive!", ["a", "b", "c", "d"], 2)
-    e4 = register_election("What to take on mars", "New Mars mission!", ["a", "b", "c", "d"], 2)
+    u = register_user("aDmin", "Testosaurus", "adminiissttr")
+    e1 = register_election("Test Election Major 2023", "A test election for who will become major!", ["a", "b", "c", "d"], 2, u)
+    e2 = register_election("Election Junior", "Who will become junior in our test?", ["a", "b", "c", "d"], 2, u)
+    e3 = register_election("Is Gollum an animal?", "New date received: DNA Test positive!", ["a", "b", "c", "d"], 2, u)
+    e4 = register_election("What to take on mars", "New Mars mission!", ["a", "b", "c", "d"], 2, u)
 
     search_res = search("Major test election")
     assert len(search_res) == 3
@@ -209,7 +217,8 @@ def test_search():
     assert search_res[2] == e3 # Keyword: "Test"
     assert e4 not in search_res # No keywords
     
-    delete_election(e1.eid, e1.evaluation_token)
-    delete_election(e2.eid, e2.evaluation_token)
-    delete_election(e3.eid, e3.evaluation_token)
-    delete_election(e4.eid, e4.evaluation_token)
+    delete_election(e1.eid, u)
+    delete_election(e2.eid, u)
+    delete_election(e3.eid, u)
+    delete_election(e4.eid, u)
+    delete_user("admin")

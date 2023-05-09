@@ -30,15 +30,19 @@ Registers a new election.
 
 @return: When registration successful, returns the election object.
 """
-def register_election(name, description, candidates, K):
+def register_election(name, description, candidates, K, user_owner):
     if len(elections) > 0xFFF:
         raise Exception("Election stroage is full.")
+    if not user_owner:
+        raise Exception("You must login to create elections.")
     new_id = "%04x" % random.randint(0, 0xFFFF)
     while new_id in elections:
         new_id = "%04x" % random.randint(0, 0xFFFF)
     e = Election(new_id, name, description, candidates, K)
     elections[new_id] = e
     save_election_to_file(e)
+    user_owner.add_election(e)
+    save_user_to_file(user_owner)
     return e
 
 """
@@ -103,13 +107,6 @@ def get_session_token(username, password):
     return token
 
 """
-Raises an exception if token is incorrect.
-"""
-def verify_token(election, token):
-    if token != election.evaluation_token:
-        raise Exception("Incorrect Token.")
-
-"""
 Searches the database for elections which match the search string. The results are
 ordered by relevance.
 
@@ -135,9 +132,10 @@ def add_vote(election_id, ballot):
 """
 Deletes the given election. This will also delete it from the persistent storage!
 """
-def delete_election(election_id, token):
+def delete_election(election_id, user):
+    if not election_id in user.elections:
+        raise Exception("You need to login!")
     e = get_election(election_id)
-    verify_token(e, token)
     elections.pop(election_id)
     os.remove(election_storage_path + election_id + ".json")
 
@@ -158,9 +156,8 @@ Evaluates an election, i.e. computes the current winners.
          system, and can be referenced e.g. for tie-breaking in the final
          outcome.
 """
-def evaluate_current_winners(election_id, token):
+def evaluate_current_winners(election_id):
     e = get_election(election_id)
-    verify_token(e, token)
     e.stop()
     ret = e.evaluate()
     e.restart()
@@ -176,9 +173,10 @@ Evaluates an election, i.e. computes the final possible winners.
          system, and can be referenced e.g. for tie-breaking in the final
          outcome.
 """
-def evaluate_final_winners(election_id, token):
+def evaluate_final_winners(election_id, user):
+    if not election_id in user.elections:
+        raise Exception("You need to login!")
     e = get_election(election_id)
-    verify_token(e, token)
     e.stop()
     ret = e.evaluate()
     save_election_to_file(e)
@@ -190,9 +188,10 @@ committees by setting the committee committee-ID as the winner. This ID is retre
 from the "evaluate" function.
 Note that this function also stops the election.
 """
-def select_winner(election_id, token, committee_id):
+def select_winner(election_id, user, committee_id):
+    if not election_id in user.elections:
+        raise Exception("You need to login!")
     e = get_election(election_id)
-    verify_token(e, token)
     e.set_winner(committee_id)
     save_election_to_file(e)
 
@@ -225,7 +224,6 @@ def load_election_from_file(filename):
     f = open(filename, "r")
     raw_obj = json.loads(f.read())
     e = Election(raw_obj["eid"], raw_obj["name"], raw_obj["description"], set(raw_obj["candidates"]), raw_obj["K"])
-    e.evaluation_token = raw_obj["evaluation_token"]
     e.potential_winners = raw_obj["potential_winners"]
     for ballot in raw_obj["__ballots__"]:
         e.add_ballot([BoundedSet(bs["lower"], bs["saturation"], bs["upper"], *bs["set"]) for bs in ballot])
@@ -247,6 +245,7 @@ def load_user_from_file(filename):
     u = User(raw_obj["username"], raw_obj["name"], "dummy1234")
     u.salt = raw_obj["salt"]
     u.password_hash = raw_obj["password_hash"]      
+    u.elections = raw_obj["elections"]      
     f.close()
     return u
 
@@ -343,7 +342,6 @@ class Election():
         self.description = description
         self.candidates = candidates
         self.K = K
-        self.evaluation_token = "%08x" % random.randint(0, 0xFFFFFFFF)
         self.__ballots__ = list()
         keywords = name.lower() + " " + description.lower() + " " + self.eid
         keywords = re.sub('[^a-zA-Z0-9äöüß]', ' ', keywords)
@@ -428,7 +426,6 @@ class Election():
             "description" : self.description,
             "candidates" : list(self.candidates),
             "K" : self.K,
-            "evaluation_token" : self.evaluation_token,
             "__ballots__" : [[bs.serialize() for bs in b] for b in self.__ballots__],
             "is_stopped" : False,
             "is_finished" : False,
@@ -452,9 +449,13 @@ class User():
         self.salt = "%08x" % random.randint(0, 0xFFFFFFFF)
         self.password_hash = password_hash(password, self.salt)
         self.username = username.lower()
+        self.elections = list()
     
     def check_password(self, passwd):
         return self.password_hash == password_hash(passwd, self.salt)
+    
+    def add_election(self, election):
+        self.elections.append(election.eid)
     
     def serialize(self):
         ret = {
@@ -462,6 +463,7 @@ class User():
             "username" : self.username,
             "salt" : self.salt,
             "password_hash" : self.password_hash,
+            "elections" : self.elections
         }
         return ret
 

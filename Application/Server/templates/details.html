@@ -101,7 +101,7 @@
                     <div style="padding-top: 25px;">
                         <form method="post">
                             <input type="hidden" id="token" name="token" value="{{election.evaluation_token}}">
-                            <input type="submit" value="Refresh" class="election-details-refreshbtn" formaction="/admin/{{ election.eid }}">
+                            <input type="submit" value="Refresh" class="election-details-refreshbtn" formaction="/details/{{ election.eid }}">
                             {% if election.is_finished %} 
                                 <input type="submit" value="Stop and Evaluate" class="election-details-resultbtn" disabled style="background-color: #a1a0a0;">
                             {% else %}
@@ -111,42 +111,13 @@
                         </form>
                     </div>
                 {% else %}
-                    <div class="sep"></div>
-                    <div class="sep"></div>
-                    <div class="sep"></div>
-
-                    <div style="padding-top: 25px;">
-                        <form method="post">
-                            <input type="text" id="token" name="token" class="tokenentry" placeholder="Access Token" required>
-                            <input type="submit" value="Admin Details" class="election-details-adminbtn" formaction="/admin/{{ election.eid }}">
-                        </form>
-                    </div>
+                    <p>As creator of this election, login to see more info.</p>
                 {% endif %}
 
                 <div class="sep"></div>
             </div>
         </div>
     </div>
-
-    {% if justcreated %}
-        <div class="infowindow" id="token-window-fg">
-            <div class="infowindow-title">
-                Access Token
-            </div>
-            <div class="window-content">
-                <p>
-                    Your election was created <span style="color: green;">successfully.</span>
-                    To evaluate or delete the election, you need the following access token.
-                    Please save your token, and don't share it with anyone.
-                </p>
-                <div class="center">
-                    <input type="text" value="{{election.evaluation_token}}" id="evaltoken" class="textfield" style="width: 50%;" readonly>
-                    <br><br>
-                    <button class="copybutton" onclick="copyEvalToClipboard()">Copy and Close</button>
-                </div>
-            </div>
-        </div>
-    {% endif %}
 
     <div class="infowindow" id="share-window-fg" style="display: none;">
         <div class="infowindow-title">
@@ -168,18 +139,6 @@
 
 {%block scripts%}
   <script>
-
-    function copyEvalToClipboard(){
-        var copyText = document.getElementById("evaltoken");
-        copyText.select();
-        copyText.setSelectionRange(0, 200);
-        navigator.clipboard.writeText(copyText.value);
-        
-        // Hide info window
-        document.getElementById("blurred-background").style.display = "none";
-        document.getElementById("token-window-fg").style.display = "none";
-    }
-
     function shareOptions(){
         // Show info window
         document.getElementById("blurred-background").style.display = "block";
