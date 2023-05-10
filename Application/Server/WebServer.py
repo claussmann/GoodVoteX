@@ -20,14 +20,14 @@ def login():
     password = request.form.get('passwd')
 
     token = Service.get_session_token(username, password)
-    response = make_response(render_template('done.html'))
+    response = make_response(render_template('done.html', forward = "/"))
     response.set_cookie('token', value=token, secure=True, httponly=True)
     return response
 
 @app.route('/done')
 def voted_successfully_page():
     user = check_user()
-    return render_template('done.html', user=user)
+    return render_template('done.html', user=user, forward = "/")
 
 @app.route('/createnew', methods=['POST'])
 def create_new_election():
@@ -96,14 +96,14 @@ def evaluate(electionID):
     best_committee = Service.evaluate(electionID, user)
     Service.stop_election(electionID, user)
     app.logger.info("Election stopped by creator: %s (%s)" %(election.eid, election.name))
-    return render_template('done.html', user=user)
+    return render_template('done.html', user=user, forward = "/details/"+electionID)
 
 @app.route('/delete/<electionID>', methods=['POST'])
 def deletion_successful_page(electionID):
     user = check_user()
     Service.delete_election(electionID, user)
     app.logger.info("Results deleted by creator: %s" %election.eid)
-    return render_template('done.html', user=user)
+    return render_template('done.html', user=user, forward = "/")
 
 @app.errorhandler(404)
 def page_not_found(e):
