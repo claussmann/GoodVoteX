@@ -87,13 +87,12 @@ class Election():
         self.votecount += 1
         self.__ballots__.append(list_of_bounded_sets)
     
-    def get_current_winner(self):
+    def compute_current_winner(self):
         tmp = self.is_stopped
         self.is_stopped = True # Prevent further votes (not sure if flask allows parallelism)
         if self.current_winner == None:
             self.current_winner = self.__compute_winner__()
         self.is_stopped = tmp
-        return self.current_winner
     
     def stop(self):
         self.is_stopped = True

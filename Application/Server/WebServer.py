@@ -59,9 +59,7 @@ def details_page(electionID):
     user = check_user()
     election = Service.get_election(electionID)
     if user and electionID in user.elections:
-        best_committee = Service.get_current_winner(electionID)
-        if len(best_committee) > 10:
-            best_committee = best_committee[:11]
+        Service.evaluate(electionID, user)
         return render_template('details.html', election = election, admin = True, user=user)
     return render_template('details.html', election = election, admin = False, user=user)
 
@@ -95,8 +93,8 @@ def add_vote(electionID):
 def evaluate(electionID):
     user = check_user()
     election = Service.get_election(electionID)
-    best_committee = Service.get_current_winner(electionID)
-    Service.stop_election(electionID)
+    best_committee = Service.evaluate(electionID, user)
+    Service.stop_election(electionID, user)
     app.logger.info("Election stopped by creator: %s (%s)" %(election.eid, election.name))
     return render_template('done.html', user=user)
 

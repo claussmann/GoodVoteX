@@ -86,25 +86,26 @@ def add_vote(election_id, ballot):
 Deletes the given election. This will also delete it from the persistent storage!
 """
 def delete_election(election_id, user):
-    if election_id not in user.elections:
+    if not user or election_id not in user.elections:
         raise Exception("You need to login!")
     db.delete_election(election_id)
 
 """
 Evaluates an election, i.e. computes the current winners.
-
-@return: A winner committee.
 """
-def get_current_winner(election_id):
+def evaluate(election_id, user):
+    if not user or election_id not in user.elections:
+        raise Exception("You need to login!")
     e = db.get_election(election_id)
-    ret = e.get_current_winner()
+    e.compute_current_winner()
     db.sync_election(election_id)
-    return ret
 
 """
 Stops an election.
 """
-def stop_election(election_id):
+def stop_election(election_id, user):
+    if not user or election_id not in user.elections:
+        raise Exception("You need to login!")
     e = db.get_election(election_id)
     e.stop()
     db.sync_election(election_id)
