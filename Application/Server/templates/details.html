@@ -9,7 +9,8 @@
             {% else %}
                 <button onclick="window.location.href='/vote/{{ election.eid }}';" class="election-details-votebtn">Vote</button>
             {% endif %}
-            <button onclick="shareOptions()" class="election-details-sharebtn">Share</button>
+            <input hidden type="text" value="/details/{{ election.eid }}" id="sharelink" class="textfield" readonly>
+            <button id="sharebutton" onclick="copyShareToClipboard()" class="election-details-sharebtn">Share</button>
 
             <div class="sep"></div>
 
@@ -119,32 +120,10 @@
         </div>
     </div>
 
-    <div class="infowindow" id="share-window-fg" style="display: none;">
-        <div class="infowindow-title">
-            Share Link
-        </div>
-        <div class="window-content">
-            <p>
-                Share this link with other voters.
-            </p>
-            <div class="center">
-                <input type="text" value="/details/{{ election.eid }}" id="sharelink" class="textfield" style="width: 50%;" readonly>
-                <br><br>
-                <button class="copybutton" onclick="copyShareToClipboard()">Copy and Close</button>
-            </div>
-        </div>
-    </div>
-
 {% endblock %}
 
 {%block scripts%}
   <script>
-    function shareOptions(){
-        // Show info window
-        document.getElementById("blurred-background").style.display = "block";
-        document.getElementById("share-window-fg").style.display = "block";
-    }
-
     function copyShareToClipboard(){
         var copyText = document.getElementById("sharelink");
         copyText.select();
@@ -152,8 +131,8 @@
         navigator.clipboard.writeText(copyText.value);
         
         // Hide info window
-        document.getElementById("blurred-background").style.display = "none";
-        document.getElementById("share-window-fg").style.display = "none";
+        document.getElementById("sharebutton").firstChild.data = "Copied!";
+        document.getElementById("sharebutton").style.backgroundColor = "#313f78";
     }
   </script>
 {% endblock %}
