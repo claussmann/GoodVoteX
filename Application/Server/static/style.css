@@ -96,23 +96,6 @@ input[type="radio"] {
   border-bottom-right-radius: 10px;
 }
 
-.copybutton {
-  height: 1.5em;
-  background-color: #10a816;
-  border: none;
-  color: white;
-  text-align: center;
-  text-decoration: none;
-  font-size: 2vw;
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-  font-weight: 600;
-  padding-left: 15px;
-  padding-right: 15px;
-}
-
 .election-details-votebtn {
   width: 14%;
   position: absolute;
@@ -207,59 +190,6 @@ input[type="radio"] {
   box-shadow: 0px 0px 3px #333333;
   font-weight: 600;
   margin-right: 2%;
-}
-
-.election-details-refreshbtn {
-  width: 14%;
-  height: 1.5em;
-  background-color: #10a816;
-  border: none;
-  color: white;
-  text-align: center;
-  text-decoration: none;
-  font-size: 2vw;
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-  box-shadow: 0px 0px 3px #333333;
-  font-weight: 600;
-  margin-right: 2%;
-}
-
-.election-details-adminbtn {
-  width: 30%;
-  height: 1.5em;
-  background-color: #3c0cc0;
-  border: none;
-  color: white;
-  text-align: center;
-  text-decoration: none;
-  font-size: 2vw;
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-  box-shadow: 0px 0px 3px #333333;
-  font-weight: 600;
-  margin-left: 2%;
-}
-
-.publishbtn {
-  width: 14%;
-  height: 1.5em;
-  background-color: #db7617;
-  border: none;
-  color: white;
-  text-align: center;
-  text-decoration: none;
-  font-size: 2vw;
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-  box-shadow: 0px 0px 3px #333333;
-  font-weight: 600;
 }
 
 .loginbtn {
@@ -433,20 +363,6 @@ input[type="radio"] {
   font-weight: 800;
   position: absolute;
   top: 2vh;
-}
-
-.tokenentry {
-  background-color: white;
-  color: #333333;
-  background-position: 10px 10px;
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-  width: 65%;
-  height: 5vh;
-  font-size: 3vh;
-  font-weight: 800;
 }
 
 
