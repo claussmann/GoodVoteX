@@ -151,13 +151,11 @@ class DataBase():
         f = open(filename, "r")
         raw_obj = json.loads(f.read())
         e = Election(raw_obj["eid"], raw_obj["name"], raw_obj["description"], set(raw_obj["candidates"]), raw_obj["K"])
-        e.potential_winners = raw_obj["potential_winners"]
+        if "current_winner" in raw_obj:
+            e.current_winner = raw_obj["current_winner"]
         for ballot in raw_obj["__ballots__"]:
             e.add_ballot([BoundedSet(bs["lower"], bs["saturation"], bs["upper"], *bs["set"]) for bs in ballot])
-        e.is_stopped = raw_obj["is_stopped"]
-        if raw_obj["is_finished"]:
-            e.is_finished = True
-            e.winner = raw_obj["winner"]        
+        e.is_stopped = raw_obj["is_stopped"]      
         f.close()
         return e
 

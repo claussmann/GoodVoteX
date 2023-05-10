@@ -72,10 +72,8 @@ class Election():
         keywords = re.sub(r'\b\w{1,3}\b', '', keywords) # Remove short words.
         self.keywords = set(keywords.split())
         self.keywords.add(name.lower())
-        self.is_finished = False
         self.is_stopped = False
-        self.winner = None
-        self.potential_winners = None
+        self.current_winner = None
         self.votecount = 0
     
     def add_ballot(self, list_of_bounded_sets):
@@ -85,16 +83,17 @@ class Election():
             for j in range(i):
                 if not list_of_bounded_sets[i].is_disjoint(list_of_bounded_sets[j]):
                     raise Exception("Bounded sets within a ballot must be disjoint.")
-        self.potential_winners = None
+        self.current_winner = None
         self.votecount += 1
         self.__ballots__.append(list_of_bounded_sets)
     
-    def evaluate(self):
-        if self.is_finished:
-            raise Exception("This election has already a winner.")
-        if self.potential_winners == None:
-            self.potential_winners = self.compute_winners()
-        return self.potential_winners
+    def get_current_winner(self):
+        tmp = self.is_stopped
+        self.is_stopped = True # Prevent further votes (not sure if flask allows parallelism)
+        if self.current_winner == None:
+            self.current_winner = self.__compute_winner__()
+        self.is_stopped = tmp
+        return self.current_winner
     
     def stop(self):
         self.is_stopped = True
@@ -102,7 +101,7 @@ class Election():
     def restart(self):
         self.is_stopped = False
     
-    def compute_winners(self):
+    def __compute_winner__(self):
         best_score = 0
         committees_with_score = list()
         for committee in itertools.combinations(self.candidates, self.K):
@@ -113,20 +112,8 @@ class Election():
                 committees_with_score.append(committee)
             elif current_score == best_score:
                 committees_with_score.append(committee)
-        ret = dict()
-        for i in range(len(committees_with_score)):
-            ret["cid" + str(i)] = committees_with_score[i]
+        ret = random.choice(committees_with_score)
         return ret
-    
-    def set_winner(self, committee_id):
-        if self.is_finished:
-            raise Exception("This election has already a winner.")
-        if committee_id not in self.potential_winners.keys():
-            raise Exception("This committee id doesn't exist:%s"%committee_id)
-        self.is_finished = True
-        self.is_stopped = True
-        self.winner = self.potential_winners[committee_id]
-        self.potential_winners = None
 
     def score(self, committee):
         return sum(
@@ -151,16 +138,11 @@ class Election():
             "candidates" : list(self.candidates),
             "K" : self.K,
             "__ballots__" : [[bs.serialize() for bs in b] for b in self.__ballots__],
-            "is_stopped" : False,
-            "is_finished" : False,
-            "potential_winners" : self.potential_winners,
             "is_stopped" : self.is_stopped,
             "votecount" : self.votecount
         }
-        
-        if self.is_finished:
-            ret["is_finished"] = True
-            ret["winner"] = self.winner
+        if self.current_winner != None:
+            ret["current_winner"] = self.current_winner
         return ret
 
 class User():

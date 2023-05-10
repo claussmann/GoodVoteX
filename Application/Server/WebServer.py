@@ -59,10 +59,10 @@ def details_page(electionID):
     user = check_user()
     election = Service.get_election(electionID)
     if user and electionID in user.elections:
-        best_committees = Service.evaluate_current_winners(electionID)
-        if len(best_committees) > 10:
-            best_committees = best_committees[:11]
-        return render_template('details.html', election = election, admin = True, user=user, bestcommittees=best_committees)
+        best_committee = Service.get_current_winner(electionID)
+        if len(best_committee) > 10:
+            best_committee = best_committee[:11]
+        return render_template('details.html', election = election, admin = True, user=user)
     return render_template('details.html', election = election, admin = False, user=user)
 
 @app.route('/vote/<electionID>')
@@ -92,23 +92,13 @@ def add_vote(electionID):
     return "OK"
 
 @app.route('/evaluate/<electionID>', methods=['POST'])
-def evaluation_page(electionID):
+def evaluate(electionID):
     user = check_user()
     election = Service.get_election(electionID)
-    best_committees = Service.evaluate_final_winners(electionID, user)
-    if len(best_committees) > 10:
-        best_committees = best_committees[:11]
+    best_committee = Service.get_current_winner(electionID)
+    Service.stop_election(electionID)
     app.logger.info("Election stopped by creator: %s (%s)" %(election.eid, election.name))
-    return render_template('eval.html', election = election, bestcommittees = best_committees, user=user)
-
-@app.route('/publish/<electionID>', methods=['POST'])
-def publish_successful_page(electionID):
-    user = check_user()
-    election = Service.get_election(electionID)
-    winner_id = request.form['winner']
-    Service.select_winner(electionID, user, winner_id)
-    app.logger.info("Results published by creator: %s (%s)" %(election.eid, election.name))
-    return render_template('done.html', user = user)
+    return render_template('done.html', user=user)
 
 @app.route('/delete/<electionID>', methods=['POST'])
 def deletion_successful_page(electionID):

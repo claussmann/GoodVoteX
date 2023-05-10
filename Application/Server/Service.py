@@ -93,50 +93,18 @@ def delete_election(election_id, user):
 """
 Evaluates an election, i.e. computes the current winners.
 
-@return: A dict mapping a committee-ID to committee members. Each committee
-         in the dict is a winner committee (due to ties we do not always
-         have a unique winner committee). The committee-IDs are known to the
-         system, and can be referenced e.g. for tie-breaking in the final
-         outcome.
+@return: A winner committee.
 """
-def evaluate_current_winners(election_id):
+def get_current_winner(election_id):
     e = db.get_election(election_id)
-    e.stop()
-    ret = e.evaluate()
-    e.restart()
+    ret = e.get_current_winner()
     db.sync_election(election_id)
     return ret
 
 """
-Evaluates an election, i.e. computes the final possible winners.
-
-@return: A dict mapping a committee-ID to committee members. Each committee
-         in the dict is a winner committee (due to ties we do not always
-         have a unique winner committee). The committee-IDs are known to the
-         system, and can be referenced e.g. for tie-breaking in the final
-         outcome.
+Stops an election.
 """
-def evaluate_final_winners(election_id, user):
-    if not election_id in user.elections:
-        raise Exception("You need to login!")
+def stop_election(election_id):
     e = db.get_election(election_id)
     e.stop()
-    ret = e.evaluate()
     db.sync_election(election_id)
-    return ret
-
-"""
-After evaluating the election, we can break potential ties between multiple winner-
-committees by setting the committee committee-ID as the winner. This ID is retreived
-from the "evaluate" function.
-Note that this function also stops the election.
-"""
-def select_winner(election_id, user, committee_id):
-    if not election_id in user.elections:
-        raise Exception("You need to login!")
-    e = db.get_election(election_id)
-    e.set_winner(committee_id)
-    db.sync_election(election_id)
-
-
-

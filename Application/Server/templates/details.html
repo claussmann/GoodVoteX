@@ -62,7 +62,7 @@
                     </datalist>
                 </div>
 
-                {% if election.is_finished %}
+                {% if election.is_stopped %}
                     <div class="sep"></div>
                     <div class="sep"></div>
                     <div class="sep"></div>
@@ -73,7 +73,7 @@
                     The following committee is the winner of this election:
 
                     <div>
-                        {% for candidate in election.winner %}
+                        {% for candidate in election.current_winner %}
                         <div class="is-candidate">
                             {{candidate}}
                         </div>
@@ -91,18 +91,18 @@
                     <div class="sep"></div>
                     Currently <b>{{election.votecount}} voters</b> participated.
                     <div class="sep"></div>
-                    The current best committee(s) is (are) the following:
-                    <ul>
-                    {% for id in bestcommittees.keys() %}
-                        <li>{% for candidate in bestcommittees[id] %}{{candidate}}, {% endfor %} </li>
-                    {% endfor %}
-                    </ul>
+                    The best committee currently is the following:
+                    <div>
+                        {% for candidate in election.current_winner %}
+                        <div class="is-candidate">
+                            {{candidate}}
+                        </div>
+                        {% endfor %}
+                    </div>
 
                     <div style="padding-top: 25px;">
                         <form method="post">
-                            <input type="hidden" id="token" name="token" value="{{election.evaluation_token}}">
-                            <input type="submit" value="Refresh" class="election-details-refreshbtn" formaction="/details/{{ election.eid }}">
-                            {% if election.is_finished %} 
+                            {% if election.is_stopped %} 
                                 <input type="submit" value="Stop and Evaluate" class="election-details-resultbtn" disabled style="background-color: #a1a0a0;">
                             {% else %}
                                 <input type="submit" value="Stop and Evaluate" class="election-details-resultbtn" formaction="/evaluate/{{ election.eid }}" onclick="return confirm('By evaluating the election, it will be closed for further votes. Do you want to continue evaluation?')">
