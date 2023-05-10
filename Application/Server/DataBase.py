@@ -2,6 +2,7 @@ import json
 import os
 from DataStructures import *
 from pathlib import Path
+import time
 
 class DataBase():
     def __init__(self, storage_path):
@@ -9,9 +10,10 @@ class DataBase():
         self.election_storage_path = storage_path + "/elections/"
         Path(self.user_storage_path).mkdir(parents=True, exist_ok=True)
         Path(self.election_storage_path).mkdir(parents=True, exist_ok=True)
-        self.elections = dict()
-        self.users = dict()
-        self.sessions = dict()
+        self.elections = dict() # eID -> election
+        self.users = dict() # username -> user
+        self.sessions = dict() # token -> user
+        self.sessions_ttl = dict() # token -> expiration time
         self.__load_all__()
     
     """
@@ -41,6 +43,9 @@ class DataBase():
     """
     def get_user_for_session(self, token):
         if token in self.sessions:
+            if time.time() > self.sessions_ttl[token]:
+                self.sessions.pop(token)
+                raise Exception("This session expired. Log in again.")
             return self.sessions[token]
         raise Exception("This session does not exist")
 
@@ -84,6 +89,7 @@ class DataBase():
         while token in self.sessions:
             token = "%020x" % random.randint(0, 0xFFFFFFFFFFFFFFFF)
         self.sessions[token] = user
+        self.sessions_ttl[token] = time.time() + 1800 # 30 minutes
         return token
     
     """

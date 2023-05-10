@@ -2,6 +2,7 @@ import random
 import itertools
 import re
 from hashlib import sha256
+from time import sleep
 
 class BoundedSet(frozenset):
     def __new__(cls, lower, saturation, upper, *items):
@@ -157,6 +158,7 @@ class User():
         self.elections = list()
     
     def check_password(self, passwd):
+        sleep(0.001*random.randint(1,2000)) # prevent timing attacks
         return self.password_hash == password_hash(passwd, self.salt)
     
     def add_election(self, election):
