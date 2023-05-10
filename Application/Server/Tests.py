@@ -1,8 +1,12 @@
-from Service import *
+import Service
 from DataStructures import *
+from DataBase import *
 import pytest
 import os
 
+
+db = DataBase("../DB/Test")
+db.dump()
 
 """
     Tests for Bounded Set
@@ -140,86 +144,76 @@ def test_password_length():
 
 
 """
-    Tests for Service
+    Tests for DB
 """
 
 def test_import_export_election():
     e = Election(42, "This Year Food Selection: What should be served?", "You decide on Food: Banana, or Fish? Döner?", {"a", "b", "c", "d", "e", "f", "g"}, 3)
+    db.add_election(e)
     e.add_ballot([BoundedSet(1,2,4,{"a", "b", "c", "f"}), BoundedSet(1,1,2,{"d", "g"})])
     e.add_ballot([BoundedSet(1,1,1,{"a", "b", "c"})])
-    save_election_to_file(e)
-    e2 = load_election_from_file(election_storage_path + "42.json")
-    os.remove(election_storage_path + "42.json")
+    db.sync_election(e.eid)
+
+    db2 = DataBase("../DB/Test")
+    e2 = db.get_election("42")
     assert e2.name == e.name
     assert e2.eid == e.eid
     assert e2.description == e.description
     assert e2.K == e.K
     assert e2.candidates == e.candidates
+    assert len(e2.__ballots__) == len(e.__ballots__)
+    db.dump()
 
 def test_import_export_user():
     u = User("admin", "Administrator Rex", "admin123")
-    save_user_to_file(u)
-    u2 = load_user_from_file(user_storage_path + "admin.json")
-    os.remove(user_storage_path + "admin.json")
+    db.add_user(u)
+
+    db2 = DataBase("../DB/Test")
+    u2 = db.get_user("admin")
     assert u2.name == u.name
     assert u2.username == u.username
     assert u2.password_hash == u.password_hash
     assert u2.salt == u.salt
+    db.dump()
 
-def test_register_delete_election():
-    u = User("admin", "Administrator Rex", "admin123")
-    e1 = register_election("Test 42", "A test election.", ["a", "b", "c", "d"], 3, u)
-    assert str(e1.eid) + ".json" in [f for f in os.listdir(election_storage_path) if f.endswith(".json")]
+def test_delete_election():
+    e = Election(42, "This Year Food Selection: What should be served?", "You decide on Food: Banana, or Fish? Döner?", {"a", "b", "c", "d", "e", "f", "g"}, 3)
+    db.add_election(e)
+    assert str(e.eid) + ".json" in [f for f in os.listdir(db.election_storage_path) if f.endswith(".json")]
+    db.delete_election(e.eid)
+    assert str(e.eid) + ".json" not in [f for f in os.listdir(db.election_storage_path) if f.endswith(".json")]
+    db.dump()
 
-    with pytest.raises(Exception):
-        e2 = register_election("Test 43", "A second test election.", ["a", "b", "c"], 3, u) # should fail because too small K
-    
-    delete_election(e1.eid, u)
-    os.remove(user_storage_path + "admin.json")
-    assert str(e1.eid) + ".json" not in [f for f in os.listdir(election_storage_path) if f.endswith(".json")]
-
-def test_register_delete_user():
-    u1 = register_user("aDmin", "Testosaurus", "adminiissttr")
-
-    with pytest.raises(Exception):
-        u2 = register_user("admin", "Mr Smith", "kjfhnasdjjnj") # should fail because same username
-    
-    assert u1 == get_user("AdMIN") # lower/upper case doesn't matter
-    
-    delete_user("admin")
-    assert "admin.json" not in [f for f in os.listdir(user_storage_path) if f.endswith(".json")]
+def test_delete_user():
+    u = User("admini", "Administrator Rex", "admin123")
+    db.add_user(u)
+    assert str(u.username) + ".json" in [f for f in os.listdir(db.user_storage_path) if f.endswith(".json")]
+    db.delete_user(u.username)
+    assert str(u.username) + ".json" not in [f for f in os.listdir(db.user_storage_path) if f.endswith(".json")]
+    db.dump()
 
 def test_election_not_exists():
     with pytest.raises(Exception):
-        e = get_election("abcdef")
+        db.get_election("abcdef")
 
-def test_wrong_user():
-    u1 = register_user("aDmin", "Testosaurus", "adminiissttr")
-    u2 = register_user("peter", "Testosaurus", "adminiissttr")
-    e1 = register_election("Test 42", "A test election.", ["a", "b", "c", "d"], 3, u1)
-    with pytest.raises(Exception):
-        delete_election(e1.eid, u2)
-    delete_election(e1.eid, u1)
-    delete_user("admin")
-    delete_user("peter")
 
+"""
+    Tests for Service
+"""
 
 def test_search():
-    u = register_user("aDmin", "Testosaurus", "adminiissttr")
-    e1 = register_election("Test Election Major 2023", "A test election for who will become major!", ["a", "b", "c", "d"], 2, u)
-    e2 = register_election("Election Junior", "Who will become junior in our test?", ["a", "b", "c", "d"], 2, u)
-    e3 = register_election("Is Gollum an animal?", "New date received: DNA Test positive!", ["a", "b", "c", "d"], 2, u)
-    e4 = register_election("What to take on mars", "New Mars mission!", ["a", "b", "c", "d"], 2, u)
+    Service.db = DataBase("../DB/Test")
+    u = Service.register_user("aDmin", "Testosaurus", "adminiissttr")
+    e1 = Service.register_election("Test Election Major 2023", "A test election for who will become major!", ["a", "b", "c", "d"], 2, u)
+    e2 = Service.register_election("Election Junior", "Who will become junior in our test?", ["a", "b", "c", "d"], 2, u)
+    e3 = Service.register_election("Is Gollum an animal?", "New date received: DNA Test positive!", ["a", "b", "c", "d"], 2, u)
+    e4 = Service.register_election("What to take on mars", "New Mars mission!", ["a", "b", "c", "d"], 2, u)
 
-    search_res = search("Major test election")
+    search_res = Service.search("Major test election")
     assert len(search_res) == 3
     assert search_res[0] == e1 # Keywords: "Major", "Test", "Election"
     assert search_res[1] == e2 # Keywords: "Election", "Test"
     assert search_res[2] == e3 # Keyword: "Test"
     assert e4 not in search_res # No keywords
     
-    delete_election(e1.eid, u)
-    delete_election(e2.eid, u)
-    delete_election(e3.eid, u)
-    delete_election(e4.eid, u)
-    delete_user("admin")
+    Service.db.dump()

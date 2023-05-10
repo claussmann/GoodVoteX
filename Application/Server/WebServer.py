@@ -4,9 +4,9 @@ from werkzeug.exceptions import HTTPException
 
 app = Flask(__name__)
 
-@app.before_first_request
-def initialization_code():
-    Service.load_all()
+# @app.before_first_request
+# def initialization_code():
+#     Service.load_all()
 
 @app.route('/')
 def start_page():
@@ -62,7 +62,7 @@ def details_page(electionID):
         best_committees = Service.evaluate_current_winners(electionID)
         if len(best_committees) > 10:
             best_committees = best_committees[:11]
-        return render_template('details.html', election = Service.get_election(electionID), admin = True, user=user, bestcommittees=best_committees)
+        return render_template('details.html', election = election, admin = True, user=user, bestcommittees=best_committees)
     return render_template('details.html', election = election, admin = False, user=user)
 
 @app.route('/vote/<electionID>')

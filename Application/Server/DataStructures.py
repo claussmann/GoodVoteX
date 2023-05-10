@@ -1,6 +1,4 @@
 import random
-import json
-import os
 import itertools
 import re
 from hashlib import sha256
