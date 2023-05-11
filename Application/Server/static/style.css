@@ -227,7 +227,9 @@ input[type="radio"] {
 }
 
 .logout-submitbtn {
-  width: 100%;
+  position: absolute;
+  top: 5px;
+  left: 5px;
   height: 1.5em;
   background-color: #a81010;
   border: none;

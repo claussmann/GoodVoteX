@@ -55,6 +55,9 @@
                     {{user.name}}
             </div>
             <button onclick="close_userinfo()" class="closebtn">X</button>
+            <form action="/logout" method="post">
+                <input type="submit" id="logoutbtn" value="Logout" class="logout-submitbtn">
+            </form>
             <div class="window-content">
                 <h2>See your registered elections:</h2>
                 <ul>
@@ -62,11 +65,6 @@
                         <li><a href="/details/{{e.eid}}">{{e.name}}</a></li>
                     {% endfor %}
                 </ul>
-                <br>
-                <form action="/logout" method="post">
-                    <input type="submit" id="logoutbtn" value="Logout" class="logout-submitbtn">
-                </form>
-                <br>
                 <br>
                 <h2>Change Password:</h2>
                 <form action="/changepasswd" method="post">
