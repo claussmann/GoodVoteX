@@ -56,9 +56,7 @@
             </div>
             <button onclick="close_userinfo()" class="closebtn">X</button>
             <div class="window-content">
-                <p>
-                    See your registered elections:
-                </p>
+                <h2>See your registered elections:</h2>
                 <ul>
                     {% for e in user.elections %}
                         <li><a href="/details/{{e.eid}}">{{e.name}}</a></li>
@@ -67,6 +65,16 @@
                 <br>
                 <form action="/logout" method="post">
                     <input type="submit" id="logoutbtn" value="Logout" class="logout-submitbtn">
+                </form>
+                <br>
+                <br>
+                <h2>Change Password:</h2>
+                <form action="/changepasswd" method="post">
+                    <input type="password" id="passwd_old" name="passwd" style="width: 96%;" placeholder="Password" class="textfield" required>
+                    <input type="password" id="passwd_new" name="new_passwd" style="width: 96%;" placeholder="New Password" class="textfield" required>
+                    <input type="password" id="passwd_confirm" name="confirm_passwd" style="width: 96%;" placeholder="Confirm New Password" class="textfield" required>
+                    <br><br>
+                    <input type="submit" id="logintbtn" value="Change Password" class="changepass-submitbtn">
                 </form>
             </div>
         </div>

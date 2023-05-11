@@ -31,6 +31,15 @@ def logout():
     response.set_cookie('token', value="None", secure=True, httponly=True, expires=0)
     return response
 
+@app.route('/changepasswd', methods=['POST'])
+def change_passwd():
+    user = check_user()
+    password = request.form.get('passwd')
+    new_password = request.form.get('new_passwd')
+    confirm_password = request.form.get('confirm_passwd')
+    Service.change_password(user, password, new_password, confirm_password)
+    return render_template('done.html', user=user, forward = "/")
+
 @app.route('/done')
 def voted_successfully_page():
     user = check_user()

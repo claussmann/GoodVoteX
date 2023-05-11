@@ -30,6 +30,17 @@ def register_user(username, name, password):
     return u
 
 """
+Changes a users password.
+"""
+def change_password(user, password, new_password, confirm_password):
+    if new_password != confirm_password:
+        raise Exception("New passwords do not match.")
+    if not user.check_password(password):
+        raise Exception("Incorrect password!")
+    user.set_password(new_password)
+    db.sync_user(user.username)
+
+"""
 @return: The election object with the given ID (if exists).
 """
 def get_election(election_id):

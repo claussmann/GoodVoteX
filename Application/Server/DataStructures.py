@@ -157,14 +157,17 @@ class User():
     def __init__(self, username, name, password):
         if len(name) > 60: raise Exception("Name is too long.")
         if len(name) < 3: raise Exception("Name is too short.")
-        if len(password) > 40: raise Exception("Password must be no more than 40 chars")
-        if len(password) < 8: raise Exception("Password must be at least 8 chars")
         self.name = name
         self.salt = "%08x" % random.randint(0, 0xFFFFFFFF)
-        self.password_hash = password_hash(password, self.salt)
         self.username = username.lower()
         self.elections = list()
+        self.set_password(password)
     
+    def set_password(self, new_passwd):
+        if len(new_passwd) > 40: raise Exception("Password must be no more than 40 chars")
+        if len(new_passwd) < 8: raise Exception("Password must be at least 8 chars")
+        self.password_hash = password_hash(new_passwd, self.salt)
+
     def check_password(self, passwd):
         sleep(0.001*random.randint(1,2000)) # prevent timing attacks
         return self.password_hash == password_hash(passwd, self.salt)
