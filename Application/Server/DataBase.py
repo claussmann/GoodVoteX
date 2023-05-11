@@ -45,6 +45,7 @@ class DataBase():
         if token in self.sessions:
             if time.time() > self.sessions_ttl[token]:
                 self.sessions.pop(token)
+                self.sessions_ttl.pop(token)
                 raise Exception("This session expired. Log in again.")
             return self.sessions[token]
         raise Exception("This session does not exist")
@@ -91,6 +92,16 @@ class DataBase():
         self.sessions[token] = user
         self.sessions_ttl[token] = time.time() + 1800 # 30 minutes
         return token
+    
+    """
+    Removes user session and effectively logs out the user.
+    """
+    def terminate_user_session(self, token):
+        if token in self.sessions:
+            self.sessions.pop(token)
+            self.sessions_ttl.pop(token)
+        else:
+            raise Exception("This session was logged out already.")
     
     """
     Persists changes to a user.

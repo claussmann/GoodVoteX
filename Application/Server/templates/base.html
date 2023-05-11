@@ -64,6 +64,10 @@
                         <li><a href="/details/{{e.eid}}">{{e.name}}</a></li>
                     {% endfor %}
                 </ul>
+                <br>
+                <form action="/logout" method="post">
+                    <input type="submit" id="logoutbtn" value="Logout" class="logout-submitbtn">
+                </form>
             </div>
         </div>
         {% endif %}

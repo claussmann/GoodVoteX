@@ -51,6 +51,12 @@ def get_user_by_session(token):
         return False
 
 """
+Logout the user.
+"""
+def terminate_user_session(token):
+    db.terminate_user_session(token)
+
+"""
 @return: Temporary access token if the user exists and passowrd is correct.
 """
 def get_session_token(username, password):

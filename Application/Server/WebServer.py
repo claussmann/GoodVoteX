@@ -24,6 +24,13 @@ def login():
     response.set_cookie('token', value=token, secure=True, httponly=True)
     return response
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    Service.terminate_user_session(request.cookies.get('token'))
+    response = make_response(render_template('done.html', forward = "/", user=False))
+    response.set_cookie('token', value="None", secure=True, httponly=True, expires=0)
+    return response
+
 @app.route('/done')
 def voted_successfully_page():
     user = check_user()
