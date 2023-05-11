@@ -170,8 +170,9 @@ class DataBase():
         raw_obj = json.loads(f.read())
         u = User(raw_obj["username"], raw_obj["name"], "dummy1234")
         u.salt = raw_obj["salt"]
-        u.password_hash = raw_obj["password_hash"]      
-        u.elections = raw_obj["elections"]      
+        u.password_hash = raw_obj["password_hash"]
+        for eid in raw_obj["elections"]:
+            u.add_election(self.get_election(eid))
         f.close()
         return u
 

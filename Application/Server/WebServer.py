@@ -45,7 +45,7 @@ def create_new_election():
         user
     )
     app.logger.info("Election registered: %s, %d candidates, committee size: %d" %(election.name, len(election.candidates), election.K))
-    return render_template('details.html', election = election, admin=True, user=user)
+    return render_template('done.html', user=user, forward = "/details/"+election.eid)
 
 @app.route('/searchforelection')
 def search_election():
@@ -58,7 +58,7 @@ def search_election():
 def details_page(electionID):
     user = check_user()
     election = Service.get_election(electionID)
-    if user and electionID in user.elections:
+    if user and user.owns_election(electionID):
         Service.evaluate(electionID, user)
         return render_template('details.html', election = election, admin = True, user=user)
     return render_template('details.html', election = election, admin = False, user=user)

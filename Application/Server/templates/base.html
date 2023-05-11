@@ -26,12 +26,13 @@
             {% endif %}
         </div>
 
-        <div class="blurred-background" id="blurred-background" style="display: none;"></div>        
         
         <div class="sep"></div>
         {% block content %}
         {% endblock %}
     
+        <div class="blurred-background" id="blurred-background" style="display: none;"></div>        
+
         <!-- Windows for login, userinfo, and logout -->
         <div class="infowindow" id="login-window" style="display: none;">
             <div class="infowindow-title">
@@ -48,19 +49,24 @@
             </div>
         </div>
 
+        {% if user %}
         <div class="infowindow" id="userinfo-window" style="display: none;">
             <div class="infowindow-title">
-                {% if user %}
-                    Signed in as {{user.username}}
-                    {% endif %}
+                    {{user.name}}
             </div>
             <button onclick="close_userinfo()" class="closebtn">X</button>
             <div class="window-content">
                 <p>
-                    Info
+                    See your registered elections:
                 </p>
+                <ul>
+                    {% for e in user.elections %}
+                        <li><a href="/details/{{e.eid}}">{{e.name}}</a></li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
+        {% endif %}
     </body>
     {% block scripts %}
     {% endblock %}

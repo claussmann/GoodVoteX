@@ -77,6 +77,14 @@ class Election():
         self.current_winner = None
         self.votecount = 0
     
+    def __eq__(self, other):
+        try:
+            return self.eid == other.eid
+        except:
+            return False
+        return False
+
+    
     def add_ballot(self, list_of_bounded_sets):
         if self.is_stopped:
             raise Exception("The creator stopped the voting process. You can no longer vote.")
@@ -162,7 +170,7 @@ class User():
         return self.password_hash == password_hash(passwd, self.salt)
     
     def add_election(self, election):
-        self.elections.append(election.eid)
+        self.elections.append(election)
     
     def serialize(self):
         ret = {
@@ -170,10 +178,12 @@ class User():
             "username" : self.username,
             "salt" : self.salt,
             "password_hash" : self.password_hash,
-            "elections" : self.elections
+            "elections" : [e.eid for e in self.elections]
         }
         return ret
 
+    def owns_election(self, eID):
+        return eID in [e.eid for e in self.elections]
 
 def password_hash(passwd, salt):
     tmp = passwd + " " + salt

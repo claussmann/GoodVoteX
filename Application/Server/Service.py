@@ -86,7 +86,7 @@ def add_vote(election_id, ballot):
 Deletes the given election. This will also delete it from the persistent storage!
 """
 def delete_election(election_id, user):
-    if not user or election_id not in user.elections:
+    if not user or not user.owns_election(election_id):
         raise Exception("You need to login!")
     db.delete_election(election_id)
 
@@ -94,7 +94,7 @@ def delete_election(election_id, user):
 Evaluates an election, i.e. computes the current winners.
 """
 def evaluate(election_id, user):
-    if not user or election_id not in user.elections:
+    if not user or not user.owns_election(election_id):
         raise Exception("You need to login!")
     e = db.get_election(election_id)
     e.compute_current_winner()
@@ -104,7 +104,7 @@ def evaluate(election_id, user):
 Stops an election.
 """
 def stop_election(election_id, user):
-    if not user or election_id not in user.elections:
+    if not user or not user.owns_election(election_id):
         raise Exception("You need to login!")
     e = db.get_election(election_id)
     e.stop()
