@@ -24,6 +24,22 @@ def login():
     response.set_cookie('token', value=token, secure=True, httponly=True)
     return response
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    Service.terminate_user_session(request.cookies.get('token'))
+    response = make_response(render_template('done.html', forward = "/", user=False))
+    response.set_cookie('token', value="None", secure=True, httponly=True, expires=0)
+    return response
+
+@app.route('/changepasswd', methods=['POST'])
+def change_passwd():
+    user = check_user()
+    password = request.form.get('passwd')
+    new_password = request.form.get('new_passwd')
+    confirm_password = request.form.get('confirm_passwd')
+    Service.change_password(user, password, new_password, confirm_password)
+    return render_template('done.html', user=user, forward = "/")
+
 @app.route('/done')
 def voted_successfully_page():
     user = check_user()
@@ -45,7 +61,7 @@ def create_new_election():
         user
     )
     app.logger.info("Election registered: %s, %d candidates, committee size: %d" %(election.name, len(election.candidates), election.K))
-    return render_template('details.html', election = election, admin=True, user=user)
+    return render_template('done.html', user=user, forward = "/details/"+election.eid)
 
 @app.route('/searchforelection')
 def search_election():
@@ -58,7 +74,7 @@ def search_election():
 def details_page(electionID):
     user = check_user()
     election = Service.get_election(electionID)
-    if user and electionID in user.elections:
+    if user and user.owns_election(electionID):
         Service.evaluate(electionID, user)
         return render_template('details.html', election = election, admin = True, user=user)
     return render_template('details.html', election = election, admin = False, user=user)

@@ -30,6 +30,17 @@ def register_user(username, name, password):
     return u
 
 """
+Changes a users password.
+"""
+def change_password(user, password, new_password, confirm_password):
+    if new_password != confirm_password:
+        raise Exception("New passwords do not match.")
+    if not user.check_password(password):
+        raise Exception("Incorrect password!")
+    user.set_password(new_password)
+    db.sync_user(user.username)
+
+"""
 @return: The election object with the given ID (if exists).
 """
 def get_election(election_id):
@@ -49,6 +60,12 @@ def get_user_by_session(token):
         return db.get_user_for_session(token)
     except:
         return False
+
+"""
+Logout the user.
+"""
+def terminate_user_session(token):
+    db.terminate_user_session(token)
 
 """
 @return: Temporary access token if the user exists and passowrd is correct.
@@ -86,7 +103,7 @@ def add_vote(election_id, ballot):
 Deletes the given election. This will also delete it from the persistent storage!
 """
 def delete_election(election_id, user):
-    if not user or election_id not in user.elections:
+    if not user or not user.owns_election(election_id):
         raise Exception("You need to login!")
     db.delete_election(election_id)
 
@@ -94,7 +111,7 @@ def delete_election(election_id, user):
 Evaluates an election, i.e. computes the current winners.
 """
 def evaluate(election_id, user):
-    if not user or election_id not in user.elections:
+    if not user or not user.owns_election(election_id):
         raise Exception("You need to login!")
     e = db.get_election(election_id)
     e.compute_current_winner()
@@ -104,7 +121,7 @@ def evaluate(election_id, user):
 Stops an election.
 """
 def stop_election(election_id, user):
-    if not user or election_id not in user.elections:
+    if not user or not user.owns_election(election_id):
         raise Exception("You need to login!")
     e = db.get_election(election_id)
     e.stop()
