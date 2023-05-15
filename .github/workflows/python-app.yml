@@ -31,4 +31,4 @@ jobs:
         pip install pytest
     - name: Test with pytest
       run: |
-        cd Application/Server && pytest Tests.py
+        cd tests && pytest Tests.py
