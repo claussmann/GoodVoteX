@@ -28,8 +28,11 @@ class Election(db.Model):
     def add_ballot(self, ballot):
         if self.is_stopped:
             raise Exception("The creator stopped the voting process. You can no longer vote.")
-        self.votecount += 1
         self.ballots.append(ballot)
+        if not ballot.check_validity():
+            self.ballots.remove(ballot)
+            raise Exception("Ballot does not seem to be valid.")
+        self.votecount += 1
 
     def recompute_current_winner(self):
         for c in self.candidates:
@@ -61,7 +64,7 @@ class Election(db.Model):
         return ret
 
     def score(self, committee):
-        return sum(ballot.score([c.name for c in committee]) for ballot in self.ballots)
+        return sum(ballot.score([c.id for c in committee]) for ballot in self.ballots)
 
     def search_relevance(self, search_string):
         search_string = search_string.lower()
@@ -108,6 +111,7 @@ class Ballot(db.Model):
         pass
 
 
+
 class BoundedApprovalBallot(Ballot):
     id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
     json_encoded = db.Column(db.String(1000), nullable=False)
@@ -119,12 +123,21 @@ class BoundedApprovalBallot(Ballot):
     def score(self, committee):
         sets = self.__decode()
         return sum(bs.phi(committee) * bs.intersection_size(committee) for bs in sets)
-
-    def encode(self, list_of_bounded_sets):
-        for i in range(1, len(list_of_bounded_sets)):
+    
+    def check_validity(self):
+        sets = self.__decode()
+        for i in range(1, len(sets)):
             for j in range(i):
                 if not list_of_bounded_sets[i].is_disjoint(list_of_bounded_sets[j]):
-                    raise Exception("Bounded sets within a ballot must be disjoint.")
+                    return False
+        valid_ids = [str(c.id) for c in self.election.candidates]
+        for bs in sets:
+            for c in bs:
+                if not c in valid_ids:
+                    return False
+        return True
+
+    def encode(self, list_of_bounded_sets):
         bounded_sets_encoded = {"bsets" : [bs.serialize() for bs in list_of_bounded_sets]}
         self.json_encoded = json.dumps(bounded_sets_encoded)
     

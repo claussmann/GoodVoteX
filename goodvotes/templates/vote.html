@@ -42,7 +42,7 @@
           <div class="sep"></div>
           <div id="not-approved-zone">
             {% for candidate in election.candidates %}
-            <div id="{{candidate.name}}" class="is-candidate" draggable="true" ondragstart="onDragStart(event);">
+            <div id="{{candidate.id}}" class="is-candidate" draggable="true" ondragstart="onDragStart(event);">
               {{candidate.name}}
             </div>
             {% endfor %}
