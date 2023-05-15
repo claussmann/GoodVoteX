@@ -185,7 +185,7 @@ class JSONFileStorage:
         """
         u = self.get_user(username)
         self.users.pop(username)
-        (self.user_storage_path / username + ".json").unlink()
+        (self.user_storage_path / "{}.json".format(username)).unlink()
 
     def dump(self):
         """
