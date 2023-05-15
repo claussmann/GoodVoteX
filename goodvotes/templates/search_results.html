@@ -7,13 +7,13 @@
     {% endif %}
     {% for e in elections %}
       <div class="electioncard">
-        <div class="electioncard-title">{{e.name}}</div>
+        <div class="electioncard-title">{{e.title}}</div>
         {% if e.is_stopped %} 
                 <button class="election-details-votebtn" disabled style="background-color: #a1a0a0;">Vote</button>
         {% else %}
-            <button onclick="window.location.href='/vote/{{ e.eid }}';" class="election-details-votebtn">Vote</button>
+            <button onclick="window.location.href='/vote/{{ e.id }}';" class="election-details-votebtn">Vote</button>
         {% endif %}
-        <button onclick="window.location.href='/details/{{ e.eid }}';" class="election-details-detailsbtn">Details</button>
+        <button onclick="window.location.href='/details/{{ e.id }}';" class="election-details-detailsbtn">Details</button>
         <div class="electioncard-body">
           <div class="electioncard-description">
             <p>

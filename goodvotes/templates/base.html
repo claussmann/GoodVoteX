@@ -62,7 +62,7 @@
                 <h2>See your registered elections:</h2>
                 <ul>
                     {% for e in user.elections %}
-                        <li><a href="/details/{{e.eid}}">{{e.name}}</a></li>
+                        <li><a href="/details/{{e.id}}">{{e.title}}</a></li>
                     {% endfor %}
                 </ul>
                 <br>

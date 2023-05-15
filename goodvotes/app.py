@@ -1,8 +1,4 @@
-from flask import *
-from . import service
-from werkzeug.exceptions import HTTPException
-
-app = Flask(__name__)
+from goodvotes import *
 
 
 # @app.before_first_request
@@ -11,48 +7,48 @@ app = Flask(__name__)
 
 @app.route('/')
 def start_page():
-    user = check_user()
+    user = False
     return render_template('start.html', user=user)
 
 
-@app.route('/login', methods=['POST'])
-def login():
-    username = request.form.get('username')
-    password = request.form.get('passwd')
+# @app.route('/login', methods=['POST'])
+# def login():
+#     username = request.form.get('username')
+#     password = request.form.get('passwd')
 
-    token = service.get_session_token(username, password)
-    response = make_response(render_template('done.html', forward="/"))
-    response.set_cookie('token', value=token, secure=True, httponly=True)
-    return response
-
-
-@app.route('/logout', methods=['POST'])
-def logout():
-    service.terminate_user_session(request.cookies.get('token'))
-    response = make_response(render_template('done.html', forward="/", user=False))
-    response.set_cookie('token', value="None", secure=True, httponly=True, expires=0)
-    return response
+#     token = service.get_session_token(username, password)
+#     response = make_response(render_template('done.html', forward="/"))
+#     response.set_cookie('token', value=token, secure=True, httponly=True)
+#     return response
 
 
-@app.route('/changepasswd', methods=['POST'])
-def change_passwd():
-    user = check_user()
-    password = request.form.get('passwd')
-    new_password = request.form.get('new_passwd')
-    confirm_password = request.form.get('confirm_passwd')
-    service.change_password(user, password, new_password, confirm_password)
-    return render_template('done.html', user=user, forward="/")
+# @app.route('/logout', methods=['POST'])
+# def logout():
+#     service.terminate_user_session(request.cookies.get('token'))
+#     response = make_response(render_template('done.html', forward="/", user=False))
+#     response.set_cookie('token', value="None", secure=True, httponly=True, expires=0)
+#     return response
+
+
+# @app.route('/changepasswd', methods=['POST'])
+# def change_passwd():
+#     user = check_user()
+#     password = request.form.get('passwd')
+#     new_password = request.form.get('new_passwd')
+#     confirm_password = request.form.get('confirm_passwd')
+#     service.change_password(user, password, new_password, confirm_password)
+#     return render_template('done.html', user=user, forward="/")
 
 
 @app.route('/done')
-def voted_successfully_page():
-    user = check_user()
+def done_page():
+    user = False
     return render_template('done.html', user=user, forward="/")
 
 
 @app.route('/createnew', methods=['POST'])
 def create_new_election():
-    user = check_user()
+    user = False
     candidates = set()
     for i in range(1, 13):
         c = request.form.get('candidate%d' % i)
@@ -66,13 +62,13 @@ def create_new_election():
         user
     )
     app.logger.info("Election registered: %s, %d candidates, committee size: %d" % (
-        election.name, len(election.candidates), election.K))
-    return render_template('done.html', user=user, forward="/details/" + election.eid)
+        election.title, len(election.candidates), election.committeesize))
+    return render_template('done.html', user=user, forward="/details/" + str(election.id))
 
 
 @app.route('/searchforelection')
 def search_election():
-    user = check_user()
+    user = False
     keyword = request.args.get('keyword')
     matching_elections = service.search(keyword)
     return render_template('search_results.html', keyword=keyword, elections=matching_elections, user=user)
@@ -80,17 +76,17 @@ def search_election():
 
 @app.route('/details/<electionID>')
 def details_page(electionID):
-    user = check_user()
+    user = False
     election = service.get_election(electionID)
-    if user and user.owns_election(electionID):
-        service.evaluate(electionID, user)
-        return render_template('details.html', election=election, admin=True, user=user)
-    return render_template('details.html', election=election, admin=False, user=user)
+    # if user and user.owns_election(electionID):
+    service.evaluate(electionID, user)
+    return render_template('details.html', election=election, admin=True, user=user)
+    # return render_template('details.html', election=election, admin=False, user=user)
 
 
 @app.route('/vote/<electionID>')
 def voting_page(electionID):
-    user = check_user()
+    user = False
     return render_template('vote.html', election=service.get_election(electionID), user=user)
 
 
@@ -109,7 +105,9 @@ def add_vote(electionID):
 
         votesstring = ("%s  " * len(bounded_sets)) % tuple([str(s) for s in bounded_sets])
         app.logger.debug("New vote received: " + votesstring)
-        service.add_vote(electionID, bounded_sets)
+        ballot = service.BoundedApprovalBallot()
+        ballot.encode(bounded_sets)
+        service.add_vote(electionID, ballot)
     except Exception as e:
         app.logger.warn(e)
         return "something is wrong with the data", 400
@@ -118,19 +116,19 @@ def add_vote(electionID):
 
 @app.route('/evaluate/<electionID>', methods=['POST'])
 def evaluate(electionID):
-    user = check_user()
+    user = False
     election = service.get_election(electionID)
     best_committee = service.evaluate(electionID, user)
     service.stop_election(electionID, user)
-    app.logger.info("Election stopped by creator: %s (%s)" % (election.eid, election.name))
+    app.logger.info("Election stopped by creator: %s (%s)" % (election.id, election.title))
     return render_template('done.html', user=user, forward="/details/" + electionID)
 
 
 @app.route('/delete/<electionID>', methods=['POST'])
 def deletion_successful_page(electionID):
-    user = check_user()
+    user = False
     service.delete_election(electionID, user)
-    app.logger.info("Results deleted by creator: %s" % election.eid)
+    app.logger.info("Results deleted by creator: %s" % str(electionID))
     return render_template('done.html', user=user, forward="/")
 
 
@@ -148,11 +146,6 @@ def page_not_found(e):
 def handle_exception(e):
     if isinstance(e, HTTPException):
         return e
+    print(e)
     return render_template("errors/500.html", exception=e), 500
 
-
-def check_user():
-    user = False
-    if 'token' in request.cookies:
-        user = service.get_user_by_session(request.cookies.get('token'))
-    return user
