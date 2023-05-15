@@ -28,11 +28,12 @@ class Election(db.Model):
     def add_ballot(self, ballot):
         if self.is_stopped:
             raise Exception("The creator stopped the voting process. You can no longer vote.")
-        self.current_winner = None
         self.votecount += 1
         self.ballots.append(ballot)
 
-    def compute_current_winner(self):
+    def recompute_current_winner(self):
+        for c in self.candidates:
+            c.is_winner = False
         for w in self.__compute_winner__():
             w.is_winner = True
     

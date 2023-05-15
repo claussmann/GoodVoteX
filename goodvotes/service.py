@@ -122,7 +122,7 @@ def evaluate(election_id, user):
     # if not user or not user.owns_election(election_id):
     #     raise Exception("You need to login!")
     e = get_election(election_id)
-    e.compute_current_winner()
+    e.recompute_current_winner()
     db.session.add(e)
     db.session.commit()
 
