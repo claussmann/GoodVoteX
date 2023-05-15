@@ -1,9 +1,9 @@
 from goodvotes import *
 
 
-# @app.before_first_request
-# def initialization_code():
-#     Service.load_all()
+@app.before_first_request
+def initialization_code():
+    service.create_admin_if_not_exists()
 
 @app.route('/')
 def start_page():

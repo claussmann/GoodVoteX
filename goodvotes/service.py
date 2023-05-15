@@ -1,7 +1,19 @@
 from goodvotes import *
 from .models.election import *
 from .models.auth import *
+import random
 
+
+def create_admin_if_not_exists():
+    """
+    Registers the first user if no user exists.
+    """
+    if len(User.query.all()) == 0:
+        init_passwd = "%08x" % random.randint(0, 0xFFFFFFFF)
+        app.logger.warn("Admin user created: username: admin, password %s (please change password!)" % init_passwd)
+        u = User(username = "admin", name="Armin Admin", password_hash=password_hash(init_passwd, "123"))
+        db.session.add(u)
+        db.session.commit()
 
 def register_election(title, description, candidates, K, user_owner):
     """
