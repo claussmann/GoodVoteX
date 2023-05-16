@@ -17,6 +17,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 from . import service
+from .cli import *
 from .auth import *
 from .models.auth import *
 from .models.election import *
