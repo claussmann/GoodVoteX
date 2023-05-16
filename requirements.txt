@@ -8,3 +8,6 @@ Werkzeug>=2.2.3
 Flask-SQLAlchemy>=3.0.3
 SQLAlchemy>=2.0.13
 waitress>=2.1.2
+ruamel.yaml>=0.17.26
+Flask-Login>=0.6.2
+python-dotenv>=1.0.0
