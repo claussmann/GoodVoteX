@@ -3,13 +3,13 @@
 
     <div class="content">
         <div class="election-details">
-            <div class="election-details-title">{{election.name}}</div>
+            <div class="election-details-title">{{election.title}}</div>
             {% if election.is_stopped %} 
                 <button class="election-details-votebtn" disabled style="background-color: #a1a0a0;">Vote</button>
             {% else %}
-                <button onclick="window.location.href='/vote/{{ election.eid }}';" class="election-details-votebtn">Vote</button>
+                <button onclick="window.location.href='/vote/{{ election.id }}';" class="election-details-votebtn">Vote</button>
             {% endif %}
-            <input hidden type="text" value="/details/{{ election.eid }}" id="sharelink" class="textfield" readonly>
+            <input hidden type="text" value="/details/{{ election.id }}" id="sharelink" class="textfield" readonly>
             <button id="sharebutton" onclick="copyShareToClipboard()" class="election-details-sharebtn">Share</button>
 
             <div class="sep"></div>
@@ -34,7 +34,7 @@
                 <div>
                     {% for candidate in election.candidates %}
                     <div class="is-candidate">
-                        {{candidate}}
+                        {{candidate.name}}
                     </div>
                     {% endfor %}
                 </div>
@@ -49,7 +49,7 @@
 
 
                 <div>
-                    <input type="range" id="committeesize" name="committeesize" min="2" max="10" class="slider" list="ticks" value="{{election.K}}" style="width: 100%;" disabled>
+                    <input type="range" id="committeesize" name="committeesize" min="2" max="10" class="slider" list="ticks" value="{{election.committeesize}}" style="width: 100%;" disabled>
                     <datalist id="ticks" style="width: 100%; margin-left: 0;">
                         <option value="2" label="2"></option>
                         <option value="3"></option>
@@ -74,16 +74,16 @@
                     The following committee is the winner of this election:
 
                     <div>
-                        {% for candidate in election.current_winner %}
+                        {% for candidate in election.get_winners() %}
                         <div class="is-candidate">
-                            {{candidate}}
+                            {{candidate.name}}
                         </div>
                         {% endfor %}
                     </div>
+                    <div class="sep"></div>
                 {% endif %}
 
                 {% if admin %}
-                    <div class="sep"></div>
                     <div class="sep"></div>
                     <div class="sep"></div>
                     <div class="section-caption">
@@ -94,21 +94,23 @@
                     <div class="sep"></div>
                     The best committee currently is the following:
                     <div>
-                        {% for candidate in election.current_winner %}
+                        {% for candidate in election.get_winners() %}
                         <div class="is-candidate">
-                            {{candidate}}
+                            {{candidate.name}}
                         </div>
                         {% endfor %}
                     </div>
+                    <div class="sep"></div>
+
 
                     <div style="padding-top: 25px;">
                         <form method="post">
                             {% if election.is_stopped %} 
                                 <input type="submit" value="Stop and Evaluate" class="election-details-resultbtn" disabled style="background-color: #a1a0a0;">
                             {% else %}
-                                <input type="submit" value="Stop and Evaluate" class="election-details-resultbtn" formaction="/evaluate/{{ election.eid }}" onclick="return confirm('By evaluating the election, it will be closed for further votes. Do you want to continue evaluation?')">
+                                <input type="submit" value="Stop and Evaluate" class="election-details-resultbtn" formaction="/evaluate/{{ election.id }}" onclick="return confirm('By evaluating the election, it will be closed for further votes. Do you want to continue evaluation?')">
                             {% endif %}
-                            <input type="submit" value="Delete" class="election-details-deletebtn" formaction="/delete/{{ election.eid }}">
+                            <input type="submit" value="Delete" class="election-details-deletebtn" formaction="/delete/{{ election.id }}">
                         </form>
                     </div>
                 {% else %}

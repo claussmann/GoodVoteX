@@ -1,13 +1,21 @@
-from pathlib import Path
-
-from .persistence.storage import JSONFileStorage
-from .persistence.models.election import *
-from .persistence.models.auth import *
-
-db = JSONFileStorage(Path(__file__).parent / "../storage")
+from goodvotes import *
+from .models.election import *
+from .models.auth import *
+import random
 
 
-def register_election(name, description, candidates, K, user_owner):
+def create_admin_if_not_exists():
+    """
+    Registers the first user if no user exists.
+    """
+    if len(User.query.all()) == 0:
+        init_passwd = "%08x" % random.randint(0, 0xFFFFFFFF)
+        app.logger.warn("Admin user created: username: admin, password %s (please change password!)" % init_passwd)
+        u = User(username = "admin", name="Armin Admin", password_hash=password_hash(init_passwd, "123"))
+        db.session.add(u)
+        db.session.commit()
+
+def register_election(title, description, candidates, K, user_owner):
     """
     Registers a new election.
 
@@ -18,12 +26,14 @@ def register_election(name, description, candidates, K, user_owner):
     :param user_owner:
     :return: When registration successful, returns the election object.
     """
-    if not user_owner:
-        raise Exception("You must login to create elections.")
-    e = Election(db.get_new_unique_id(), name, description, candidates, K)
-    db.add_election(e)
-    user_owner.add_election(e)
-    db.sync_user(user_owner.username)
+    # u = get_user(user_owner)
+    u = get_user("admin")
+    e = Election(title = title, description=description, committeesize=K)
+    for c in candidates:
+        e.candidates.append(Candidate(name=c))
+    u.elections.append(e)
+    db.session.add(e)
+    db.session.commit()
     return e
 
 
@@ -36,19 +46,10 @@ def register_user(username, name, password):
     :param password:
     :return: When registration successful, returns the election object.
     """
-    u = User(username, name, password)
-    db.add_user(u)
+    u = User(username = username, name=name, password_hash=password_hash(password, "123"))
+    db.session.add(u)
+    db.session.commit()
     return u
-
-
-def change_password(user, password, new_password, confirm_password):
-    """Changes a user password."""
-    if new_password != confirm_password:
-        raise Exception("New passwords do not match.")
-    if not user.check_password(password):
-        raise Exception("Incorrect password!")
-    user.set_password(new_password)
-    db.sync_user(user.username)
 
 
 def get_election(election_id):
@@ -57,7 +58,7 @@ def get_election(election_id):
     :param election_id:
     :return: The election object with the given ID (if exists).
     """
-    return db.get_election(election_id)
+    return Election.query.filter_by(id=election_id).first()
 
 
 def get_user(username):
@@ -66,42 +67,7 @@ def get_user(username):
     :param username:
     :return: The user object with the given username (if exists).
     """
-    return db.get_user(username)
-
-
-def get_user_by_session(token):
-    """
-
-    :param token:
-    :return: The user object with the given session token. If it doesn't exist, returns False.
-    """
-    try:
-        return db.get_user_for_session(token)
-    except:
-        return False
-
-
-def terminate_user_session(token):
-    """
-    Logout the user.
-
-    :param token:
-    :return:
-    """
-    db.terminate_user_session(token)
-
-
-def get_session_token(username, password):
-    """
-
-    :param username:
-    :param password:
-    :return: Temporary access token if the user exists and passowrd is correct.
-    """
-    user = db.get_user(username)
-    if not user.check_password(password):
-        raise Exception("Incorrect password!")
-    return db.create_new_session_id(username)
+    return User.query.filter_by(username=username).first()
 
 
 def search(search_string):
@@ -112,7 +78,7 @@ def search(search_string):
     """
     if len(search_string) > 60: raise Exception("Search is too long.")
     ret = list()
-    for election in db.get_all_elections():
+    for election in Election.query.all():
         search_relevance = election.search_relevance(search_string)
         if search_relevance > 0:
             ret.append((search_relevance, election))
@@ -127,9 +93,10 @@ def add_vote(election_id, ballot):
     :param ballot:
     :return:
     """
-    e = db.get_election(election_id)
+    e = get_election(election_id)
     e.add_ballot(ballot)
-    db.sync_election(election_id)
+    db.session.add(e)
+    db.session.commit()
 
 
 def delete_election(election_id, user):
@@ -140,9 +107,8 @@ def delete_election(election_id, user):
     :param user:
     :return:
     """
-    if not user or not user.owns_election(election_id):
-        raise Exception("You need to login!")
-    db.delete_election(election_id)
+    Election.query.filter_by(id=election_id).delete()
+    db.session.commit()
 
 
 def evaluate(election_id, user):
@@ -153,11 +119,12 @@ def evaluate(election_id, user):
     :param user:
     :return:
     """
-    if not user or not user.owns_election(election_id):
-        raise Exception("You need to login!")
-    e = db.get_election(election_id)
-    e.compute_current_winner()
-    db.sync_election(election_id)
+    # if not user or not user.owns_election(election_id):
+    #     raise Exception("You need to login!")
+    e = get_election(election_id)
+    e.recompute_current_winner()
+    db.session.add(e)
+    db.session.commit()
 
 
 def stop_election(election_id, user):
@@ -168,8 +135,9 @@ def stop_election(election_id, user):
     :param user:
     :return:
     """
-    if not user or not user.owns_election(election_id):
-        raise Exception("You need to login!")
-    e = db.get_election(election_id)
+    # if not user or not user.owns_election(election_id):
+    #     raise Exception("You need to login!")
+    e = get_election(election_id)
     e.stop()
-    db.sync_election(election_id)
+    db.session.add(e)
+    db.session.commit()
