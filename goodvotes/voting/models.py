@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from goodvotes import *
-
-import random
 import itertools
-import re
-from abc import ABC
 import json
+import random
+import re
+
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
+
+from .. import db
 
 
 class Election(db.Model):
@@ -13,8 +15,8 @@ class Election(db.Model):
     title = db.Column(db.String(60), nullable=False)
     description = db.Column(db.String(500), nullable=False)
     committeesize = db.Column(db.Integer)
-    is_stopped = db.Column(db.Boolean, default = False)
-    votecount = db.Column(db.Integer, default = 0)
+    is_stopped = db.Column(db.Boolean, default=False)
+    votecount = db.Column(db.Integer, default=0)
     owner_id = db.Column(db.String(100), db.ForeignKey('user.username'), nullable=False)
     owner = db.relationship('User', backref=db.backref('elections', lazy=True))
 
@@ -39,7 +41,7 @@ class Election(db.Model):
             c.is_winner = False
         for w in self.__compute_winner__():
             w.is_winner = True
-    
+
     def get_winners(self):
         return [c for c in self.candidates if c.is_winner]
 
@@ -75,7 +77,7 @@ class Election(db.Model):
         if len(words) < 1:
             raise Exception("Search is empty.")
         return len(words.intersection(self.__get_keywords()))
-    
+
     def __get_keywords(self):
         if not hasattr(self, 'keywords'):
             keywords = self.title.lower() + " " + self.description.lower() + " " + str(self.id)
@@ -92,14 +94,14 @@ class Candidate(db.Model):
     name = db.Column(db.String(60), nullable=False)
     election_id = db.Column(db.Integer, db.ForeignKey('election.id'), nullable=False)
     election = db.relationship('Election', backref=db.backref('candidates', lazy=True))
-    is_winner = db.Column(db.Boolean, default = False)
+    is_winner = db.Column(db.Boolean, default=False)
 
 
 class Ballot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type: Mapped[str]
     election_id = db.Column(db.Integer, db.ForeignKey('election.id'),
-        nullable=False)
+                            nullable=False)
     election = db.relationship('Election', backref=db.backref('ballots', lazy=True))
 
     __mapper_args__ = {
@@ -109,7 +111,6 @@ class Ballot(db.Model):
 
     def score(self, option):
         pass
-
 
 
 class BoundedApprovalBallot(Ballot):
@@ -123,7 +124,7 @@ class BoundedApprovalBallot(Ballot):
     def score(self, committee):
         sets = self.__decode()
         return sum(bs.phi(committee) * bs.intersection_size(committee) for bs in sets)
-    
+
     def check_validity(self):
         sets = self.__decode()
         for i in range(1, len(sets)):
@@ -138,9 +139,9 @@ class BoundedApprovalBallot(Ballot):
         return True
 
     def encode(self, list_of_bounded_sets):
-        bounded_sets_encoded = {"bsets" : [bs.serialize() for bs in list_of_bounded_sets]}
+        bounded_sets_encoded = {"bsets": [bs.serialize() for bs in list_of_bounded_sets]}
         self.json_encoded = json.dumps(bounded_sets_encoded)
-    
+
     def __decode(self):
         raw_obj = json.loads(self.json_encoded)
         ret = list()
