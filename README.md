@@ -1,6 +1,8 @@
 # GoodVotes
 A scientifically approved voting platform for complex preferences.
 
+## Configuration
+
 ## Run
 
 For development, simply run the script `run-debug.sh`.

@@ -2,104 +2,94 @@
 <!-- Copyrigth (C) 2022, 2023 Christian Laußmann -->
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>GoodVotes!</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename= 'style.css') }}" />
-        <script src="{{ url_for('static', filename= 'jquery-3.6.0.min.js') }}"></script>
-        <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename= 'img/logo.png') }}">
-        {% block head %}
-        {% endblock %}
-    </head>
-
-    <body>
-        <div class="title-bar">
-            <a href="/"><img src="{{ url_for('static', filename= 'img/logo.png') }}"></a>
-            <div class="search">
-                <form action="/searchforelection" method="get">
-                    <input type="text" id="keyword" name="keyword" placeholder="Search..." class="searchentry">
-                </form>
-            </div>
-            {% if user %}
-                <button onclick="popup_user()" class="userbtn">{{user.username}}</button>
-            {% else %}
-                <button onclick="popup_login()" class="loginbtn">Login</button>
-            {% endif %}
-        </div>
-
-        
-        <div class="sep"></div>
-        {% block content %}
-        {% endblock %}
-    
-        <div class="blurred-background" id="blurred-background" style="display: none;"></div>        
-
-        <!-- Windows for login, userinfo, and logout -->
-        <div class="infowindow" id="login-window" style="display: none;">
-            <div class="infowindow-title">
-                Sign In
-            </div>
-            <button onclick="close_login()" class="closebtn">X</button>
-            <div class="window-content">
-                <form action="/login" method="post">
-                    <input type="text" id="username" name="username" style="width: 96%;" placeholder="Username" class="textfield" required>
-                    <input type="password" id="passwd" name="passwd" style="width: 96%;" placeholder="Password" class="textfield" required>
-                    <br><br>
-                    <input type="submit" id="logintbtn" value="Login" class="login-submitbtn">
-                </form>
-            </div>
-        </div>
-
-        {% if user %}
-        <div class="infowindow" id="userinfo-window" style="display: none;">
-            <div class="infowindow-title">
-                    {{user.name}}
-            </div>
-            <button onclick="close_userinfo()" class="closebtn">X</button>
-            <form action="/logout" method="post">
-                <input type="submit" id="logoutbtn" value="Logout" class="logout-submitbtn">
-            </form>
-            <div class="window-content">
-                <h2>See your registered elections:</h2>
-                <ul>
-                    {% for e in user.elections %}
-                        <li><a href="/details/{{e.id}}">{{e.title}}</a></li>
-                    {% endfor %}
-                </ul>
-                <br>
-                <h2>Change Password:</h2>
-                <form action="/changepasswd" method="post">
-                    <input type="password" id="passwd_old" name="passwd" style="width: 96%;" placeholder="Password" class="textfield" required>
-                    <input type="password" id="passwd_new" name="new_passwd" style="width: 96%;" placeholder="New Password" class="textfield" required>
-                    <input type="password" id="passwd_confirm" name="confirm_passwd" style="width: 96%;" placeholder="Confirm New Password" class="textfield" required>
-                    <br><br>
-                    <input type="submit" id="logintbtn" value="Change Password" class="changepass-submitbtn">
-                </form>
-            </div>
-        </div>
-        {% endif %}
-    </body>
-    {% block scripts %}
+<head>
+    <title>GoodVotes!</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'style.css') }}"/>
+    <script src="{{ url_for('static', filename= 'jquery-3.6.0.min.js') }}"></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename= 'img/logo.png') }}">
+    {% block head %}
     {% endblock %}
+</head>
 
-    <script>    
-        function popup_login(){
-            document.getElementById("blurred-background").style.display = "block";
-            document.getElementById("login-window").style.display = "block";
-        }
+<body>
+<div class="title-bar">
+    <a href="/"><img src="{{ url_for('static', filename= 'img/logo.png') }}"></a>
+    <div class="search">
+        <form action="/searchforelection" method="get">
+            <input type="text" id="keyword" name="keyword" placeholder="Search..." class="searchentry">
+        </form>
+    </div>
+    {% if user is defined and user.is_authenticated %}
+        <button onclick="popup_user()" class="userbtn">{{ user.username }}</button>
+    {% else %}
+        <a href="/login">
+            <button class="loginbtn">Login</button>
+        </a>
+    {% endif %}
+</div>
 
-        function close_login(){
-            document.getElementById("blurred-background").style.display = "none";
-            document.getElementById("login-window").style.display = "none";
-        }
 
-        function popup_user(){
-            document.getElementById("blurred-background").style.display = "block";
-            document.getElementById("userinfo-window").style.display = "block";
-        }
+<div class="sep"></div>
 
-        function close_userinfo(){
-            document.getElementById("blurred-background").style.display = "none";
-            document.getElementById("userinfo-window").style.display = "none";
-        }
-      </script>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert {{category}}" role="alert">
+        {{message}}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+{% block content %}
+{% endblock %}
+
+<div class="blurred-background" id="blurred-background" style="display: none;"></div>
+
+{% if user is defined and user.is_authenticated %}
+    <div class="infowindow" id="userinfo-window" style="display: none;">
+        <div class="infowindow-title">
+            {{ user.name }} - {{ user.email }}
+        </div>
+        <button onclick="close_userinfo()" class="closebtn">X</button>
+        <form action="/logout" method="post">
+            <input type="submit" id="logoutbtn" value="Logout" class="logout-submitbtn">
+        </form>
+        <div class="window-content">
+            <h2>See your registered elections:</h2>
+            <ul>
+                {% for e in user.elections %}
+                    <li><a href="/details/{{ e.id }}">{{ e.title }}</a></li>
+                {% endfor %}
+            </ul>
+            <br>
+            <h2>Change Password:</h2>
+            <form action="/changepasswd" method="post">
+                <input type="password" id="passwd_old" name="passwd" style="width: 96%;" placeholder="Password"
+                       class="textfield" required>
+                <input type="password" id="passwd_new" name="new_passwd" style="width: 96%;" placeholder="New Password"
+                       class="textfield" required>
+                <input type="password" id="passwd_confirm" name="confirm_passwd" style="width: 96%;"
+                       placeholder="Confirm New Password" class="textfield" required>
+                <br><br>
+                <input type="submit" id="logintbtn" value="Change Password" class="changepass-submitbtn">
+            </form>
+        </div>
+    </div>
+{% endif %}
+</body>
+{% block scripts %}
+{% endblock %}
+
+<script>
+    function popup_user() {
+        document.getElementById("blurred-background").style.display = "block";
+        document.getElementById("userinfo-window").style.display = "block";
+    }
+
+    function close_userinfo() {
+        document.getElementById("blurred-background").style.display = "none";
+        document.getElementById("userinfo-window").style.display = "none";
+    }
+</script>
 </html>

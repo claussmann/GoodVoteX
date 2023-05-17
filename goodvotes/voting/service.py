@@ -1,19 +1,7 @@
-from goodvotes import *
-from .models.election import *
-from .models.auth import *
-import random
+from ..auth.service import get_user
+from .models import *
+from .. import db
 
-
-def create_admin_if_not_exists():
-    """
-    Registers the first user if no user exists.
-    """
-    if len(User.query.all()) == 0:
-        init_passwd = "%08x" % random.randint(0, 0xFFFFFFFF)
-        app.logger.warn("Admin user created: username: admin, password %s (please change password!)" % init_passwd)
-        u = User(username = "admin", name="Armin Admin", password_hash=password_hash(init_passwd, "123"))
-        db.session.add(u)
-        db.session.commit()
 
 def register_election(title, description, candidates, K, user_owner):
     """
@@ -26,30 +14,14 @@ def register_election(title, description, candidates, K, user_owner):
     :param user_owner:
     :return: When registration successful, returns the election object.
     """
-    # u = get_user(user_owner)
-    u = get_user("admin")
-    e = Election(title = title, description=description, committeesize=K)
+    u = get_user(user_owner)
+    e = Election(title=title, description=description, committeesize=K)
     for c in candidates:
         e.candidates.append(Candidate(name=c))
     u.elections.append(e)
     db.session.add(e)
     db.session.commit()
     return e
-
-
-def register_user(username, name, password):
-    """
-    Registers a new user.
-
-    :param username:
-    :param name:
-    :param password:
-    :return: When registration successful, returns the election object.
-    """
-    u = User(username = username, name=name, password_hash=password_hash(password, "123"))
-    db.session.add(u)
-    db.session.commit()
-    return u
 
 
 def get_election(election_id):
@@ -59,15 +31,6 @@ def get_election(election_id):
     :return: The election object with the given ID (if exists).
     """
     return Election.query.filter_by(id=election_id).first()
-
-
-def get_user(username):
-    """
-
-    :param username:
-    :return: The user object with the given username (if exists).
-    """
-    return User.query.filter_by(username=username).first()
 
 
 def search(search_string):
@@ -135,8 +98,8 @@ def stop_election(election_id, user):
     :param user:
     :return:
     """
-    # if not user or not user.owns_election(election_id):
-    #     raise Exception("You need to login!")
+    if not user or not user.owns_election(election_id):
+        raise Exception("You need to login!")
     e = get_election(election_id)
     e.stop()
     db.session.add(e)
