@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export FLASK_APP=goodvotes.app
+export FLASK_APP=goodvotes
 export FLASK_DEBUG=true
 
 # flask create-db --overwrite
