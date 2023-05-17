@@ -1,15 +1,15 @@
 from flask_login import UserMixin
+from flask_sqlalchemy.model import Model
+from sqlalchemy import Column, Integer, String
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from .. import db
 
-
-class User(UserMixin, db.Model):
-    id = db.Column(db.String(100), primary_key=True)
-    username = db.Column(db.String(100), primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), nullable=False)
-    password_hash = db.Column(db.String(300), nullable=False)
+class User(UserMixin, Model):
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(100))
+    name = Column(String(100), nullable=False)
+    email = Column(String(100), nullable=False)
+    password_hash = Column(String(300), nullable=False)
 
     def set_password(self, new_passwd):
         if len(new_passwd) > 40:
