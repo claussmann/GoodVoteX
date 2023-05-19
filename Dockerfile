@@ -1,16 +1,19 @@
 FROM alpine:3.17
-EXPOSE 5000
-RUN mkdir /App
+EXPOSE 80
 
-COPY run.sh /App/
-COPY ./goodvotes /App/goodvotes
-COPY requirements.txt /App/
-WORKDIR /App
+RUN apk add bash python3 python3-dev build-base
 
-RUN apk add python3 bash
+COPY requirements.txt .
 RUN python3 -m ensurepip
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
+
+# create flask app
+RUN mkdir /App
+COPY run.sh /App/
+COPY ./goodvotes /App/goodvotes
+COPY ./config /App/config
+WORKDIR /App
 
 CMD ["bash", "run.sh"]
 

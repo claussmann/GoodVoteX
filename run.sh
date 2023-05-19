@@ -1,10 +1,9 @@
 #!/bin/bash
 
-export FLASK_APP=goodvotes
-export FLASK_DEBUG=false
+FLASK_DEBUG=false
 
-$HOST_PORT=${GOODVOTES_PORT:-5000}
-$HOST=${GOODVOTES_HOST:-127.0.0.1}
+HOST_PORT=80
+HOST=0.0.0.0
 
 if [ -z "$GOODVOTES_ADMIN_PASSWORD" ]
 then
@@ -15,7 +14,7 @@ fi
 # exit when initialization fails
 set -e
 
-flask create-db
-flask add-user admin "Armin Admin" "${GOODVOTES_ADMIN_EMAIL}" "${GOODVOTES_ADMIN_PASSWORD}"
+flask goodvotes create-db
+flask auth add-user admin "Armin Admin" "${GOODVOTES_ADMIN_EMAIL}" "${GOODVOTES_ADMIN_PASSWORD}"
 
-waitress-serve --host ${HOST} --port "${HOST_PORT}" goodvotes:app
+waitress-serve --host "${HOST}" --port "${HOST_PORT}" --call goodvotes:create_app
