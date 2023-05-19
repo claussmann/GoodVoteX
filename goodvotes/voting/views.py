@@ -2,7 +2,7 @@ from flask import render_template, request
 from flask_login import login_required, current_user
 from werkzeug.exceptions import HTTPException
 
-from . import service, voting
+from . import service, voting, logger
 
 
 @voting.route('/')
@@ -31,7 +31,7 @@ def create_new_election():
         int(request.form.get('committeesize')),
         current_user
     )
-    app.logger.info("Election registered: %s, %d candidates, committee size: %d" % (
+    logger.info("Election registered: %s, %d candidates, committee size: %d" % (
         election.title, len(election.candidates), election.committeesize))
     return render_template('done.html', forward="/details/" + str(election.id))
 
@@ -72,12 +72,12 @@ def add_vote(electionID):
             bounded_sets.append(service.BoundedSet(bounds[s][0], bounds[s][1], bounds[s][2], items_in_set))
 
         votesstring = ("%s  " * len(bounded_sets)) % tuple([str(s) for s in bounded_sets])
-        app.logger.debug("New vote received: " + votesstring)
+        logger.debug("New vote received: " + votesstring)
         ballot = service.BoundedApprovalBallot()
         ballot.encode(bounded_sets)
         service.add_vote(electionID, ballot)
     except Exception as e:
-        app.logger.warn(e)
+        logger.warn(e)
         return "something is wrong with the data", 400
     return "OK"
 
@@ -88,7 +88,7 @@ def evaluate(electionID):
     election = service.get_election(electionID)
     best_committee = service.evaluate(electionID, current_user)
     service.stop_election(electionID, current_user)
-    app.logger.info("Election stopped by creator: %s (%s)" % (election.eid, election.name))
+    logger.info("Election stopped by creator: %s (%s)" % (election.eid, election.name))
     return render_template('done.html', forward="/details/" + electionID)
 
 
@@ -96,7 +96,7 @@ def evaluate(electionID):
 @login_required
 def deletion_successful_page(electionID):
     service.delete_election(electionID, current_user)
-    app.logger.info("Results deleted by creator: %s" % str(electionID))
+    logger.info("Results deleted by creator: %s" % str(electionID))
     return render_template('done.html', forward="/")
 
 
