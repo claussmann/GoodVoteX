@@ -14,11 +14,11 @@ def register_election(title, description, candidates, K, user_owner):
     :param user_owner:
     :return: When registration successful, returns the election object.
     """
-    u = get_user(user_owner)
     e = Election(title=title, description=description, committeesize=K)
     for c in candidates:
         e.candidates.append(Candidate(name=c))
-    u.elections.append(e)
+    user_owner.elections.append(e)
+    db.session.add(user_owner)
     db.session.add(e)
     db.session.commit()
     return e
