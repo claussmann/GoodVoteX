@@ -30,8 +30,8 @@ def create_app():
     login.login_view = "auth.login"
 
     @login.user_loader
-    def load_user(id):
-        user = db.get_user(id)
+    def load_user(user_id):
+        user = User.query.filter_by(id=user_id).first()
         return user
 
     @app.context_processor
@@ -53,4 +53,4 @@ def create_app():
 
 from .cli import cli
 from .voting import views
-from .auth import views, cli
+from .auth import views, cli, User
