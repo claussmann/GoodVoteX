@@ -47,7 +47,7 @@ def search_election():
 @voting.route('/details/<electionID>')
 def details_page(electionID):
     election = service.get_election(electionID)
-    if current_user and current_user.owns_election(electionID):
+    if current_user and current_user.owns_election(election):
         service.evaluate(electionID, current_user)
         return render_template('details.html', election=election, admin=True)
     return render_template('details.html', election=election, admin=False)
@@ -88,7 +88,7 @@ def evaluate(electionID):
     election = service.get_election(electionID)
     best_committee = service.evaluate(electionID, current_user)
     service.stop_election(electionID, current_user)
-    logger.info("Election stopped by creator: %s (%s)" % (election.eid, election.name))
+    logger.info("Election stopped by creator: %s (%s)" % (electionID, election.name))
     return render_template('done.html', forward="/details/" + electionID)
 
 

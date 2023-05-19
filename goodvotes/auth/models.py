@@ -25,5 +25,5 @@ class User(UserMixin, db.Model):
     def add_election(self, election):
         self.elections.append(election)
 
-    def owns_election(self, eID):
-        return eID in [e.eid for e in self.elections]
+    def owns_election(self, election):
+        return election in self.elections
