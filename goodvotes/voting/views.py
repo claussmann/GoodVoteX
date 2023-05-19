@@ -88,7 +88,7 @@ def evaluate(electionID):
     election = service.get_election(electionID)
     best_committee = service.evaluate(electionID, current_user)
     service.stop_election(electionID, current_user)
-    logger.info("Election stopped by creator: %s (%s)" % (electionID, election.name))
+    logger.info("Election stopped by creator: %s (%s)" % (electionID, election.title))
     return render_template('done.html', forward="/details/" + electionID)
 
 
