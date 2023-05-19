@@ -3,8 +3,9 @@ from flask_sqlalchemy.model import Model
 from sqlalchemy import Column, Integer, String
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from .. import db
 
-class User(UserMixin, Model):
+class User(UserMixin, db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(100))
     name = Column(String(100), nullable=False)
