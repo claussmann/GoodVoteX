@@ -34,7 +34,7 @@ GOODVOTES_HOST=${HOST:-0.0.0.0}
 }
 
 # create project dir
-PROJECT_BASE_DIR=${GOODVOTES_PROJECT_DIR:-"/tmp/test"}
+PROJECT_BASE_DIR=${GOODVOTES_PROJECT_DIR:-"/srv/docker"}
 echo "Creating project directory [${PROJECT_BASE_DIR}] ..."
 mkdir -p "${PROJECT_BASE_DIR}"
 cd "${PROJECT_BASE_DIR}" || exit 255
