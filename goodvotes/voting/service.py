@@ -33,6 +33,15 @@ def get_election(election_id):
     return Election.query.filter_by(id=election_id).first()
 
 
+def get_all_elections():
+    """
+    Retrieve all elections from database.
+
+    :return:
+    """
+    return Election.query.all()
+
+
 def search(search_string):
     """
     Searches the database for elections which match the search string. The results are ordered by relevance.

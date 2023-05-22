@@ -26,7 +26,7 @@ def start_page():
             flash("Election was successfully created.", "info")
             return redirect(url_for('voting.details_page', electionID=election.id))
 
-    return render_template('start.html')
+    return render_template('start.html', elections=service.get_all_elections())
 
 
 @voting.route('/done')

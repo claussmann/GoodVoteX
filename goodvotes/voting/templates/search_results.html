@@ -5,28 +5,7 @@
     {% if elections|length == 0 %}
       <h2>No search results.</h2>
     {% endif %}
-    {% for e in elections %}
-      <div class="electioncard">
-        <div class="electioncard-title">{{e.title}}</div>
-        {% if e.is_stopped %} 
-                <button class="election-details-votebtn" disabled style="background-color: #a1a0a0;">Vote</button>
-        {% else %}
-            <button onclick="window.location.href='/vote/{{ e.id }}';" class="election-details-votebtn">Vote</button>
-        {% endif %}
-        <button onclick="window.location.href='/details/{{ e.id }}';" class="election-details-detailsbtn">Details</button>
-        <div class="electioncard-body">
-          <div class="electioncard-description">
-            <p>
-              {% for line in e.description.split("\n") %}
-              {{line}}<br>
-              {% endfor %}
-            </p>
-          </div>
-          <div style="margin-top: 50px;"></div>
-          <hr style="width: 90%;">
-        </div>
-      </div>
-    {% endfor %}
+    {% include 'fragments/election/list.html' %}
   </div>
 
 {% endblock %}
