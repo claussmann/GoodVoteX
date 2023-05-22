@@ -10,7 +10,7 @@ Open the `.env` file in a text editor and edit it according to the instructions 
 
 ## Run
 
-For development, simply run the script `run-debug.sh` after configuring the application as described above.
+For development, simply run the script `run-debug.sh` after configuring the application as described above, with env vars exported e.g. `env $(cat .env|xargs) ./run-debug.sh`.
 
 For production, it is better to build and run the docker container.
 To this end, run `docker build -t goodvotes .` in the terminal.
