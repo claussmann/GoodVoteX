@@ -1,15 +1,19 @@
 FROM alpine:3.17
-EXPOSE 5000
-RUN mkdir /App
+EXPOSE 80
 
-RUN apk add python3 bash
+RUN apk add bash python3 python3-dev build-base
+
+COPY requirements.txt .
 RUN python3 -m ensurepip
-RUN pip install -r requirements.txt
-RUN pip install waitress
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
 
-COPY run.sh /App/
+# create flask app
+RUN mkdir /App
+COPY entrypoint.sh /App/
 COPY ./goodvotes /App/goodvotes
+COPY ./config /App/config
 WORKDIR /App
 
-CMD ["bash", "run.sh"]
+CMD ["bash", "entrypoint.sh"]
 

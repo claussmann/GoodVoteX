@@ -122,14 +122,14 @@ class BoundedApprovalBallot(Ballot):
     }
 
     def score(self, committee):
-        sets = self.__decode()
+        sets = self._decode()
         return sum(bs.phi(committee) * bs.intersection_size(committee) for bs in sets)
 
     def check_validity(self):
-        sets = self.__decode()
+        sets = self._decode()
         for i in range(1, len(sets)):
             for j in range(i):
-                if not list_of_bounded_sets[i].is_disjoint(list_of_bounded_sets[j]):
+                if not sets[i].is_disjoint(sets[j]):
                     return False
         valid_ids = [str(c.id) for c in self.election.candidates]
         for bs in sets:
@@ -142,7 +142,7 @@ class BoundedApprovalBallot(Ballot):
         bounded_sets_encoded = {"bsets": [bs.serialize() for bs in list_of_bounded_sets]}
         self.json_encoded = json.dumps(bounded_sets_encoded)
 
-    def __decode(self):
+    def _decode(self):
         raw_obj = json.loads(self.json_encoded)
         ret = list()
         for bs in raw_obj["bsets"]:
@@ -172,6 +172,11 @@ class BoundedSet(frozenset):
             if a not in other:
                 return False
         return True
+    
+    def __str__(self):
+        items = str(sorted(self)) # sort alternatives (easier debugging)
+        items = items[1:-1] # cut breakets
+        return "<{%s}, %d, %d, %d>" %(items, self.lower, self.saturation, self.upper)
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -183,7 +188,7 @@ class BoundedSet(frozenset):
         return len(self.intersection(committee))
 
     def phi(self, committee):
-        intersect_size = len(self.intersection(committee))
+        intersect_size = self.intersection_size(committee)
         if intersect_size < self.lower or intersect_size > self.upper:
             return 0
         if intersect_size > self.saturation:

@@ -4,7 +4,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask
 from flask_login import LoginManager, current_user
-from ruamel.yaml import YAML
 from flask_sqlalchemy import SQLAlchemy
 
 from config.config import DBConfig, AuthConfig
@@ -19,7 +18,6 @@ def create_app():
 
     ROOT_DIR = Path(__file__).parent
 
-    deployment_type = 'prod' if app.config["DEBUG"] is False else 'dev'
     app.config.from_object(DBConfig())
     app.config.from_object(AuthConfig())
     app.config.from_prefixed_env()
@@ -32,24 +30,27 @@ def create_app():
     login.login_view = "auth.login"
 
     @login.user_loader
-    def load_user(id):
-        user = db.get_user(id)
+    def load_user(user_id):
+        user = User.query.filter_by(id=user_id).first()
         return user
 
     @app.context_processor
     def inject_user():
         return dict(user=current_user)
 
-    from .auth import auth as auth_blueprint
-
+    from .auth import auth as auth_blueprint, auth_cli as auth_cli_blueprint
     app.register_blueprint(auth_blueprint)
+    app.register_blueprint(auth_cli_blueprint)
 
     from .voting import voting as voting_blueprint
-
     app.register_blueprint(voting_blueprint)
+
+    from .cli import goodvotes_cli as goodvotes_cli_blueprint
+    app.register_blueprint(goodvotes_cli_blueprint)
 
     return app
 
 
+from .cli import cli
 from .voting import views
-from .auth import views
+from .auth import views, cli, User

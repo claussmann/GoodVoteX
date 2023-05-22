@@ -1,15 +1,27 @@
 from pathlib import Path
 
 from .context import goodvotes
-from goodvotes import service
-from goodvotes.persistence.models.election import *
-from goodvotes.persistence.models.auth import *
-from goodvotes.persistence.storage import JSONFileStorage
+from goodvotes.voting.models import *
+from goodvotes.auth.models import *
 import pytest
 import os
 
-db = JSONFileStorage(Path(__file__).parent / "storage/1")
-db.dump()
+
+
+# @pytest.fixture()
+# def app():
+#     app = goodvotes.create_app()
+#     app.config.update({
+#         "TESTING": True,
+#     })
+#     with app.app_context():
+#         db.create_all()
+    
+#     yield app
+
+
+
+
 
 """
     Tests for Bounded Set
@@ -86,13 +98,68 @@ def test_bounded_set_phi():
 
 
 """
+    Tests for BoundedApprovalBallot
+"""
+
+def test_bounded_sets_encode_correctly():
+    bs1 = BoundedSet(2, 3, 3, {"a", "b", "c", "d"})
+    bs2 = BoundedSet(1, 1, 1, {"f", "g"})
+    ballot = BoundedApprovalBallot()
+    ballot.encode([bs1, bs2])
+    assert [bs1, bs2] == ballot._decode()
+
+def test_bounded_ballots_validity():
+    e = Election()
+    e.candidates = [Candidate() for i in range(6)]
+    e.candidates[0].id = "a"
+    e.candidates[1].id = "b"
+    e.candidates[2].id = "c"
+    e.candidates[3].id = "d"
+    e.candidates[4].id = "f"
+    e.candidates[5].id = "g"
+    bs1 = BoundedSet(2, 3, 3, {"a", "b", "c", "d"})
+    bs2 = BoundedSet(1, 1, 1, {"f", "g"})
+    bs3 = BoundedSet(1, 1, 1, {"e", "f", "g"})
+
+    ballot = BoundedApprovalBallot()
+    ballot.election = e
+    ballot.encode([bs1, bs2])
+    assert ballot.check_validity() # should be fine; ballots non-overlapping, candidates ok
+
+    ballot = BoundedApprovalBallot()
+    ballot.election = e
+    ballot.encode([bs1, bs2, bs3])
+    assert not ballot.check_validity() # ballots are overlapping
+
+    ballot = BoundedApprovalBallot()
+    ballot.election = e
+    ballot.encode([bs1, bs3])
+    assert not ballot.check_validity() # candidate "e" doesn't exist
+
+def test_bounded_ballots_score():
+    bs1 = BoundedSet(1, 2, 3, {"a", "b", "c", "d"})
+    bs2 = BoundedSet(1, 2, 2, {"e", "f"})
+    bs3 = BoundedSet(2, 3, 3, {"g", "h", "i"})
+
+    ballot = BoundedApprovalBallot()
+    ballot.encode([bs1, bs2, bs3])
+    assert ballot.score({"a", "b", "f", "g"}) == 3
+    assert ballot.score({"a", "b", "e", "f"}) == 4
+    assert ballot.score({"a", "b", "c", "e", "f"}) == 4
+    assert ballot.score({"a", "b", "c", "d", "e", "f"}) == 2
+    assert ballot.score({"a", "g"}) == 1
+    assert ballot.score({"a", "g", "i"}) == 3
+
+"""
     Tests for Election
 """
 
 
 def test_search_relevance():
-    e = Election(42, "This Year Food Selection: What should be served?", "You decide on Food: Banana, or Fish? Döner?",
-                 {"a", "b", "c", "d", "e"}, 3)
+    e = Election()
+    e.id = 42
+    e.title = "This Year Food Selection: What should be served?"
+    e.description = "You decide on Food: Banana, or Fish? Döner?"
     assert e.search_relevance("Food") == 1
     assert e.search_relevance("fOod") == 1
     assert e.search_relevance("Food Selection?") == 2
@@ -104,141 +171,86 @@ def test_search_relevance():
     assert e.search_relevance("42") == 100
 
 
-def test_election_accepts_only_disjoint_sets():
-    e = Election(42, "Test", "Testo", {"a", "b", "c", "e", "f", "g", "h", "w", "x", "y"}, 3)
-    b1 = BoundedSet(1, 1, 3, {"a", "b", "c"})
-    b2 = BoundedSet(1, 2, 3, {"e", "f", "g", "h"})
-    b3 = BoundedSet(1, 3, 4, {"w", "x", "y"})
-    b4 = BoundedSet(1, 1, 1, {"a", "e", "g"})
-    with pytest.raises(Exception):
-        e.add_ballot([b1, b2, b4])
-    e.add_ballot([b1, b2, b3])
+# def test_election_accepts_only_valid_sets(app):
+#     with app.app_context():
+#         u = User(name="Peter", username="dieter", email="foo@bar.de", password_hash="123")
+#         db.session.add(u)
+#         e = Election(title="foo bar", description="bar fo lorem", committeesize=2)
+#         for c in {"a", "b", "c", "d", "e", "f", "g", "h", "w", "x", "y"}:
+#             e.candidates.append(Candidate(name=c))
+#         u.elections.append(e)
+#         db.session.add(e)
+#         db.session.commit()
+        
+#         bs1 = BoundedSet(1, 1, 3, {"a", "b", "c"})
+#         bs2 = BoundedSet(1, 2, 3, {"e", "f", "g", "h"})
+#         bs3 = BoundedSet(1, 3, 4, {"w", "x", "y"})
+#         bs4 = BoundedSet(1, 1, 1, {"a", "e", "g"})
+#         bs5 = BoundedSet(1, 1, 1, {"a", "z"})
+
+    
+#         b1 = BoundedApprovalBallot()
+#         b1.encode([bs1, bs2, bs4]) # overlapping
+#         with pytest.raises(Exception):
+#             e.add_ballot(b1)
+
+#         b2 = BoundedApprovalBallot()
+#         b2.encode([bs1, bs2, bs3]) # should be ok
+#         e.add_ballot(b2)
+
+#         b3 = BoundedApprovalBallot()
+#         b3.encode([bs1, bs5]) # candidate "z" doesn't exist
+#         with pytest.raises(Exception):
+#             e.add_ballot(b3)
 
 
 def test_score():
-    e = Election(42, "Test", "Testo", {"a", "b", "c", "e", "f", "g", "h", "w", "x", "y", "z"}, 3)
-    b1 = BoundedSet(1, 1, 3, {"a", "b", "c"})
-    b2 = BoundedSet(1, 2, 3, {"e", "f", "g", "h"})
-    b3 = BoundedSet(2, 2, 3, {"w", "x", "y", "z"})
-    e.add_ballot([b1, b2, b3])
+    e = Election()
+    e.id = 42
+    e.title = "This Year Food Selection: What should be served?"
+    e.description = "You decide on Food: Banana, or Fish? Döner?"
+    e.candidates = [Candidate() for i in range(9)]
+    e.candidates[0].id = "a"
+    e.candidates[1].id = "b"
+    e.candidates[2].id = "c"
+    e.candidates[3].id = "d"
+    e.candidates[4].id = "e"
+    e.candidates[5].id = "f"
+    e.candidates[6].id = "g"
+    e.candidates[7].id = "h"
+    e.candidates[8].id = "i"
+    
+    bs1 = BoundedSet(1, 2, 3, {"a", "b", "c", "d"})
+    bs2 = BoundedSet(1, 2, 2, {"e", "f"})
+    bs3 = BoundedSet(2, 3, 3, {"g", "h", "i"})
+    b1 = BoundedApprovalBallot()
+    b1.encode([bs1, bs2])
+    b2 = BoundedApprovalBallot()
+    b2.encode([bs1, bs3])
+    e.ballots = [b1, b2]
 
-    assert e.score({"a", "b", "c"}) == 1
-    assert e.score({"a", "b", "y", "z", "e"}) == 4
-    assert e.score({"a", "b", "y", "e"}) == 2
-    assert e.score({"a", "w", "x", "y"}) == 3
-    assert e.score({"a", "w", "x", "y", "z"}) == 1
+    assert e.score({e.candidates[0], e.candidates[1], e.candidates[2], e.candidates[5], e.candidates[7]}) == 5
 
-
-def test_stop_election():
-    e = Election(42, "Test", "Testo", {"a", "b", "c", "d"}, 2)
-    b1 = BoundedSet(1, 1, 2, {"a", "b"})
-    b2 = BoundedSet(1, 2, 2, {"c", "d"})
-    e.add_ballot([b1, b2])
-    e.stop()
-
-    with pytest.raises(Exception):
-        e.add_ballot([b1, b2])
-
-
-"""
-    Tests for User
-"""
-
-
-def test_password_auth():
-    u = User("admin", "Administrator Rex", "admin123")
-    assert u.check_password("admin123")
-    assert not u.check_password("armin1234")
+# """
+#     Tests for service
+# """
 
 
-def test_password_length():
-    with pytest.raises(Exception):
-        u = User("admin", "Administrator Rex", "n123")  # too short
-    with pytest.raises(Exception):
-        u = User("admin", "Administrator Rex", "1234567890a1234567890a1234567890a1234567890a")  # too long
+# def test_search():
+#     service.db = JSONFileStorage(Path(__file__).parent / "storage/1")
+#     u = service.register_user("aDmin", "Testosaurus", "adminiissttr")
+#     e1 = service.register_election("Test Election Major 2023", "A test election for who will become major!",
+#                                    ["a", "b", "c", "d"], 2, u)
+#     e2 = service.register_election("Election Junior", "Who will become junior in our test?", ["a", "b", "c", "d"], 2, u)
+#     e3 = service.register_election("Is Gollum an animal?", "New date received: DNA Test positive!",
+#                                    ["a", "b", "c", "d"], 2, u)
+#     e4 = service.register_election("What to take on mars", "New Mars mission!", ["a", "b", "c", "d"], 2, u)
 
+#     search_res = service.search("Major test election")
+#     assert len(search_res) == 3
+#     assert search_res[0] == e1  # Keywords: "Major", "Test", "Election"
+#     assert search_res[1] == e2  # Keywords: "Election", "Test"
+#     assert search_res[2] == e3  # Keyword: "Test"
+#     assert e4 not in search_res  # No keywords
 
-"""
-    Tests for DB
-"""
-
-
-def test_import_export_election():
-    e = Election(42, "This Year Food Selection: What should be served?", "You decide on Food: Banana, or Fish? Döner?",
-                 {"a", "b", "c", "d", "e", "f", "g"}, 3)
-    db.add_election(e)
-    e.add_ballot([BoundedSet(1, 2, 4, {"a", "b", "c", "f"}), BoundedSet(1, 1, 2, {"d", "g"})])
-    e.add_ballot([BoundedSet(1, 1, 1, {"a", "b", "c"})])
-    db.sync_election(e.eid)
-
-    db2 = JSONFileStorage(Path(__file__).parent / "storage/2")
-    e2 = db.get_election("42")
-    assert e2.name == e.name
-    assert e2.eid == e.eid
-    assert e2.description == e.description
-    assert e2.K == e.K
-    assert e2.candidates == e.candidates
-    assert len(e2.__ballots__) == len(e.__ballots__)
-    db.dump()
-
-
-def test_import_export_user():
-    u = User("admin", "Administrator Rex", "admin123")
-    db.add_user(u)
-
-    db2 = JSONFileStorage(Path(__file__).parent / "storage/2")
-    u2 = db.get_user("admin")
-    assert u2.name == u.name
-    assert u2.username == u.username
-    assert u2.password_hash == u.password_hash
-    assert u2.salt == u.salt
-    db.dump()
-
-
-def test_delete_election():
-    e = Election(42, "This Year Food Selection: What should be served?", "You decide on Food: Banana, or Fish? Döner?",
-                 {"a", "b", "c", "d", "e", "f", "g"}, 3)
-    db.add_election(e)
-    assert str(e.eid) + ".json" in [f for f in os.listdir(db.election_storage_path) if f.endswith(".json")]
-    db.delete_election(e.eid)
-    assert str(e.eid) + ".json" not in [f for f in os.listdir(db.election_storage_path) if f.endswith(".json")]
-    db.dump()
-
-
-def test_delete_user():
-    u = User("admini", "Administrator Rex", "admin123")
-    db.add_user(u)
-    assert str(u.username) + ".json" in [f for f in os.listdir(db.user_storage_path) if f.endswith(".json")]
-    db.delete_user(u.username)
-    assert str(u.username) + ".json" not in [f for f in os.listdir(db.user_storage_path) if f.endswith(".json")]
-    db.dump()
-
-
-def test_election_not_exists():
-    with pytest.raises(Exception):
-        db.get_election("abcdef")
-
-
-"""
-    Tests for service
-"""
-
-
-def test_search():
-    service.db = JSONFileStorage(Path(__file__).parent / "storage/1")
-    u = service.register_user("aDmin", "Testosaurus", "adminiissttr")
-    e1 = service.register_election("Test Election Major 2023", "A test election for who will become major!",
-                                   ["a", "b", "c", "d"], 2, u)
-    e2 = service.register_election("Election Junior", "Who will become junior in our test?", ["a", "b", "c", "d"], 2, u)
-    e3 = service.register_election("Is Gollum an animal?", "New date received: DNA Test positive!",
-                                   ["a", "b", "c", "d"], 2, u)
-    e4 = service.register_election("What to take on mars", "New Mars mission!", ["a", "b", "c", "d"], 2, u)
-
-    search_res = service.search("Major test election")
-    assert len(search_res) == 3
-    assert search_res[0] == e1  # Keywords: "Major", "Test", "Election"
-    assert search_res[1] == e2  # Keywords: "Election", "Test"
-    assert search_res[2] == e3  # Keyword: "Test"
-    assert e4 not in search_res  # No keywords
-
-    service.db.dump()
+#     service.db.dump()

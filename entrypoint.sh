@@ -1,7 +1,9 @@
 #!/bin/bash
 
-export FLASK_APP=goodvotes
-export FLASK_DEBUG=true
+FLASK_DEBUG=false
+
+HOST_PORT=80
+HOST=0.0.0.0
 
 if [ -z "$GOODVOTES_ADMIN_PASSWORD" ]
 then
@@ -15,4 +17,4 @@ set -e
 flask goodvotes create-db
 flask auth add-user admin "Armin Admin" "${GOODVOTES_ADMIN_EMAIL}" "${GOODVOTES_ADMIN_PASSWORD}"
 
-flask run
+waitress-serve --host "${HOST}" --port "${HOST_PORT}" --call goodvotes:create_app
