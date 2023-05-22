@@ -10,10 +10,10 @@ RUN pip3 install -r requirements.txt
 
 # create flask app
 RUN mkdir /App
-COPY run.sh /App/
+COPY entrypoint.sh /App/
 COPY ./goodvotes /App/goodvotes
 COPY ./config /App/config
 WORKDIR /App
 
-CMD ["bash", "run.sh"]
+CMD ["bash", "entrypoint.sh"]
 
