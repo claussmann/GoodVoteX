@@ -7,6 +7,9 @@ from . import auth, service
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
+    if not auth.config["AUTH_ENABLE_REGISTRATION"]:
+        return render_template('info.html', message="Registration is disabled.")
+
     if current_user.is_authenticated:
         return redirect(url_for('voting.start_page'))
 
@@ -15,7 +18,7 @@ def register():
             request.form.get('username'),
             request.form.get('name'),
             request.form.get('email'),
-            generate_password_hash(request.form.get('passwd'))
+            request.form.get('passwd')
         )
         flash("Registration successful.", "info")
 
