@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from flask import flash
+from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash
 
 from .models import User
@@ -27,7 +29,12 @@ def register_user(username, name, email, password):
     u = User(username=username, name=name, email=email,
              password_hash=generate_password_hash(password, method='pbkdf2:sha512'))
     db.session.add(u)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        flash("The username is already taken")
+        raise Exception
     return u
 
 

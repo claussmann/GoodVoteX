@@ -7,7 +7,7 @@ from .. import db
 
 class User(UserMixin, db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(100))
+    username = Column(String(100), nullable=False, unique=True)
     name = Column(String(100), nullable=False)
     email = Column(String(100), nullable=False)
     password_hash = Column(String(300), nullable=False)

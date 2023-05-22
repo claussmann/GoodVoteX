@@ -14,17 +14,18 @@ def register():
         return redirect(url_for('voting.start_page'))
 
     if request.method == 'POST':
-        service.register_user(
-            request.form.get('username'),
-            request.form.get('name'),
-            request.form.get('email'),
-            request.form.get('passwd')
-        )
-        flash("Registration successful.", "info")
+        try:
+            service.register_user(
+                request.form.get('username'),
+                request.form.get('name'),
+                request.form.get('email'),
+                request.form.get('passwd')
+            )
+            flash("Registration successful.", "info")
+        except:
+            return render_template('register.html')
 
-    # TODO if POST register user and redirect
-
-    return render_template('register.html')
+    return redirect(url_for('auth.login'))
 
 
 @auth.route('/login', methods=['GET', 'POST'])
