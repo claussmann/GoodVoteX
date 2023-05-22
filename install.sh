@@ -46,7 +46,6 @@ echo "Cloning git repository into [${PROJECT_BASE_DIR}/${PROJECT_DIR}] ..."
 git clone https://github.com/claussmann/GoodVotes.git "${PROJECT_DIR}"
 
 cd "${PROJECT_DIR}" || exit 255
-git checkout deployment
 
 read -p "Create new .env file? ([Y]es)?" ASK_CREATE_ENV
 case "$ASK_CREATE_ENV" in
