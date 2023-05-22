@@ -1,39 +1,37 @@
-from flask import render_template, request
+from flask import render_template, request, flash, url_for, redirect
 from flask_login import login_required, current_user
 from werkzeug.exceptions import HTTPException
 
 from . import service, voting, logger
 
 
-@voting.route('/')
+@voting.route('/', methods=['GET', 'POST'])
 def start_page():
+    if request.method == 'POST':
+        candidates = set(filter(len, request.form.getlist('candidates[]')))
+        if len(candidates) != len(list(filter(len, request.form.getlist('candidates[]')))):
+            # at least one name was present twice
+            flash("Candidate names must be unique. Creation failed.", "error")
+        else:
+            # we can continue creation with the given candidate set.
+            election = service.register_election(
+                request.form.get('name'),
+                request.form.get('description'),
+                candidates,
+                int(request.form.get('committeesize')),
+                current_user
+            )
+            logger.info("Election registered: %s, %d candidates, committee size: %d" % (
+                election.title, len(election.candidates), election.committeesize))
+            flash("Election was successfully created.", "info")
+            return redirect(url_for('voting.details_page', electionID=election.id))
+
     return render_template('start.html')
 
 
 @voting.route('/done')
 def done_page():
-    user = False
     return render_template('done.html', forward="/")
-
-
-@voting.route('/createnew', methods=['POST'])
-@login_required
-def create_new_election():
-    candidates = set()
-    for i in range(1, 13):
-        c = request.form.get('candidate%d' % i)
-        if c != None and c != "" and not c.isspace():
-            candidates.add(c)
-    election = service.register_election(
-        request.form.get('name'),
-        request.form.get('description'),
-        candidates,
-        int(request.form.get('committeesize')),
-        current_user
-    )
-    logger.info("Election registered: %s, %d candidates, committee size: %d" % (
-        election.title, len(election.candidates), election.committeesize))
-    return render_template('done.html', forward="/details/" + str(election.id))
 
 
 @voting.route('/searchforelection')
@@ -44,7 +42,7 @@ def search_election():
                            user=current_user)
 
 
-@voting.route('/details/<electionID>')
+@voting.route('/details/<electionID>', methods=['GET', 'POST'])
 def details_page(electionID):
     election = service.get_election(electionID)
     if current_user and current_user.owns_election(election):
@@ -114,5 +112,5 @@ def page_not_found(e):
 def handle_exception(e):
     if isinstance(e, HTTPException):
         return e
-    print(e)
+    logger.error(e)
     return render_template("errors/500.html", exception=e), 500
