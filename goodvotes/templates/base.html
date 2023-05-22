@@ -52,9 +52,7 @@
             {{ user.name }} - {{ user.email }}
         </div>
         <button onclick="close_userinfo()" class="closebtn">X</button>
-        <form action="/logout" method="post">
-            <input type="submit" id="logoutbtn" value="Logout" class="logout-submitbtn">
-        </form>
+        <a href="/logout"><input type="submit" id="logoutbtn" value="Logout" class="logout-submitbtn"></a>
         <div class="window-content">
             <h2>See your registered elections:</h2>
             <ul>

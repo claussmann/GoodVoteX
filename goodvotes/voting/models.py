@@ -17,7 +17,7 @@ class Election(db.Model):
     committeesize = db.Column(db.Integer)
     is_stopped = db.Column(db.Boolean, default=False)
     votecount = db.Column(db.Integer, default=0)
-    owner_id = db.Column(db.String(100), db.ForeignKey('user.username'), nullable=False)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     owner = db.relationship('User', backref=db.backref('elections', lazy=True))
 
     def __eq__(self, other):

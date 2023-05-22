@@ -24,6 +24,12 @@ def create_app():
 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + str(ROOT_DIR / app.config['DB_RELATIVE_PATH'])
 
+    # Since Env vars are always loaded as string, we may need to cast them.
+    BOOLEAN_CONFIG_KEYS = ["AUTH_ENABLE_REGISTRATION"]
+    for key in BOOLEAN_CONFIG_KEYS:
+        if not isinstance(app.config[key], bool):
+            app.config[key] = True if app.config[key].lower in ['true', 'yes', '1'] else False
+
     db.init_app(app)
 
     login = LoginManager(app)

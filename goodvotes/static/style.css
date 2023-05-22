@@ -1,3 +1,10 @@
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -100,7 +107,7 @@ input[type="radio"] {
   width: 14%;
   position: absolute;
   top: 0;
-  left: 70%;
+  left: 67%;
   height: 1.5em;
   background-color: #10a816;
   border: none;
@@ -120,7 +127,7 @@ input[type="radio"] {
   width: 14%;
   position: absolute;
   top: 0;
-  left: 86%;
+  left: 82%;
   height: 1.5em;
   background-color: #105fa8;
   border: none;
@@ -140,7 +147,7 @@ input[type="radio"] {
   width: 14%;
   position: absolute;
   top: 0;
-  left: 86%;
+  left: 82%;
   height: 1.5em;
   background-color: #a81094;
   border: none;
@@ -687,7 +694,7 @@ datalist {
   padding-right: 0.5vw;
   padding-top: 1.0vw;
   width: 10vw;
-  height: 3vw;
+  height: 4vw;
   border-top-left-radius: 2vw;
   border-bottom-left-radius: 2vw;
   border-top-right-radius: 2vw;
@@ -743,6 +750,34 @@ datalist {
   padding: 5%;
   font-size: 1.4vw;
   font-weight: 600;
+}
+
+.cf::after {
+    display: block;
+    content: "";
+    clear: both;
+}
+
+/* colors */
+.c-lightgreen{
+  background-color: #c8e6c9;
+}
+
+.c-lightred{
+  background-color: #e6c8c8;
+}
+
+/* padding */
+.p-5{
+  padding: 5%;
+}
+
+.pl-5{
+  padding-left: 5%;
+}
+
+.pr-5{
+  padding-right: 5%;
 }
 
 @media only screen and (orientation: portrait) {

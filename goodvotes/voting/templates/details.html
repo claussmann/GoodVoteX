@@ -9,7 +9,7 @@
             {% else %}
                 <button onclick="window.location.href='/vote/{{ election.id }}';" class="election-details-votebtn">Vote</button>
             {% endif %}
-            <input hidden type="text" value="/details/{{ election.id }}" id="sharelink" class="textfield" readonly>
+            <input hidden type="text" value="{{ url_for('voting.details_page', electionID=election.id, _external=True) }}" id="sharelink" class="textfield" readonly>
             <button id="sharebutton" onclick="copyShareToClipboard()" class="election-details-sharebtn">Share</button>
 
             <div class="sep"></div>
