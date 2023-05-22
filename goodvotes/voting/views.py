@@ -12,6 +12,9 @@ def start_page():
         if len(candidates) != len(list(filter(len, request.form.getlist('candidates[]')))):
             # at least one name was present twice
             flash("Candidate names must be unique. Creation failed.", "error")
+        if len(candidates) <= int(request.form.get('committeesize')):
+            # candidate set must be larger than committee-size.
+            flash("Candidate set must be larger than committee-size.", "error")
         else:
             # we can continue creation with the given candidate set.
             election = service.register_election(
