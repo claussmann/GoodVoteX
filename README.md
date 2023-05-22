@@ -13,11 +13,14 @@ Open the `.env` file in a text editor and edit it according to the instructions 
 For development, simply run the script `run-debug.sh` after configuring the application as described above, with env vars exported e.g. `env $(cat .env|xargs) ./run-debug.sh`.
 
 For production, it is better to build and run the docker container.
-To this end, run `docker build -t goodvotes .` in the terminal.
-After building the image you can start it using `docker run -p 8080:5000 goodvotes` where the `8080` specifies the port on the host where the application in the container becomes available.
+To deploy GoodVotes using docker download and run the (https://github.com/claussmann/GoodVotes/blob/main/install.sh)[install.sh] script provided by the repository.
+The `install.sh` default project directory is `/srv/docker`. To change this set `GOODVOTES_PROJECT_DIR` to a path of your choosing.
 
-Note that you can stop the container by typing `docker container list` into another terminal, and then typing `docker stop abc123` (where abc123 is the container ID you get from the first command).
-You can restart the container later by typing `docker restart abc123`.
+`GOODVOTES_PROJECT_DIR=/home/goodvotes ./install.sh`
+
+Once installed the `docker-compose.yml` file can be found in `$GOODVOTES_PROJECT_DIR/GoodVotes/`.
+
+Configuration changes can be applied to `$GOODVOTES_PROJECT_DIR/GoodVotes/.env`
 
 
 ## Use
