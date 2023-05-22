@@ -745,6 +745,13 @@ datalist {
   font-weight: 600;
 }
 
+.cf::after {
+    display: block;
+    content: "";
+    clear: both;
+}
+
+
 @media only screen and (orientation: portrait) {
   .bin-settings {
     font-size: 2.7vw;
