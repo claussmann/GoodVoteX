@@ -29,7 +29,7 @@ Finally, you can run the script `run-debug.sh`, with env vars exported e.g. `env
 
 ### Production
 
-To deploy GoodVotes using docker download and run the [install.sh](https://github.com/claussmann/GoodVotes/blob/main/install.sh) script provided by the repository.
+To deploy GoodVotes using docker download and run the [install.sh](https://raw.githubusercontent.com/claussmann/GoodVotes/main/install.sh) script provided by the repository.
 The `install.sh` default project directory is `/srv/docker`. To change this set `GOODVOTES_PROJECT_DIR` to a path of your choosing.
 
 `GOODVOTES_PROJECT_DIR=/home/goodvotes ./install.sh`
