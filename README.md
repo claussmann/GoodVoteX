@@ -7,9 +7,9 @@ Thus, the platform allows you to choose a suitable voting rule and ballot format
 
 We currently support the following ballot types and voting rules:
 
-| Ballot Type | Available Voting Rules | Reference |
-|-------------|------------------------|-----------|
-| Bounded approval ballots (disjoint) | Total Scoring | AAMAS-2023: "Bounded Approval Ballots: Balancing Expressiveness and Simplicity for Multiwinner Elections" by D. Baumeister, L. Boes, C. Laußmann and S. Rey |
+| Ballot Type                         | Available Voting Rules | Reference                                                                                                                                                   |
+|-------------------------------------|------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Bounded approval ballots (disjoint) | Total Scoring          | AAMAS-2023: "Bounded Approval Ballots: Balancing Expressiveness and Simplicity for Multiwinner Elections" by D. Baumeister, L. Boes, C. Laußmann and S. Rey |
 
 
 ## Run
@@ -30,6 +30,9 @@ Finally, you can run the script `run-debug.sh`, with env vars exported e.g. `env
 ### Production
 
 To deploy GoodVotes using docker download and run the [install.sh](https://raw.githubusercontent.com/claussmann/GoodVotes/main/install.sh) script provided by the repository.
+
+The following dependencies are required: `docker`, `docker-compose`, `python3`
+
 The `install.sh` default project directory is `/srv/docker`. To change this set `GOODVOTES_PROJECT_DIR` to a path of your choosing.
 
 `GOODVOTES_PROJECT_DIR=/home/goodvotes ./install.sh`

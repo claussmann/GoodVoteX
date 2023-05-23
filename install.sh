@@ -20,7 +20,7 @@ create_env_file(){
   echo "
 FLASK_APP=goodvotes
 FLASK_SQLALCHEMY_TRACK_MODIFICATIONS=False
-FLASK_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex())')
+FLASK_SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_hex())')
 # Optional (overwrite default config from config/config.py)
 #FLASK_AUTH_ENABLE_REGISTRATION=${ENABLE_REGISTRATION}
 
