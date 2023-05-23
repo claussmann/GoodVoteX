@@ -6,7 +6,7 @@ from flask import Flask
 from flask_login import LoginManager, current_user
 from flask_sqlalchemy import SQLAlchemy
 
-from config.config import DBConfig, AuthConfig
+from config.config import DBConfig, AuthConfig, GoodVotesConfig
 
 # Populate ENV vars from .env file.
 load_dotenv()
@@ -20,6 +20,7 @@ def create_app():
 
     app.config.from_object(DBConfig())
     app.config.from_object(AuthConfig())
+    app.config.from_object(GoodVotesConfig())
     app.config.from_prefixed_env()
 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + str(ROOT_DIR / app.config['DB_RELATIVE_PATH'])

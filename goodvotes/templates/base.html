@@ -44,6 +44,16 @@
 {% block content %}
 {% endblock %}
 
+<div class="sep"></div>
+<div class="footer">
+    <div class="sep"></div>
+    <div class="center">
+        <a href="{{config.GOODVOTES_IMPRINT_URL}}" style="color:lightgray">Impressum/Imprint</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;        
+        <a href="{{config.GOODVOTES_PRIVACY_URL}}" style="color:lightgray">Datenschutz/Privacy</a> 
+    </div>
+</div>
+
 <div class="blurred-background" id="blurred-background" style="display: none;"></div>
 
 {% if user is defined and user.is_authenticated %}

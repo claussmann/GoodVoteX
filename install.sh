@@ -10,6 +10,8 @@ create_env_file(){
   read -s -p "Please provide a password for the goodvotes-admin user: " ADMIN_PASSWORD
   echo ""
   read -p 'Disable user registration? ([No]|Yes): ' DISABLE_REGISTRATION
+  read -p 'Enter the link to your imprint: ' IMPRINT
+  read -p 'Enter the link to your privacy statement: ' PRIVACY
 
   if [[ "$DISABLE_REGISTRATION" =~ ^(Y|Yes|y|yes|)$ ]]; then
     ENABLE_REGISTRATION='False'
@@ -22,7 +24,10 @@ FLASK_APP=goodvotes
 FLASK_SQLALCHEMY_TRACK_MODIFICATIONS=False
 FLASK_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex())')
 # Optional (overwrite default config from config/config.py)
-#FLASK_AUTH_ENABLE_REGISTRATION=${ENABLE_REGISTRATION}
+FLASK_AUTH_ENABLE_REGISTRATION=${ENABLE_REGISTRATION}
+
+FLASK_GOODVOTES_IMPRINT_URL=${IMPRINT}
+FLASK_GOODVOTES_PRIVACY_URL=${PRIVACY}
 
 # entrypoint.sh config / docker-compose config
 GOODVOTES_ADMIN_PASSWORD=${ADMIN_PASSWORD}
