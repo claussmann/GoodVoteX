@@ -12,6 +12,9 @@ def start_page():
         if len(candidates) != len(list(filter(len, request.form.getlist('candidates[]')))):
             # at least one name was present twice
             flash("Candidate names must be unique. Creation failed.", "error")
+        if len(candidates) <= int(request.form.get('committeesize')):
+            # candidate set must be larger than committee-size.
+            flash("Candidate set must be larger than committee-size.", "error")
         else:
             # we can continue creation with the given candidate set.
             election = service.register_election(
@@ -45,7 +48,7 @@ def search_election():
 @voting.route('/details/<electionID>', methods=['GET', 'POST'])
 def details_page(electionID):
     election = service.get_election(electionID)
-    if current_user and current_user.owns_election(election):
+    if current_user.is_authenticated and current_user.owns_election(election):
         service.evaluate(electionID, current_user)
         return render_template('details.html', election=election, admin=True)
     return render_template('details.html', election=election, admin=False)

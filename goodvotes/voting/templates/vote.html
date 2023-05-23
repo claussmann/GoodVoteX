@@ -214,6 +214,9 @@
     }
 
     function finishApproval(){
+      if(sets["bin-init"].length < 1){
+          return
+      }
       $("#step1").slideToggle();
       $("#step2").slideToggle();
       sets["bin0"] = sets["bin-init"];
