@@ -24,7 +24,7 @@ FLASK_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex())')
 # Optional (overwrite default config from config/config.py)
 #FLASK_AUTH_ENABLE_REGISTRATION=${ENABLE_REGISTRATION}
 
-# run.sh config / docker-compose config
+# entrypoint.sh config / docker-compose config
 GOODVOTES_ADMIN_PASSWORD=${ADMIN_PASSWORD}
 GOODVOTES_ADMIN_EMAIL=${ADMIN_EMAIL}
 GOODVOTES_PORT=${PORT:-80}
