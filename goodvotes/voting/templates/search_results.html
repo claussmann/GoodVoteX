@@ -1,12 +1,10 @@
 {%extends "base.html" %}
 {%block content%}
 
-  <div class="content">
     {% if elections|length == 0 %}
       <h2>No search results.</h2>
     {% endif %}
     {% include 'fragments/election/list.html' %}
-  </div>
 
 {% endblock %}
 
