@@ -112,6 +112,7 @@
         <div class="sep"></div>
 
         <div>
+            {% if elections|length > 0 %}
             <div class="center">
                 <h2>Featured Elections</h2>
             </div>
@@ -204,7 +205,7 @@
                   <span class="carousel-control-next-icon" aria-hidden="true"></span>
                 </button>
             </div>
-            
+            {% endif %}
         </div>
 
 
