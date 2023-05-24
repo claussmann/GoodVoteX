@@ -106,10 +106,99 @@
             </div>
         </div>
         <div class="sep"></div>
-        <div class="createcard c-lightred pl-5 pr-5">
-            <div class="center"><h2>Current Elections</h2></div>
+        <div>
+            <div class="center">
+                <h2>Featured Elections</h2>
+            </div>
 
-            {% include 'fragments/election/list.html' %}
+            <div id="featuredCarousel" class="carousel slide mb-5" data-bs-ride="carousel" data-interval="false">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <div class="col-sm-8 mx-auto">
+                            <div class="card text-dark bg-light">
+                                <div class="card-header">
+                                    <b>{{ elections[0].title }}</b>
+                                    <div class="float-end">
+                                        <a href="/details/{{ elections[0].id }}"><button class="btn btn-secondary">Details</button></a>
+                                        {% if elections[0].is_stopped %} 
+                                            <button class="btn btn-success" disabled>Vote</button>
+                                        {% else %}
+                                            <a href="/vote/{{ elections[0].id }}"><button class="btn btn-success">Vote</button></a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <b>Description:</b>
+                                    <p>
+                                        {% for line in elections[0].description.split("\n") %}
+                                            {{ line }}<br>
+                                        {% endfor %}
+                                    </p>
+                                    <br>
+                                    <b>Committee Size:</b> {{elections[0].committeesize}}
+                                    <br>
+                                    <b>Candidates:</b>
+                                    <p>
+                                        {% for candidate in elections[0].candidates %}
+                                            <div class="is-candidate">
+                                                {{candidate.name}}
+                                            </div>
+                                        {% endfor %}
+                                    </p>
+                                    <div style="clear: both;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% for e in elections[1:] %}
+                        <div class="carousel-item">
+                            <div class="col-sm-8 mx-auto">
+                                <div class="card text-dark bg-light">
+                                    <div class="card-header">
+                                        <b>{{ e.title }}</b>
+                                        <div class="float-end">
+                                            <a href="/details/{{ e.id }}"><button class="btn btn-secondary">Details</button></a>
+                                            {% if e.is_stopped %} 
+                                                <button class="btn btn-success" disabled>Vote</button>
+                                            {% else %}
+                                                <a href="/vote/{{ e.id }}"><button class="btn btn-success">Vote</button></a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <b>Description:</b>
+                                        <p>
+                                            {% for line in e.description.split("\n") %}
+                                                {{ line }}<br>
+                                            {% endfor %}
+                                        </p>
+                                        <br>
+                                        <b>Committee Size:</b> {{e.committeesize}}
+                                        <br>
+                                        <b>Candidates:</b>
+                                        <p>
+                                            {% for candidate in e.candidates %}
+                                                <div class="is-candidate">
+                                                    {{candidate.name}}
+                                                </div>
+                                            {% endfor %}
+                                        </p>
+                                        <div style="clear: both;"></div>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>            
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev text-bg-dark" type="button" data-bs-target="#featuredCarousel" data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                </button>
+                <button class="carousel-control-next text-bg-dark" type="button" data-bs-target="#featuredCarousel" data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                </button>
+            </div>
+            
         </div>
 
 
