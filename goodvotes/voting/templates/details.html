@@ -1,124 +1,101 @@
 {%extends "base.html" %}
 {%block content%}
-
-        <div class="election-details">
-            <div class="election-details-title">{{election.title}}</div>
-            {% if election.is_stopped %} 
-                <button class="election-details-votebtn" disabled style="background-color: #a1a0a0;">Vote</button>
-            {% else %}
-                <button onclick="window.location.href='/vote/{{ election.id }}';" class="election-details-votebtn">Vote</button>
-            {% endif %}
-            <input hidden type="text" value="{{ url_for('voting.details_page', electionID=election.id, _external=True) }}" id="sharelink" class="textfield" readonly>
-            <button id="sharebutton" onclick="copyShareToClipboard()" class="election-details-sharebtn">Share</button>
-
-            <div class="sep"></div>
-
-            <div class="election-details-body">
-                <div class="election-details-description">
-                    <p>
-                        {% for line in election.description.split("\n") %}
-                        {{line}}<br>
-                        {% endfor %}
-                    </p>
-                </div>
-
-                <div class="sep"></div>
-
-                <div class="section-caption">
-                    <span>Candidates</span>
-                </div>
-
-                <div class="sep"></div>
-
-                <div>
-                    {% for candidate in election.candidates %}
+<div class="col-sm-8 mx-auto mb-3">
+    <div class="card text-dark bg-light">
+        <div class="card-header">
+            <b>{{ election.title }}</b>
+            <div class="float-end">
+                <input hidden type="text" value="{{ url_for('voting.details_page', electionID=election.id, _external=True) }}" id="sharelink" class="textfield" readonly>
+                <button id="sharebutton" onclick="copyShareToClipboard()" class="btn btn-primary">Share</button>
+                {% if election.is_stopped %} 
+                    <button class="btn btn-success" disabled>Vote</button>
+                {% else %}
+                    <a href="/vote/{{ election.id }}"><button class="btn btn-success">Vote</button></a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body">
+            <b>Description:</b>
+            <p>
+                {% for line in election.description.split("\n") %}
+                    {{ line }}<br>
+                {% endfor %}
+            </p>
+            <br>
+            <b>Committee Size:</b> {{election.committeesize}}
+            <br>
+            <b>Candidates:</b>
+            <p>
+                {% for candidate in election.candidates %}
                     <div class="is-candidate">
                         {{candidate.name}}
                     </div>
-                    {% endfor %}
-                </div>
+                {% endfor %}
+            </p>
+            <div style="clear: both;"></div>
 
-                <div class="sep"></div>
-
-                <div class="section-caption">
-                    <span>Committee Size</span>
-                </div>
-
-                <div class="sep"></div>
-
-
-                <div>
-                    <input type="range" id="committeesize" name="committeesize" min="2" max="10" class="slider" list="ticks" value="{{election.committeesize}}" style="width: 100%;" disabled>
-                    <datalist id="ticks" style="width: 100%; margin-left: 0;">
-                        <option value="2" label="2"></option>
-                        <option value="3"></option>
-                        <option value="4" label="4"></option>
-                        <option value="5"></option>
-                        <option value="6" label="6"></option>
-                        <option value="7"></option>
-                        <option value="8" label="8"></option>
-                        <option value="9"></option>
-                        <option value="10" label="10"></option>
-                    </datalist>
-                </div>
-
+            {% if admin %}
+                <br>
+                <b>Admin Space:</b>
                 {% if election.is_stopped %}
-                    <div class="sep"></div>
-                    <div class="sep"></div>
-                    <div class="sep"></div>
-                    <div class="section-caption">
-                        <span>Election Result</span>
-                    </div>
-                    <div class="sep"></div>
-                    The following committee is the winner of this election:
-
+                    <br>
+                    This election was stopped by you (or another administrator).
+                    <br>
+                    A total of <b>{{election.votecount}} voters</b> participated.
+                    <br>
+                    The winner committee is:
                     <div>
                         {% for candidate in election.get_winners() %}
                         <div class="is-candidate">
                             {{candidate.name}}
                         </div>
                         {% endfor %}
-                    </div>
-                    <div class="sep"></div>
-                {% endif %}
-
-                {% if admin %}
-                    <div class="sep"></div>
-                    <div class="sep"></div>
-                    <div class="section-caption">
-                        <span>Admin Space</span>
-                    </div>
-                    <div class="sep"></div>
-                    Currently <b>{{election.votecount}} voters</b> participated.
-                    <div class="sep"></div>
-                    The best committee currently is the following:
-                    <div>
-                        {% for candidate in election.get_winners() %}
-                        <div class="is-candidate">
-                            {{candidate.name}}
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <div class="sep"></div>
-
-
-                    <div style="padding-top: 25px;">
-                        <form method="post">
-                            {% if election.is_stopped %} 
-                                <input type="submit" value="Stop and Evaluate" class="election-details-resultbtn" disabled style="background-color: #a1a0a0;">
-                            {% else %}
-                                <input type="submit" value="Stop and Evaluate" class="election-details-resultbtn" formaction="/evaluate/{{ election.id }}" onclick="return confirm('By evaluating the election, it will be closed for further votes. Do you want to continue evaluation?')">
-                            {% endif %}
-                            <input type="submit" value="Delete" class="election-details-deletebtn" formaction="/delete/{{ election.id }}">
-                        </form>
                     </div>
                 {% else %}
-                    <p>As creator of this election, login to see more info.</p>
+                    <br>
+                    Voters can still vote in this election. Click the button at the bottom to stop voting.
+                    <br>
+                    Currently <b>{{election.votecount}} voters</b> participated.
+                    <br>
+                    Currently, the best committee is:
+                    <div>
+                        {% for candidate in election.get_winners() %}
+                        <div class="is-candidate">
+                            {{candidate.name}}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div style="clear: both;"></div>
                 {% endif %}
-
-                <div class="sep"></div>
-            </div>
+                <div class="float-end">
+                    <form method="post">
+                        {% if election.is_stopped %} 
+                            <input value="Stop + Evaluate" class="btn btn-warning" disabled>
+                        {% else %}
+                            <input type="submit" value="Stop and Evaluate" class="btn btn-warning" formaction="/evaluate/{{ election.id }}" onclick="return confirm('By evaluating the election, it will be closed for further votes. Do you want to continue?')">
+                        {% endif %}
+                        <input type="submit" value="Delete" class="btn btn-danger" formaction="/delete/{{ election.id }}" onclick="return confirm('This election will be deleted. Results will no longer be available. This cannot be undone. Do you want to continue?')">
+                    </form>
+                </div>
+            {% else %}
+                <br>
+                <b>Election Result:</b>
+                {% if election.is_stopped %}
+                    <div>
+                        {% for candidate in election.get_winners() %}
+                        <div class="is-candidate">
+                            {{candidate.name}}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div style="clear: both;"></div>
+                {% else %}
+                    <i>The results will be published here when the election is finished. As creator of this election, login to see details.</i>
+                {% endif %}
+            {% endif %}
         </div>
+    </div>
+</div>
 
 {% endblock %}
 
@@ -129,10 +106,8 @@
         copyText.select();
         copyText.setSelectionRange(0, 200);
         navigator.clipboard.writeText(copyText.value);
-        
-        // Hide info window
         document.getElementById("sharebutton").firstChild.data = "Copied!";
-        document.getElementById("sharebutton").style.backgroundColor = "#313f78";
+        document.getElementById("sharebutton").disabled = true;
     }
   </script>
 {% endblock %}
