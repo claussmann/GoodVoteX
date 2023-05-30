@@ -19,6 +19,7 @@ class Election(db.Model):
     votecount = db.Column(db.Integer, default=0)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     owner = db.relationship('User', backref=db.backref('elections', lazy=True))
+    ballot_type = db.Column(db.String(60), nullable=False)
 
     def __eq__(self, other):
         try:
@@ -31,6 +32,8 @@ class Election(db.Model):
         if self.is_stopped:
             raise Exception("The creator stopped the voting process. You can no longer vote.")
         self.ballots.append(ballot)
+        if not ballot.is_of_type(self.ballot_type):
+            raise Exception("This election does not accept this type of ballot.")
         if not ballot.check_validity():
             self.ballots.remove(ballot)
             raise Exception("Ballot does not seem to be valid.")
@@ -110,8 +113,25 @@ class Ballot(db.Model):
     }
 
     def score(self, option):
+        return 0
+
+    def check_validity(self):
+        return False
+    
+    def is_of_type(self, ballot_type):
+        return False
+    
+    def parse_from_json(self, json):
         pass
 
+
+
+
+
+
+#################################################################################
+#                 Bounded Approval Ballots
+#################################################################################
 
 class BoundedApprovalBallot(Ballot):
     id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
@@ -137,10 +157,22 @@ class BoundedApprovalBallot(Ballot):
                 if not c in valid_ids:
                     return False
         return True
+    
+    def is_of_type(self, ballot_type):
+        return ballot_type == "boundedApprovalBallot"
 
-    def encode(self, list_of_bounded_sets):
-        bounded_sets_encoded = {"bsets": [bs.serialize() for bs in list_of_bounded_sets]}
+    def parse_from_json(self, json_content):
+        sets = json_content["sets"]
+        bounds = json_content["bounds"]
+        bounded_sets = list()
+        for s in sets:
+            items_in_set = set(sets[s])
+            if len(items_in_set) == 0:
+                continue
+            bounded_sets.append(BoundedSet(bounds[s][0], bounds[s][1], bounds[s][2], items_in_set))
+        bounded_sets_encoded = {"bsets": [bs.serialize() for bs in bounded_sets]}
         self.json_encoded = json.dumps(bounded_sets_encoded)
+
 
     def _decode(self):
         raw_obj = json.loads(self.json_encoded)
