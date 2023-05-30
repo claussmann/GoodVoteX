@@ -25,42 +25,16 @@ For production, the application will run in a docker container with a production
 For development, you first need to edit the configuration.
 To this end, rename (or copy) `.env.example` to `.env`.
 Open the `.env` file in a text editor and edit it according to the instructions in the file.
-Finally, you can run the script `run-debug.sh`, with env vars exported e.g. `env $(cat .env|xargs) ./run-debug.sh`.
+Finally, you can run the script `run-development.sh`, and access the app in your web browser under `http://127.0.0.1:5000`.
+
+Note that python3, pypy3, and the dependencies from `requirements.txt` need to be installed.
 
 ### Production
 
-To deploy GoodVotes using docker download and run the [install.sh](https://raw.githubusercontent.com/claussmann/GoodVotes/main/install.sh) script provided by the repository.
-
-The following dependencies are required: `docker`, `docker-compose`, `python3`
-
-The `install.sh` default project directory is `/srv/docker`. To change this set `GOODVOTES_PROJECT_DIR` to a path of your choosing.
-
-`GOODVOTES_PROJECT_DIR=/home/goodvotes ./install.sh`
-
-Once installed, the `docker-compose.yml` file can be found in `$GOODVOTES_PROJECT_DIR/GoodVotes/`.
-The installer will ask you whether you want to build and start the docker container right now.
-Note that you will (depending on your system configuration) need root permissions to do this.
-Thus, in case the installer fails to build and start the container, you can later build it by running
-
-`sudo docker-compose -f "$GOODVOTES_PROJECT_DIR/GoodVotes/docker-compose.yml" build`
-
-and start it by running
-
-`sudo docker-compose -f "$GOODVOTES_PROJECT_DIR/GoodVotes/docker-compose.yml" up -d`
-
-Configuration changes can be applied to `$GOODVOTES_PROJECT_DIR/GoodVotes/.env`.
-However, you will need to restart the container afterwards.
-
-
-## Use
-
-The Server will listen on port 5000 in development, or 80 when in the docker container.
-Open the URL (e.g. `http://127.0.0.1:5000` for development) in a web browser and start using the application.
+Production deployment works via docker-compose.
+Detailed instructions can be found in the directory `deployment`.
 
 
 ## Copyright notice
 
 This software is licensed under the MIT License. It was developed in 2022 and 2023 by Christian Laußmann and Paul Nüsken at the Heinrich-Heine-University in Düsseldorf.
-
-This software contains the jQuery library which is licensed under the MIT License, too.
-See the file /goodvotes/static/jquery-3.6.0.min.js for more information.
