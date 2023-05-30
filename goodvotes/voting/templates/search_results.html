@@ -1,13 +1,48 @@
 {%extends "base.html" %}
 {%block content%}
 
-  <div class="content">
     {% if elections|length == 0 %}
       <h2>No search results.</h2>
+    {% else %}
+      {% for e in elections %}
+        <div class="col-sm-8 mx-auto mb-3">
+            <div class="card text-dark bg-light">
+                <div class="card-header">
+                    <b>{{ e.title }}</b>
+                    <div class="float-end">
+                        <a href="/details/{{ e.id }}"><button class="btn btn-secondary">Details</button></a>
+                        {% if e.is_stopped %} 
+                            <button class="btn btn-success" disabled>Vote</button>
+                        {% else %}
+                            <a href="/vote/{{ e.id }}"><button class="btn btn-success">Vote</button></a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <b>Description:</b>
+                    <p>
+                        {% for line in e.description.split("\n") %}
+                            {{ line }}<br>
+                        {% endfor %}
+                    </p>
+                    <br>
+                    <b>Committee Size:</b> {{e.committeesize}}
+                    <br>
+                    <b>Candidates:</b>
+                    <p>
+                        {% for candidate in e.candidates %}
+                            <div class="is-candidate">
+                                {{candidate.name}}
+                            </div>
+                        {% endfor %}
+                    </p>
+                    <div style="clear: both;"></div>
+                    
+                </div>
+            </div>
+        </div>
+      {% endfor %}
     {% endif %}
-    {% include 'fragments/election/list.html' %}
-  </div>
-
 {% endblock %}
 
 
