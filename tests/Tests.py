@@ -101,13 +101,6 @@ def test_bounded_set_phi():
     Tests for BoundedApprovalBallot
 """
 
-def test_bounded_sets_encode_correctly():
-    bs1 = BoundedSet(2, 3, 3, {"a", "b", "c", "d"})
-    bs2 = BoundedSet(1, 1, 1, {"f", "g"})
-    ballot = BoundedApprovalBallot()
-    ballot.encode([bs1, bs2])
-    assert [bs1, bs2] == ballot._decode()
-
 def test_bounded_ballots_validity():
     e = Election()
     e.candidates = [Candidate() for i in range(6)]
@@ -121,34 +114,45 @@ def test_bounded_ballots_validity():
     bs2 = BoundedSet(1, 1, 1, {"f", "g"})
     bs3 = BoundedSet(1, 1, 1, {"e", "f", "g"})
 
+    json_content = {'sets' : {'bs1' : ['a', 'b', 'c', 'd'], 'bs2' : ['f', 'g']}, 
+                'bounds' : {'bs1' : [2,3,3], 'bs2' : [1,1,1]}}
     ballot = BoundedApprovalBallot()
     ballot.election = e
-    ballot.encode([bs1, bs2])
+    ballot.parse_from_json(json_content)
     assert ballot.check_validity() # should be fine; ballots non-overlapping, candidates ok
 
+    json_content = {'sets' : {'bs1' : ['a', 'b', 'c', 'd'], 'bs2' : ['f', 'g'], 'bs3' : ['e', 'f', 'g']}, 
+                'bounds' : {'bs1' : [2,3,3], 'bs2' : [1,1,1], 'bs3' : [1,1,1]}}
     ballot = BoundedApprovalBallot()
     ballot.election = e
-    ballot.encode([bs1, bs2, bs3])
+    ballot.parse_from_json(json_content)
     assert not ballot.check_validity() # ballots are overlapping
 
+    json_content = {'sets' : {'bs1' : ['a', 'b', 'c', 'd'], 'bs3' : ['e', 'f', 'g']}, 
+                'bounds' : {'bs1' : [2,3,3], 'bs3' : [1,1,1]}}
     ballot = BoundedApprovalBallot()
     ballot.election = e
-    ballot.encode([bs1, bs3])
+    ballot.parse_from_json(json_content)
     assert not ballot.check_validity() # candidate "e" doesn't exist
 
 def test_bounded_ballots_score():
-    bs1 = BoundedSet(1, 2, 3, {"a", "b", "c", "d"})
-    bs2 = BoundedSet(1, 2, 2, {"e", "f"})
-    bs3 = BoundedSet(2, 3, 3, {"g", "h", "i"})
-
+    json_content = {'sets' : {'bs1' : ['a', 'b', 'c', 'd'], 'bs2' : ['e', 'f'], 'bs3' : ['g', 'h', 'i']}, 
+                'bounds' : {'bs1' : [1,2,3], 'bs2' : [1,2,2], 'bs3' : [2,3,3]}}
     ballot = BoundedApprovalBallot()
-    ballot.encode([bs1, bs2, bs3])
+    ballot.parse_from_json(json_content)
     assert ballot.score({"a", "b", "f", "g"}) == 3
     assert ballot.score({"a", "b", "e", "f"}) == 4
     assert ballot.score({"a", "b", "c", "e", "f"}) == 4
     assert ballot.score({"a", "b", "c", "d", "e", "f"}) == 2
     assert ballot.score({"a", "g"}) == 1
     assert ballot.score({"a", "g", "i"}) == 3
+
+"""
+    Tests for ApprovalBallot
+"""
+
+# todo
+
 
 """
     Tests for Election
@@ -220,13 +224,14 @@ def test_score():
     e.candidates[7].id = "h"
     e.candidates[8].id = "i"
     
-    bs1 = BoundedSet(1, 2, 3, {"a", "b", "c", "d"})
-    bs2 = BoundedSet(1, 2, 2, {"e", "f"})
-    bs3 = BoundedSet(2, 3, 3, {"g", "h", "i"})
+    json_content = {'sets' : {'bs1' : ['a', 'b', 'c', 'd'], 'bs2' : ['e', 'f']}, 
+                'bounds' : {'bs1' : [1,2,3], 'bs2' : [1,2,2]}}
     b1 = BoundedApprovalBallot()
-    b1.encode([bs1, bs2])
+    b1.parse_from_json(json_content)
+    json_content = {'sets' : {'bs1' : ['a', 'b', 'c', 'd'], 'bs3' : ['g', 'h', 'i']}, 
+                'bounds' : {'bs1' : [1,2,3], 'bs3' : [2,3,3]}}
     b2 = BoundedApprovalBallot()
-    b2.encode([bs1, bs3])
+    b2.parse_from_json(json_content)
     e.ballots = [b1, b2]
 
     assert e.score({e.candidates[0], e.candidates[1], e.candidates[2], e.candidates[5], e.candidates[7]}) == 5
