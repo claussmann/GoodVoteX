@@ -70,6 +70,9 @@ def add_vote_from_json(election_id, json_content):
     if json_content["type"] == "boundedApprovalBallot":
         ballot = BoundedApprovalBallot()
         ballot.parse_from_json(json_content)
+    elif json_content["type"] == "approvalBallot":
+        ballot = ApprovalBallot()
+        ballot.parse_from_json(json_content)
     else:
         raise Exception("This ballot type is unknown.")
         

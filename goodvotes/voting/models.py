@@ -229,3 +229,40 @@ class BoundedSet(frozenset):
 
     def serialize(self):
         return {"set": list(self), "lower": self.lower, "saturation": self.saturation, "upper": self.upper}
+
+
+#################################################################################
+#                 Regular Approval Ballots
+#################################################################################
+
+class ApprovalBallot(Ballot):
+    id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
+    json_encoded = db.Column(db.String(1000), nullable=False)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "approvalBallot",
+    }
+
+    def score(self, committee):
+        app_candidates = self._decode()
+        return len(app_candidates.intersection(committee))
+
+    def check_validity(self):
+        app_candidates = self._decode()
+        valid_ids = [str(c.id) for c in self.election.candidates]
+        for c in app_candidates:
+            if not c in valid_ids:
+                return False
+        return True
+    
+    def is_of_type(self, ballot_type):
+        return ballot_type == "approvalBallot"
+
+    def parse_from_json(self, json_content):
+        app_candidates = json_content["app_candidates"]
+        self.json_encoded = json.dumps({"app_candidates" : app_candidates})
+
+
+    def _decode(self):
+        raw_obj = json.loads(self.json_encoded)
+        return set(raw_obj["app_candidates"])

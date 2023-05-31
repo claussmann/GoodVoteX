@@ -50,7 +50,13 @@
                 <div class="card-body">
                     {% if user.is_authenticated %}
                         <form action="/" method="post">
-                            <input type="text" id="ballot_type" name="type" hidden value="boundedApprovalBallot">
+                            <div class="form-group">
+                                <select id="ballot_type" name="type" class="form-select">
+                                    <option value="boundedApprovalBallot">Bounded Approval Ballots</option>
+                                    <option value="approvalBallot">Regular Approval Ballots</option>
+                                </select>
+                                <small class="form-text text-muted">Select the ballot type for your election.</small>
+                            </div>
 
                             <div class="form-group">
                                 <input type="text" id="name" name="name" placeholder="Election Title*" required class="form-control">

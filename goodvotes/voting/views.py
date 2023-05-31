@@ -67,8 +67,8 @@ def add_vote(electionID):
     try:
         json_content = request.get_json()
         service.add_vote_from_json(electionID, json_content)
-    except:
-        return "Something is wrong with the data", 400
+    except Exception as e:
+        return "Something is wrong with the data: " + str(e), 400
     return "OK"
 
 
