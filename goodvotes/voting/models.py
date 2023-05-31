@@ -69,7 +69,7 @@ class Election(db.Model):
         return ret
 
     def score(self, committee):
-        return sum(ballot.score([c.id for c in committee]) for ballot in self.ballots)
+        return sum(ballot.score({str(c.id) for c in committee}) for ballot in self.ballots)
 
     def search_relevance(self, search_string):
         search_string = search_string.lower()
