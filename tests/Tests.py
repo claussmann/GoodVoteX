@@ -151,8 +151,13 @@ def test_bounded_ballots_score():
     Tests for ApprovalBallot
 """
 
-# todo
-
+def test_approval_ballots_score():
+    json_content = {'app_candidates' : ['a', 'b', 'c']}
+    ballot = ApprovalBallot()
+    ballot.parse_from_json(json_content)
+    assert ballot.score({"a", "b", "f", "g"}) == 2
+    assert ballot.score({"a", "b", "c", "f"}) == 3
+    assert ballot.score({"e", "f"}) == 0
 
 """
     Tests for Election
