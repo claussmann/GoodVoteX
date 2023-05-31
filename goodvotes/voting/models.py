@@ -19,6 +19,7 @@ class Election(db.Model):
     votecount = db.Column(db.Integer, default=0)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     owner = db.relationship('User', backref=db.backref('elections', lazy=True))
+    ballot_type = db.Column(db.String(60), nullable=False)
 
     def __eq__(self, other):
         try:
@@ -31,6 +32,8 @@ class Election(db.Model):
         if self.is_stopped:
             raise Exception("The creator stopped the voting process. You can no longer vote.")
         self.ballots.append(ballot)
+        if not ballot.is_of_type(self.ballot_type):
+            raise Exception("This election does not accept this type of ballot.")
         if not ballot.check_validity():
             self.ballots.remove(ballot)
             raise Exception("Ballot does not seem to be valid.")
@@ -66,7 +69,7 @@ class Election(db.Model):
         return ret
 
     def score(self, committee):
-        return sum(ballot.score([c.id for c in committee]) for ballot in self.ballots)
+        return sum(ballot.score({str(c.id) for c in committee}) for ballot in self.ballots)
 
     def search_relevance(self, search_string):
         search_string = search_string.lower()
@@ -110,8 +113,25 @@ class Ballot(db.Model):
     }
 
     def score(self, option):
+        return 0
+
+    def check_validity(self):
+        return False
+    
+    def is_of_type(self, ballot_type):
+        return False
+    
+    def parse_from_json(self, json):
         pass
 
+
+
+
+
+
+#################################################################################
+#                 Bounded Approval Ballots
+#################################################################################
 
 class BoundedApprovalBallot(Ballot):
     id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
@@ -137,10 +157,22 @@ class BoundedApprovalBallot(Ballot):
                 if not c in valid_ids:
                     return False
         return True
+    
+    def is_of_type(self, ballot_type):
+        return ballot_type == "boundedApprovalBallot"
 
-    def encode(self, list_of_bounded_sets):
-        bounded_sets_encoded = {"bsets": [bs.serialize() for bs in list_of_bounded_sets]}
+    def parse_from_json(self, json_content):
+        sets = json_content["sets"]
+        bounds = json_content["bounds"]
+        bounded_sets = list()
+        for s in sets:
+            items_in_set = set(sets[s])
+            if len(items_in_set) == 0:
+                continue
+            bounded_sets.append(BoundedSet(bounds[s][0], bounds[s][1], bounds[s][2], items_in_set))
+        bounded_sets_encoded = {"bsets": [bs.serialize() for bs in bounded_sets]}
         self.json_encoded = json.dumps(bounded_sets_encoded)
+
 
     def _decode(self):
         raw_obj = json.loads(self.json_encoded)
@@ -197,3 +229,40 @@ class BoundedSet(frozenset):
 
     def serialize(self):
         return {"set": list(self), "lower": self.lower, "saturation": self.saturation, "upper": self.upper}
+
+
+#################################################################################
+#                 Regular Approval Ballots
+#################################################################################
+
+class ApprovalBallot(Ballot):
+    id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
+    json_encoded = db.Column(db.String(1000), nullable=False)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "approvalBallot",
+    }
+
+    def score(self, committee):
+        app_candidates = self._decode()
+        return len(app_candidates.intersection(committee))
+
+    def check_validity(self):
+        app_candidates = self._decode()
+        valid_ids = [str(c.id) for c in self.election.candidates]
+        for c in app_candidates:
+            if not c in valid_ids:
+                return False
+        return True
+    
+    def is_of_type(self, ballot_type):
+        return ballot_type == "approvalBallot"
+
+    def parse_from_json(self, json_content):
+        app_candidates = json_content["app_candidates"]
+        self.json_encoded = json.dumps({"app_candidates" : app_candidates})
+
+
+    def _decode(self):
+        raw_obj = json.loads(self.json_encoded)
+        return set(raw_obj["app_candidates"])

@@ -258,11 +258,13 @@
             window.location.href = '/done';
           }
           else{
+            console.log(this.responseText)
             alert("Something went wrong. Please reload the page and try again.");
           }
         } 
       };
       xhr.send(JSON.stringify({
+          "type" : "boundedApprovalBallot",
           "sets" : sets,
           "bounds" : bounds
       }));

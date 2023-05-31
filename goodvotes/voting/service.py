@@ -3,7 +3,7 @@ from .models import *
 from .. import db
 
 
-def register_election(title, description, candidates, K, user_owner):
+def register_election(ballot_type, title, description, candidates, K, user_owner):
     """
     Registers a new election.
 
@@ -14,7 +14,7 @@ def register_election(title, description, candidates, K, user_owner):
     :param user_owner:
     :return: When registration successful, returns the election object.
     """
-    e = Election(title=title, description=description, committeesize=K)
+    e = Election(ballot_type=ballot_type, title=title, description=description, committeesize=K)
     for c in candidates:
         e.candidates.append(Candidate(name=c))
     user_owner.elections.append(e)
@@ -57,7 +57,7 @@ def search(search_string):
     return [x[1] for x in sorted(ret, key=lambda e: e[0], reverse=True)]  # Sort results by relevance
 
 
-def add_vote(election_id, ballot):
+def add_vote_from_json(election_id, json_content):
     """
     Adds a ballot to the given election.
 
@@ -66,6 +66,16 @@ def add_vote(election_id, ballot):
     :return:
     """
     e = get_election(election_id)
+
+    if json_content["type"] == "boundedApprovalBallot":
+        ballot = BoundedApprovalBallot()
+        ballot.parse_from_json(json_content)
+    elif json_content["type"] == "approvalBallot":
+        ballot = ApprovalBallot()
+        ballot.parse_from_json(json_content)
+    else:
+        raise Exception("This ballot type is unknown.")
+        
     e.add_ballot(ballot)
     db.session.add(e)
     db.session.commit()
