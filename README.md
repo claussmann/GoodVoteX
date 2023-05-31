@@ -10,6 +10,7 @@ We currently support the following ballot types and voting rules:
 | Ballot Type                         | Available Voting Rules | Reference                                                                                                                                                   |
 |-------------------------------------|------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Bounded approval ballots (disjoint) | Total Scoring          | AAMAS-2023: "Bounded Approval Ballots: Balancing Expressiveness and Simplicity for Multiwinner Elections" by D. Baumeister, L. Boes, C. Laußmann and S. Rey |
+| Approval ballots | Approval          | - |
 
 
 ## Run
