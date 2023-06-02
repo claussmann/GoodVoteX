@@ -71,7 +71,7 @@ def add_vote_from_json(election_id, json_content):
         "approvalBallot" : ApprovalBallot
     }
     if json_content["type"] in constructors:
-        ballot = constructors[json_content["type"]]()
+        ballot = constructors[json_content["type"]](json_content)
         ballot.parse_from_json(json_content)
     else:
         raise Exception("This ballot type is unknown.")

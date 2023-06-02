@@ -45,10 +45,11 @@ Let's assume you want to call the ballot `Simple Ballot`.
 Next, in the file `goodvotes/voting/models.py` you create a class `SimpleBallot` which inherits from the class `Ballot`.
 Note that you have to overwrite the following methods:
 
-- `score(self, option)`: Returns the score `option` receives from this ballot (`option` is a committee of candidates).
-- `check_validity(self)`: Returns `True` if and only if this ballot is valid.
+- `score(self, committee)`: Returns the score `committee` receives from this ballot.
+- `check_validity(self)`: Returns `True` if and only if this ballot is valid (OPTIONAL; as a default every ballot is considered valid).
 - `is_of_type(self, ballot_type)`: Returns `True` if and only if this ballot is of type `ballot_type`, which is a string.
 - `parse_from_json(self, json)`: This function is called immediately after construction. It is given a dict in a JSON like structure. The format of this dict is defined by you when you write the HTML/JS form later.
+- `get_involved_candidates(self)`: Returns a set of all involved candidates in this ballot.
 
 Further, your class must have the following database attributes:
 
