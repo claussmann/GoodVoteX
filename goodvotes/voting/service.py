@@ -66,16 +66,15 @@ def add_vote_from_json(election_id, json_content):
     :return:
     """
     e = get_election(election_id)
-
-    if json_content["type"] == "boundedApprovalBallot":
-        ballot = BoundedApprovalBallot()
-        ballot.parse_from_json(json_content)
-    elif json_content["type"] == "approvalBallot":
-        ballot = ApprovalBallot()
+    constructors = {
+        "boundedApprovalBallot" : BoundedApprovalBallot,
+        "approvalBallot" : ApprovalBallot
+    }
+    if json_content["type"] in constructors:
+        ballot = constructors[json_content["type"]]()
         ballot.parse_from_json(json_content)
     else:
         raise Exception("This ballot type is unknown.")
-        
     e.add_ballot(ballot)
     db.session.add(e)
     db.session.commit()
