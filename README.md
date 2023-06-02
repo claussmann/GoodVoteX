@@ -36,6 +36,46 @@ Production deployment works via docker-compose.
 Detailed instructions can be found in the directory `deployment`.
 
 
+## Contribute
+
+We welcome everyone who wants to add ballot formats.
+
+First, think of a good name for your ballot format.
+Let's assume you want to call the ballot `Simple Ballot`.
+Next, in the file `goodvotes/voting/models.py` you create a class `SimpleBallot` which inherits from the class `Ballot`.
+Note that you have to overwrite the following methods:
+
+- `score(self, option)`: Returns the score `option` receives from this ballot (`option` is a committee of candidates).
+- `check_validity(self)`: Returns `True` if and only if this ballot is valid.
+- `is_of_type(self, ballot_type)`: Returns `True` if and only if this ballot is of type `ballot_type`, which is a string.
+- `parse_from_json(self, json)`: This function is called immediately after construction. It is given a dict in a JSON like structure. The format of this dict is defined by you when you write the HTML/JS form later.
+
+Further, your class must have the following database attributes:
+
+
+    id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
+    json_encoded = db.Column(db.String(1000), nullable=False)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "simpleBallot",
+    }
+
+Of course, you replace `simpleBallot` by the name of your ballot.
+
+Next, go to the file `goodvotes/voting/service.py` and find the function `add_vote_from_json` where you add your instructions for `simpleBallot`.
+
+Finally, you have to create an HTML template for your ballot format.
+Place it in `goodvotes/voting/templates` and name it `vote_simpleBallot.html`.
+You can do whatever you want in this template.
+However, eventually you must POST a JSON formatted object to the URL `/vote/{{election.id}}`.
+You can format it as you like, as you will evaluate it on your own in the function `parse_from_json(self, json)`.
+The only requirement is that it has an attribute `type` with the value `"simpleBallot"`, as this is used to figure out which ballot object should be created.
+
+Now, your new ballot type is registered in the system.
+However, if you want to create an election with this ballot type, you have to add this option in the file `goodvotes/voting/templates/start.html` in the select-form with id `ballot_type`.
+That's it.
+
+
 ## Copyright notice
 
 This software is licensed under the MIT License. It was developed in 2022 and 2023 by Christian Laußmann and Paul Nüsken at the Heinrich-Heine-University in Düsseldorf.
