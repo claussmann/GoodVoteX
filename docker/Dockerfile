@@ -8,16 +8,17 @@ RUN python3 -m ensurepip
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 
-# download external css and js files
-COPY ./docker/install-dependencies.sh .
-RUN bash install-dependencies.sh
-
 # create flask app
 RUN mkdir /App
 COPY ./docker/entrypoint.sh /App/
 COPY ./goodvotes /App/goodvotes
 COPY ./config /App/config
-WORKDIR /App
 
+# download external css and js files
+COPY ./docker/install-dependencies.sh .
+RUN bash install-dependencies.sh
+
+
+WORKDIR /App
 CMD ["bash", "entrypoint.sh"]
 
