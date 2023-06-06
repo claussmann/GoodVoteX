@@ -116,21 +116,17 @@ def test_bounded_ballots_validity():
 
     json_content = {'sets' : {'bs1' : ['a', 'b', 'c', 'd'], 'bs2' : ['f', 'g']}, 
                 'bounds' : {'bs1' : [2,3,3], 'bs2' : [1,1,1]}}
-    ballot = BoundedApprovalBallot(json_content)
-    ballot.election = e
-    assert ballot.check_validity() # should be fine; ballots non-overlapping, candidates ok
+    ballot = BoundedApprovalBallot(json_content) # should be fine; ballots non-overlapping, candidates ok
 
     json_content = {'sets' : {'bs1' : ['a', 'b', 'c', 'd'], 'bs2' : ['f', 'g'], 'bs3' : ['e', 'f', 'g']}, 
                 'bounds' : {'bs1' : [2,3,3], 'bs2' : [1,1,1], 'bs3' : [1,1,1]}}
-    ballot = BoundedApprovalBallot(json_content)
-    ballot.election = e
-    assert not ballot.check_validity() # ballots are overlapping
+    with pytest.raises(Exception): # ballots are overlapping
+        ballot = BoundedApprovalBallot(json_content)
 
     json_content = {'sets' : {'bs1' : ['a', 'b', 'c', 'd'], 'bs3' : ['e', 'f', 'g']}, 
                 'bounds' : {'bs1' : [2,3,3], 'bs3' : [1,1,1]}}
-    ballot = BoundedApprovalBallot(json_content)
-    ballot.election = e
-    assert not ballot.check_validity() # candidate "e" doesn't exist
+    with pytest.raises(Exception): # candidate "e" doesn't exist
+        ballot = BoundedApprovalBallot(json_content)
 
 def test_bounded_ballots_score():
     json_content = {'sets' : {'bs1' : ['a', 'b', 'c', 'd'], 'bs2' : ['e', 'f'], 'bs3' : ['g', 'h', 'i']}, 
