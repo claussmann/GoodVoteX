@@ -15,6 +15,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: apt-get install coreutils
+      run: sudo apt-get install coreutils
     - name: Build the Docker image
       run: docker build . --file docker/Dockerfile --tag goodvotes-webservice:$(date +%s)
