@@ -1,0 +1,11 @@
+version: "3"
+services:
+  webserver:
+    build: "."
+    container_name: goodvotes-web
+    ports:
+      - "$GOODVOTES_HOST:$GOODVOTES_PORT:80"
+    volumes:
+      - "$FLASK_APP_INSTALL_PATH/storage":/App/storage
+    env_file:
+      - .env

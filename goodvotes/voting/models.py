@@ -34,9 +34,9 @@ class Election(db.Model):
         self.ballots.append(ballot)
         if not ballot.is_of_type(self.ballot_type):
             raise Exception("This election does not accept this type of ballot.")
-        if not ballot.check_validity():
+        if len(ballot.get_involved_candidates().difference([str(c.id) for c in self.candidates])) > 0:
             self.ballots.remove(ballot)
-            raise Exception("Ballot does not seem to be valid.")
+            raise Exception("Ballot seems to involve candidates not participating in this election.")
         self.votecount += 1
 
     def recompute_current_winner(self):
@@ -112,16 +112,30 @@ class Ballot(db.Model):
         "polymorphic_on": "type",
     }
 
-    def score(self, option):
-        return 0
+    def __init__(self, json_content, **kwargs):
+        super(Ballot, self).__init__(**kwargs)
+        self.parse_from_json(json_content)
+        if not self.check_validity():
+            raise Exception("Ballot does not seem to be valid.") 
 
+    # Overwrite!
+    def score(self, committee):
+        pass
+
+    # Optional Overwrite.
     def check_validity(self):
-        return False
+        return True
     
+    # Overwrite!
     def is_of_type(self, ballot_type):
-        return False
+        pass
     
-    def parse_from_json(self, json):
+    # Overwrite!
+    def parse_from_json(self, json_content):
+        pass
+    
+    # Overwrite!
+    def get_involved_candidates(self):
         pass
 
 
@@ -151,11 +165,6 @@ class BoundedApprovalBallot(Ballot):
             for j in range(i):
                 if not sets[i].is_disjoint(sets[j]):
                     return False
-        valid_ids = [str(c.id) for c in self.election.candidates]
-        for bs in sets:
-            for c in bs:
-                if not c in valid_ids:
-                    return False
         return True
     
     def is_of_type(self, ballot_type):
@@ -173,12 +182,18 @@ class BoundedApprovalBallot(Ballot):
         bounded_sets_encoded = {"bsets": [bs.serialize() for bs in bounded_sets]}
         self.json_encoded = json.dumps(bounded_sets_encoded)
 
-
     def _decode(self):
         raw_obj = json.loads(self.json_encoded)
         ret = list()
         for bs in raw_obj["bsets"]:
             ret.append(BoundedSet(bs["lower"], bs["saturation"], bs["upper"], *bs["set"]))
+        return ret
+    
+    def get_involved_candidates(self):
+        ret = set()
+        sets = self._decode()
+        for s in sets:
+            ret = ret.union(s)
         return ret
 
 
@@ -246,14 +261,6 @@ class ApprovalBallot(Ballot):
     def score(self, committee):
         app_candidates = self._decode()
         return len(app_candidates.intersection(committee))
-
-    def check_validity(self):
-        app_candidates = self._decode()
-        valid_ids = [str(c.id) for c in self.election.candidates]
-        for c in app_candidates:
-            if not c in valid_ids:
-                return False
-        return True
     
     def is_of_type(self, ballot_type):
         return ballot_type == "approvalBallot"
@@ -266,3 +273,6 @@ class ApprovalBallot(Ballot):
     def _decode(self):
         raw_obj = json.loads(self.json_encoded)
         return set(raw_obj["app_candidates"])
+    
+    def get_involved_candidates(self):
+        return self._decode()
