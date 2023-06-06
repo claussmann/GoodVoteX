@@ -7,7 +7,7 @@ wget --quiet https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootst
 echo "$convertedHex  bootstrap.min.css" | sha384sum --check - > /dev/null
 if [ $? -eq 0 ]; then
   printf "bootstrap.min.css: \033[0;32mChecksum OK\033[0m\n"
-  mv bootstrap.min.css ./goodvotes/static/external/
+  mv bootstrap.min.css /App/goodvotes/static/external/
 else
   printf "\033[0;31mFailed to validate checksum for bootstrap.min.css\033[0m\n"
   exit 1
@@ -21,7 +21,7 @@ wget --quiet https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstr
 echo "$convertedHex  bootstrap.bundle.min.js" | sha384sum --check - > /dev/null
 if [ $? -eq 0 ]; then
   printf "bootstrap.bundle.min.js: \033[0;32mChecksum OK\033[0m\n"
-  mv bootstrap.bundle.min.js ./goodvotes/static/external/
+  mv bootstrap.bundle.min.js /App/goodvotes/static/external/
 else
   printf "\033[0;31mFailed to validate checksum for bootstrap.bundle.min.js\033[0m\n"
   exit 1
@@ -35,7 +35,7 @@ wget --quiet https://code.jquery.com/jquery-3.7.0.min.js
 echo "$convertedHex  jquery-3.7.0.min.js" | sha256sum --check - > /dev/null
 if [ $? -eq 0 ]; then
     printf "jquery-3.7.0.min.js: \033[0;32mChecksum OK\033[0m\n"
-    mv jquery-3.7.0.min.js ./goodvotes/static/external/
+    mv jquery-3.7.0.min.js /App/goodvotes/static/external/
 else
     printf "\033[0;31mFailed to validate checksum for jquery-3.7.0.min.js\033[0m\n"
     exit 1
