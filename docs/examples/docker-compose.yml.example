@@ -1,0 +1,10 @@
+version: "3"
+services:
+  webserver:
+    image: ghcr.io/claussmann/goodvotes:latest
+    container_name: goodvotes-webservice
+    ports: 
+        - "$GOODVOTES_HOST:$GOODVOTES_PORT:80"
+    volumes: 
+        - ./storage:/App/storage
+    env_file: .env

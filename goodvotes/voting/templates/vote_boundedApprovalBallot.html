@@ -1,0 +1,410 @@
+{%extends "base.html" %}
+
+{% block head %}
+<style>
+  .candidate-container {
+    background-color: #360b0b;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 0px 0px 5px #333333;
+    width: 100%;
+    min-height: 80px;
+    position: relative;
+    color: #f3eeee;
+    text-align: center;
+    font-weight: 600;
+    padding: 5px;
+  }
+
+  .is-candidate {
+    background-color: #fff6c4;
+    color: #000000;
+    margin: 1vw;
+    padding-left: 0.5vw;
+    padding-right: 0.5vw;
+    padding-top: 1.0vw;
+    width: 10vw;
+    height: 4vw;
+    border-top-left-radius: 2vw;
+    border-bottom-left-radius: 2vw;
+    border-top-right-radius: 2vw;
+    border-bottom-right-radius: 2vw;
+    overflow: hidden;
+    box-shadow: 0px 0px 3px #333333;
+    text-align: center;
+    font-weight: 600;
+    float: left;
+    z-index: 10;
+  }
+
+  @media only screen and (orientation: portrait) {
+    .is-candidate {
+      width: 14vw;
+      height: 5vw;
+      margin-top: 3vw;
+      margin-bottom: 3vw;
+    }
+  }
+
+  .bin {
+    background-color: #4b2c39;
+    color: #f3eeee;
+    float: left;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 0px 0px 5px #333333;
+  }
+
+  .bin-dropzone {
+    background-color: #5e4650;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    height: 100px;
+    text-align: center;
+    font-weight: 600;
+    padding: 20px;
+  }
+
+  .bin-items {
+    width: 100%;
+    min-height: 100px;
+  }
+
+  .bin-settings {
+    width: 100%;
+    padding: 5%;
+    font-weight: 600;
+  }
+</style>
+{% endblock %}
+
+{%block content%}
+
+<div class="col-sm-8 mx-auto mb-3">
+  <div class="card text-dark bg-light">
+      <div class="card-header">
+          <b>{{ election.title }}</b>
+      </div>
+      <div class="card-body">
+          <b>Description:</b>
+          <p>
+              {% for line in election.description.split("\n") %}
+                  {{ line }}<br>
+              {% endfor %}
+          </p>
+          <br>
+          <b>Committee Size:</b> {{election.committeesize}}
+      </div>
+  </div>
+</div>
+
+
+{% if election.is_stopped %} 
+
+  <div class="alert alert-danger" role="alert">
+    This election was closed already.
+  </div>
+
+{% else %}
+
+  <div class="mb-2" id="step0">
+    <h2>How it works:</h2>
+    <p>
+      <b>It is simple.</b>
+      Voting works in two steps.
+      <ol>
+        <li><b>Select all candidates you approve.</b> More precisely: Select each candidate for which you think there exists a committee (of the size given in the description above) where this candidate is part of, and you find it good that the candidate is part of it.</li>
+        <br>
+        <li>
+          <b>Refine your ballot</b> by stating under which conditions you like each candidate.
+          <ul>
+            <li><i>Unconditional approval:</i> The candidates are good regardless of other candidates in the committee.</li>
+            <li><i>Substitution:</i> Having one of these candidates is good, but having more than one is just as good as having only one.</li>
+            <li><i>Dependency:</i> These candidates only make sense when they are together in the committee. Any subset of them is useless.</li>
+            <li><i>Incompatibility:</i> Having exactly one of these candidates is good, but there shouldn't be more than one of them.</li>
+          </ul>
+        </li>
+      </ol>
+    </p>
+    <div class="float-end mt-2">
+      <button class="btn btn-success" onclick="finishExplain()">Got it!</button>
+    </div>
+  </div>
+
+  <!-- Step 1 -->
+  <div id="step1" class="mb-2" style="display: none;">
+    <h3>Step 1: Drag and drop all candidates you approve.</h3>
+
+    <div id="not-approved-zone">
+      {% for candidate in election.candidates %}
+      <div id="{{candidate.id}}" class="is-candidate" draggable="true" ondragstart="onDragStart(event);">
+        {{candidate.name}}
+      </div>
+      {% endfor %}
+    </div>
+
+
+    <div class="bin" style="width: 90%; margin-left: 5%; margin-right: 5%;">
+      <div id="bin-init" class="bin-dropzone" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+        <h4>Drop approved items here.</h4>
+      </div>
+      <div id="bin-inititems" class="bin-items"></div>
+    </div>
+
+    <div class="float-end mt-2">
+      <button class="btn btn-secondary" onclick="resetApproval()">Reset</button>
+      <button class="btn btn-success" onclick="finishApproval()">Continue with Step 2</button>
+    </div>
+  </div>
+  <!-- End Step 1 -->
+
+  <!-- Step 2 -->
+  <div id="step2" style="display: none;">
+    <h3>Step 2: If you want, you can specify your preference further.</h3>
+
+    <div class="bin mb-4" style="width: 80%; margin-left: 10%; margin-right: 10%;">
+      <div id="bin0" class="bin-dropzone" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+        <h4>Items here are unconditionally approved.</h4>
+      </div>
+      <div id="bin0items" class="bin-items"></div>
+    </div>
+
+    <div>
+      <!-- Bin 1 -->
+      <div class="bin" style="width: 27%; margin-left: 3%; margin-right: 3%;">
+        <div id="bin1" class="bin-dropzone" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+          <h4>Drop here.</h4>
+        </div>
+        <div id="bin1items" class="bin-items clearfix"></div>
+        <hr style="background-color: #c9c9c9;">
+        <div class="bin-settings">
+          <form>
+            <input type="radio" id="bin1substitution" name="bin1type" checked="checked"> &nbsp; Substitution<br>
+            <input type="radio" id="bin1incompatibility" name="bin1type"> &nbsp; Incompatible<br>
+            <input type="radio" id="bin1dependency" name="bin1type"> &nbsp; Dependency
+          </form>
+        </div>
+      </div>
+
+      <!-- Bin 2 -->
+      <div class="bin" style="width: 27%; margin-left: 3%; margin-right: 3%;">
+        <div id="bin2" class="bin-dropzone" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+          <h4>Drop here.</h4>
+        </div>
+        <div id="bin2items" class="bin-items clearfix"></div>
+        <hr style="background-color: #c9c9c9;">
+        <div class="bin-settings">
+          <form>
+            <input type="radio" id="bin2substitution" name="bin2type" checked="checked"> &nbsp; Substitution<br>
+            <input type="radio" id="bin2incompatibility" name="bin2type"> &nbsp; Incompatible<br>
+            <input type="radio" id="bin2dependency" name="bin2type"> &nbsp; Dependency
+          </form>
+        </div>
+      </div>
+
+      <!-- Bin 3 -->
+      <div class="bin" style="width: 27%; margin-left: 3%; margin-right: 3%;">
+        <div id="bin3" class="bin-dropzone" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+          <h4>Drop here.</h4>
+        </div>
+        <div id="bin3items" class="bin-items clearfix"></div>
+        <hr style="background-color: #c9c9c9;">
+        <div class="bin-settings">
+          <form>
+            <input type="radio" id="bin3substitution" name="bin3type" checked="checked"> &nbsp; Substitution<br>
+            <input type="radio" id="bin3incompatibility" name="bin3type"> &nbsp; Incompatible<br>
+            <input type="radio" id="bin3dependency" name="bin3type"> &nbsp; Dependency
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="float-end mt-2">
+      <button class="btn btn-secondary" onclick="resetAll()">Reset</button>
+      <button class="btn btn-success" onclick="sendBallot()">Submit</button>
+    </div>
+  </div>
+  <!-- End Step 2 -->
+{% endif %} 
+
+
+    
+{% endblock %}
+
+
+
+
+{%block scripts%}
+  <!-- This is the required script for drag and drop actions, and the form filling and sending. -->
+  <script>
+    var url = "/vote/{{election.id}}";
+
+    var bins = ["bin0", "bin1", "bin2", "bin3"];
+    var sets = {"bin-init" : [], "bin0" : [], "bin1" : [], "bin2" : [], "bin3" : []};
+    var tmp = Array.prototype.slice.call(document.getElementsByClassName('is-candidate'))
+    var candidates = tmp.map(function(e) {return e.id;});
+    
+
+    function sendBallot(){
+      var bounds = computeBounds();
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onreadystatechange = function() { 
+        if (this.readyState == 4) {
+          if(this.status == 200){
+            window.location.href = '/done';
+          }
+          else{
+            console.log(this.responseText)
+            alert("Something went wrong. Please reload the page and try again.");
+          }
+        } 
+      };
+      xhr.send(JSON.stringify({
+          "type" : "boundedApprovalBallot",
+          "sets" : sets,
+          "bounds" : bounds
+      }));
+    }
+
+    function computeBounds(){
+      var bounds = {};
+      for(i = 0; i < bins.length; i++){
+        bID = bins[i];
+        if (bID == "bin0"){
+          bounds[bID] = [1, sets[bID].length, sets[bID].length];
+        }
+        else if (document.getElementById(bID + "substitution").checked){
+          bounds[bID] = [1, 1, sets[bID].length];
+        }
+        else if (document.getElementById(bID + "dependency").checked){
+          bounds[bID] = [sets[bID].length, sets[bID].length, sets[bID].length];
+        }
+        else if (document.getElementById(bID + "incompatibility").checked){
+          bounds[bID] = [1, 1, 1];
+        }
+        else{
+          bounds[bID] = [1, sets[bID].length, sets[bID].length];
+        }
+      }
+      return bounds;
+    }
+
+    function removeCandidateFromAllSets(candidate){
+      for(i = 0; i < bins.length; i++){
+        binID = bins[i];
+        sets[binID] = sets[binID].filter(c => c !== candidate);
+      }
+    }
+
+    function finishApproval(){
+      if(sets["bin-init"].length < 1){
+          return
+      }
+      $("#step1").slideToggle();
+      $("#step2").slideToggle();
+      sets["bin0"] = sets["bin-init"];
+      delete sets["bin-init"];
+      for(i = 0; i < sets["bin0"].length; i++){
+        var candidate = document.getElementById(sets["bin0"][i]);
+        document.getElementById("bin0items").appendChild(candidate);
+      }
+    }
+
+    function finishExplain(){
+      $("#step0").slideToggle();
+      $("#step1").slideToggle();
+    }
+
+    function resetApproval(){
+      for(i=0; i < candidates.length; i++){
+        candidate = document.getElementById(candidates[i]);
+        document.getElementById("not-approved-zone").appendChild(candidate);
+      }
+      sets = {"bin-init" : [], "bin0" : [], "bin1" : [], "bin2" : [], "bin3" : []};
+    }
+
+    function resetAll(){
+      $("#step2").slideToggle();
+      $("#step1").slideToggle();
+      resetApproval()
+    }
+
+
+    /*
+        Drag and Drop Listeners
+    */
+    function onDragStart(event){
+        event.dataTransfer.clearData();
+        event.dataTransfer.setData('text/plain', event.target.id); //store id of element
+    }
+
+    function onDragOver(event){
+        event.preventDefault();
+    }
+
+    function onDrop(event){
+        event.preventDefault();
+        var cid = event.dataTransfer.getData('text'); //Get the id of dropped element
+        var candidate = document.getElementById(cid);
+        var bin = event.target;
+        var bin_itemzone = document.getElementById(bin.id + "items");
+        bin_itemzone.appendChild(candidate);
+        removeCandidateFromAllSets(cid);
+        sets[bin.id].push(cid);
+    }
+
+    /*
+        Touch support for drag & drop
+    */
+
+    var current_dragged_candidate = 0;
+
+    window.onload = function(){
+      for(i=0; i < candidates.length; i++) {
+        var candidate = document.getElementById(candidates[i]);
+        
+        candidate.addEventListener('touchmove', function(gesture){
+          var fingerXY = gesture.targetTouches[0];
+          var posX = fingerXY.pageX;
+          var posY = fingerXY.pageY;
+          if(current_dragged_candidate == 0){
+            current_dragged_candidate = document.elementFromPoint(posX, posY);
+            if(current_dragged_candidate.className != "is-candidate"){
+              current_dragged_candidate = 0;
+              return;
+            }
+            current_dragged_candidate.style.position = "fixed";
+          }
+          current_dragged_candidate.style.left = posX + "px";
+          current_dragged_candidate.style.top = posY + "px";
+        });
+
+        candidate.addEventListener('touchend', function(gesture){
+          if(current_dragged_candidate == 0){
+              return;
+            }
+          var posX = current_dragged_candidate.style.left.slice(0,-2);
+          var posY = current_dragged_candidate.style.top.slice(0,-2);
+          var binAtPos = document.elementFromPoint(posX, posY);
+
+          current_dragged_candidate.style.removeProperty('position');
+          current_dragged_candidate.style.removeProperty('top');
+          current_dragged_candidate.style.removeProperty('left');
+
+          if(binAtPos.className == "bin-dropzone"){
+            var bin_itemzone = document.getElementById(binAtPos.id + "items");
+            bin_itemzone.appendChild(current_dragged_candidate);
+            removeCandidateFromAllSets(current_dragged_candidate.id)
+            sets[binAtPos.id].push(current_dragged_candidate.id);
+          }
+          current_dragged_candidate = 0;
+        });
+      }
+    }  
+  
+  </script>
+{% endblock %}
