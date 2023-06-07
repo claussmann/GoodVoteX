@@ -46,6 +46,6 @@ jobs:
           context: .
           file: docker/Dockerfile
           push: true
-          tags: testing
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:testing
 #          tags: ${{ steps.meta.outputs.tags }}
 #          labels: ${{ steps.meta.outputs.labels }}
