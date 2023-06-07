@@ -2,7 +2,7 @@ name: Test if Docker works
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: [ "testing" ]
 
 jobs:
 
