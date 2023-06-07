@@ -72,6 +72,7 @@ echo ""
 export FLASK_APP=goodvotes
 export FLASK_DEBUG=true
 
+mkdir storage
 
 if [ -e ".env" ]; then
   printf "loading environment variables... "
