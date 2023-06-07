@@ -23,17 +23,22 @@ For production, the application will run in a docker container with a production
 
 ### Development
 
-For development, you first need to edit the configuration.
-To this end, rename (or copy) `.env.example` to `.env`.
-Open the `.env` file in a text editor and edit it according to the instructions in the file.
-Finally, you can run the script `run-development.sh`, and access the app in your web browser under `http://127.0.0.1:5000`.
+For development, you first need to add the configuration.
+To this end, add a file `.env` to the root of this repository.
+You can use the example in `docs/examples/.env.example` as a template.
+After adding the configuration, you can run the script `run-development.sh`, and access the app in your web browser under `http://127.0.0.1:5000`.
 
 Note that python3, pypy3, and the dependencies from `requirements.txt` need to be installed.
 
 ### Production
 
 Production deployment works via docker-compose.
-Detailed instructions can be found in the directory `deployment`.
+You can use the compose file `docs/examples/docker-compose.yml.example` as a template.
+After configuring it to your needs, simply run `docker-compose -f PATH_TO_DOCKER_COMPOSE_FILE up -d`.
+
+### Building a Docker Container From Source
+
+Run `docker build . -f docker/Dockerfile --tag goodvotes` from the root of the repository.
 
 
 ## Contribute
