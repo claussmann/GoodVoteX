@@ -12,153 +12,54 @@
             like the following examples in a very convenient way:
         </p>
 
-        <div class="center" style="width: 80%; margin-left: 10%;">
-            <div class="section-caption">
-                <span>Substitution</span>
-            </div>
-            <p><i>I like potatoes and pasta on the buffet. But in case both were on the buffet, I would anyway only take
-                either potatoes or pasta, not both. So having both is just as good for me as having only one of them.</i>
-            </p>
-
-            <div class="section-caption">
-                <span>Dependency</span>
-            </div>
-            <p><i>I really like the white curtains paired with the red ones. I would be in favor of buying the two, but only
-                if we buy both together, because they don't look very pretty individually.</i></p>
-
-            <div class="section-caption">
-                <span>Incompatibility</span>
-            </div>
-            <p><i>Anna and Ben are both great engineers. One of them should sit on the expert committee. However, the two
-                don't get along very well, and I think committee work would be disrupted if both were on the committee.</i>
-            </p>
-        </div>
-        <div class="sep"></div>
-
         <div class="center"><h2>We caught your attention?</h2></div>
         <p>
-            Start by creating your own election for free.
-            If you want to learn more about the science behind this tool: <b>check out our paper at the AAMAS 2023.</b>
+            {% if user.is_authenticated %}
+                Click on your name in the top right corner to create an own election.
+            {% else %}
+                Sign up <a href="/register">here</a> or login to create an own election.
+                You can participate in existing elections without signing up.
+            {% endif %}
         </p>
         <div class="sep"></div>
 
-        <div class="col-sm-11 mx-auto">
-            <div class="card text-dark bg-warning">
-                <div class="card-header">
-                    <b>Create New Election</b>
-                </div>
-                <div class="card-body">
-                    {% if user.is_authenticated %}
-                        <form action="/" method="post">
-                            <div class="form-group">
-                                <select id="ballot_type" name="type" class="form-select">
-                                    <option value="boundedApprovalBallot">Bounded Approval Ballots</option>
-                                    <option value="approvalBallot">Regular Approval Ballots</option>
-                                </select>
-                                <small class="form-text text-muted">Select the ballot type for your election.</small>
-                            </div>
-
-                            <div class="form-group">
-                                <input type="text" id="name" name="name" placeholder="Election Title*" required class="form-control">
-                                <small class="form-text text-muted">Give your election an easy to remember name.</small>
-                            </div>
-                            <div class="form-group">
-                                <textarea id="description" name="description" placeholder="Description*" required class="form-control" rows="5"></textarea>
-                                <small class="form-text text-muted">Briefly describe your election.</small>
-                            </div>
-                            <div id="form-hidden" style="display: none;">
-                                <div class="form-group">
-                                    <input type="text" id="candidate1" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;" placeholder="First Candidate*"
-                                        required class="form-control float-start">
-                                    <input type="text" id="candidate2" name="candidates[]" style="width: 49%; margin-bottom: 2px;" placeholder="Second Candidate*"
-                                        required class="form-control float-start">
-                                    <input type="text" id="candidate3" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;" placeholder="Third Candidate*"
-                                        required class="form-control float-start">
-                                    <input type="text" id="candidate4" name="candidates[]" style="width: 49%; margin-bottom: 2px;" placeholder="Candidate"
-                                        class="form-control float-start">
-                                    <input type="text" id="candidate5" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;" placeholder="Candidate"
-                                        class="form-control float-start">
-                                    <input type="text" id="candidate6" name="candidates[]" style="width: 49%; margin-bottom: 2px;" placeholder="Candidate"
-                                        class="form-control float-start">
-                                    <div id="candidates-hidden" style="display: none;">
-                                        <input type="text" id="candidate7" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;"
-                                            placeholder="Candidate" class="form-control float-start">
-                                        <input type="text" id="candidate8" name="candidates[]" style="width: 49%; margin-bottom: 2px;"
-                                            placeholder="Candidate" class="form-control float-start">
-                                        <input type="text" id="candidate9" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;"
-                                            placeholder="Candidate" class="form-control float-start">
-                                        <input type="text" id="candidate10" name="candidates[]" style="width: 49%; margin-bottom: 2px;"
-                                            placeholder="Candidate" class="form-control float-start">
-                                        <input type="text" id="candidate11" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;"
-                                            placeholder="Candidate" class="form-control float-start">
-                                        <input type="text" id="candidate12" name="candidates[]" style="width: 49%; margin-bottom: 2px;"
-                                            placeholder="Candidate" class="form-control float-start">
-                                    </div>
-                                    <small class="form-text text-muted">We currently support up to 12 candidates.</small>
-                                </div>
-                                <div class="clearfix"></div>
-                                <div class="form-group">
-                                    <select id="committeesize" name="committeesize" class="form-select">
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                        <option value="6">6</option>
-                                        <option value="7">7</option>
-                                        <option value="8">8</option>
-                                    </select>
-                                    <small class="form-text text-muted">Select the size for your committee. It must be less than the number of candidates.</small>
-                                </div>
-                            </div>
-                            <input type="submit" id="submitbtn" value="Submit" class="btn btn-success">
-                        </form>
-                    {% else %}
-                        <p>
-                        <a href="{{ url_for("auth.login") }}">Login</a> or <a href="{{ url_for("auth.login") }}">register</a> to create a new election.
-                        </p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        <div class="sep"></div>
-        <div class="sep"></div>
 
         <div>
-            {% if elections|length > 0 %}
             <div class="center">
-                <h2>Featured Elections</h2>
+                <h2>Trending Elections</h2>
             </div>
             <div class="sep"></div>
 
+            {% if trending_elections|length > 0 %}
             <div id="featuredCarousel" class="carousel slide mb-5" data-bs-ride="carousel" data-interval="false">
                 <div class="carousel-inner">
                     <div class="carousel-item active">
                         <div class="col-sm-8 mx-auto">
                             <div class="card text-dark bg-light">
                                 <div class="card-header">
-                                    <b>{{ elections[0].title }}</b>
+                                    <b>{{ trending_elections[0].title }}</b>
                                     <div class="float-end">
-                                        <a href="/details/{{ elections[0].id }}"><button class="btn btn-secondary">Details</button></a>
-                                        {% if elections[0].is_stopped %} 
+                                        <a href="/details/{{ trending_elections[0].id }}"><button class="btn btn-secondary">Details</button></a>
+                                        {% if trending_elections[0].is_stopped %} 
                                             <button class="btn btn-success" disabled>Vote</button>
                                         {% else %}
-                                            <a href="/vote/{{ elections[0].id }}"><button class="btn btn-success">Vote</button></a>
+                                            <a href="/vote/{{ trending_elections[0].id }}"><button class="btn btn-success">Vote</button></a>
                                         {% endif %}
                                     </div>
                                 </div>
                                 <div class="card-body">
                                     <b>Description:</b>
                                     <p>
-                                        {% for line in elections[0].description.split("\n") %}
+                                        {% for line in trending_elections[0].description.split("\n") %}
                                             {{ line }}<br>
                                         {% endfor %}
                                     </p>
                                     <br>
-                                    <b>Committee Size:</b> {{elections[0].committeesize}}
+                                    <b>Committee Size:</b> {{trending_elections[0].committeesize}}
                                     <br>
                                     <b>Candidates:</b>
                                     <p>
-                                        {% for candidate in elections[0].candidates %}
+                                        {% for candidate in trending_elections[0].candidates %}
                                             <div class="is-candidate">
                                                 {{candidate.name}}
                                             </div>
@@ -169,7 +70,7 @@
                             </div>
                         </div>
                     </div>
-                    {% for e in elections[1:] %}
+                    {% for e in trending_elections[1:] %}
                         <div class="carousel-item">
                             <div class="col-sm-8 mx-auto">
                                 <div class="card text-dark bg-light">
@@ -216,6 +117,10 @@
                 <button class="carousel-control-next text-bg-dark" type="button" data-bs-target="#featuredCarousel" data-bs-slide="next">
                   <span class="carousel-control-next-icon" aria-hidden="true"></span>
                 </button>
+            </div>
+            {% else %}
+            <div class="alert alert-info" role="alert">
+                There are currently no active elections.
             </div>
             {% endif %}
         </div>
