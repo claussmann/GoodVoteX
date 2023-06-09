@@ -128,13 +128,3 @@
 
 {% endblock %}
 
-{% block scripts %}
-    <script>
-        document.getElementById("description").addEventListener('input', function () {
-            $("div#form-hidden").css('display', 'block');
-        });
-        document.getElementById("candidate6").addEventListener('input', function () {
-            $("div#candidates-hidden").css('display', 'block');
-        });
-    </script>
-{% endblock %}
