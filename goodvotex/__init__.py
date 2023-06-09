@@ -6,7 +6,7 @@ from flask import Flask
 from flask_login import LoginManager, current_user
 from flask_sqlalchemy import SQLAlchemy
 
-from config.config import DBConfig, AuthConfig, GoodVotesConfig
+from config.config import DBConfig, AuthConfig, GoodVoteXConfig
 
 # Populate ENV vars from .env file.
 load_dotenv()
@@ -20,7 +20,7 @@ def create_app():
 
     app.config.from_object(DBConfig())
     app.config.from_object(AuthConfig())
-    app.config.from_object(GoodVotesConfig())
+    app.config.from_object(GoodVoteXConfig())
     app.config.from_prefixed_env()
 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + str(ROOT_DIR / app.config['DB_RELATIVE_PATH'])
@@ -52,8 +52,8 @@ def create_app():
     from .voting import voting as voting_blueprint
     app.register_blueprint(voting_blueprint)
 
-    from .cli import goodvotes_cli as goodvotes_cli_blueprint
-    app.register_blueprint(goodvotes_cli_blueprint)
+    from .cli import goodvotex_cli as goodvotex_cli_blueprint
+    app.register_blueprint(goodvotex_cli_blueprint)
 
     return app
 

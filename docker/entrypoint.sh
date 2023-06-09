@@ -6,7 +6,7 @@ HOST_PORT=80
 HOST=0.0.0.0
 
 
-flask goodvotes create-db
-flask auth add-user admin "Armin Admin" "${GOODVOTES_ADMIN_EMAIL}" "${GOODVOTES_ADMIN_PASSWORD}"
+flask goodvotex create-db
+flask auth add-user admin "Armin Admin" "${GOODVOTX_ADMIN_EMAIL}" "${GOODVOTEX_ADMIN_PASSWORD}"
 
-waitress-serve --host "${HOST}" --port "${HOST_PORT}" --call goodvotes:create_app
+waitress-serve --host "${HOST}" --port "${HOST_PORT}" --call goodvotex:create_app
