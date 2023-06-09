@@ -40,25 +40,36 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
+                                <h4>User Info:</h4>
                                 <b>Username:</b> {{user.username}}
                                 <br>
                                 <b>Mail:</b> {{user.email}}
                                 <br>
-                                <b>Your elections:</b>
-                                <ul>
-                                    {% for e in user.elections %}
-                                        <li><a href="/details/{{ e.id }}">{{ e.title }}</a></li>
-                                    {% endfor %}
-                                </ul>
+                                <hr>
                                 <br>
-                                <b>You can change your password here:</b>
+                                <h4>Your elections:</h4>
+                                {% if elections|length > 0 %}
+                                    <ul>
+                                        {% for e in user.elections %}
+                                            <li><a href="/details/{{ e.id }}">{{ e.title }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p>You don't have elections yet.</p>
+                                {% endif %}
+                                <br>
+                                <a href="/create"><button type="button" class="btn btn-info">New Election</button></a>
+                                <br>
+                                <hr>
+                                <br>
+                                <h4>Change Password:</h4>
                                 <form action="/changepasswd" method="post">
                                     <input type="password" id="passwd_old" name="passwd" class="form-control" placeholder="Password" required>
                                     <input type="password" id="passwd_new" name="new_passwd" class="form-control" placeholder="New Password" required>
                                     <input type="password" id="passwd_confirm" name="confirm_passwd" class="form-control"
                                         placeholder="Confirm New Password" required>
                                     <br>
-                                    <input type="submit" value="Change Password" class="btn btn-warning">
+                                    <input type="submit" value="Change Password" class="btn btn-secondary">
                                 </form>
                             </div>
                             <div class="modal-footer">
@@ -69,8 +80,8 @@
                         </div>
                     </div>
                 {% else %}
-                    <button type="button" class="btn btn-info ms-2" data-bs-toggle="modal" data-bs-target="#login-modal">Login</button>
-                    <a href="/register"><button type="button" class="btn btn-outline-light ms-2">Register</button></a>
+                    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#login-modal">Login</button>
+                    <a href="/register"><button type="button" class="btn btn-outline-success ms-2">Register</button></a>
 
                     <!-- Login window -->
                     <div class="modal fade" id="login-modal" tabindex="-1" aria-hidden="true">

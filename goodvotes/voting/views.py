@@ -5,8 +5,12 @@ from werkzeug.exceptions import HTTPException
 from . import service, voting, logger
 
 
-@voting.route('/', methods=['GET', 'POST'])
+@voting.route('/', methods=['GET'])
 def start_page():
+    return render_template('start.html', trending_elections=service.get_all_elections())
+
+@voting.route('/create', methods=['GET', 'POST'])
+def create_election_page():
     if request.method == 'POST':
         ballot_type = request.form.get('type')
         candidates = set(filter(len, request.form.getlist('candidates[]')))
@@ -31,7 +35,7 @@ def start_page():
             flash("Election was successfully created.", "info")
             return redirect(url_for('voting.details_page', electionID=election.id))
 
-    return render_template('start.html', elections=service.get_all_elections())
+    return render_template('create.html', elections=service.get_all_elections())
 
 
 @voting.route('/done')
