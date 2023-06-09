@@ -3,9 +3,9 @@
 # Downloading files if not present
 echo "Checking if external JS and CSS libraries are present..."
 
-mkdir -p ./goodvotes/static/external/
+mkdir -p ./goodvotex/static/external/
 
-if [ -e "./goodvotes/static/external/bootstrap.min.css" ]
+if [ -e "./goodvotex/static/external/bootstrap.min.css" ]
 then
   echo "bootstrap.min.css exists"
 else
@@ -18,14 +18,14 @@ else
 
   if [ $? -eq 0 ]; then
     printf "bootstrap.min.css: \033[0;32mChecksum OK\033[0m\n"
-    mv bootstrap.min.css ./goodvotes/static/external/
+    mv bootstrap.min.css ./goodvotex/static/external/
   else
     printf "\033[0;31mFailed to validate checksum for bootstrap.min.css\033[0m\n"
     exit 1
   fi
 fi
 
-if [ -e "./goodvotes/static/external/bootstrap.bundle.min.js" ]
+if [ -e "./goodvotex/static/external/bootstrap.bundle.min.js" ]
 then
   echo "bootstrap.bundle.min.js exists"
 else
@@ -38,14 +38,14 @@ else
 
   if [ $? -eq 0 ]; then
     printf "bootstrap.bundle.min.js: \033[0;32mChecksum OK\033[0m\n"
-    mv bootstrap.bundle.min.js ./goodvotes/static/external/
+    mv bootstrap.bundle.min.js ./goodvotex/static/external/
   else
     printf "\033[0;31mFailed to validate checksum for bootstrap.bundle.min.js\033[0m\n"
     exit 1
   fi
 fi
 
-if [ -e "./goodvotes/static/external/jquery-3.7.0.min.js" ]
+if [ -e "./goodvotex/static/external/jquery-3.7.0.min.js" ]
 then
   echo "jquery-3.7.0.min.js exists"
 else
@@ -58,7 +58,7 @@ else
 
   if [ $? -eq 0 ]; then
       printf "jquery-3.7.0.min.js: \033[0;32mChecksum OK\033[0m\n"
-      mv jquery-3.7.0.min.js ./goodvotes/static/external/
+      mv jquery-3.7.0.min.js ./goodvotex/static/external/
   else
       printf "\033[0;31mFailed to validate checksum for jquery-3.7.0.min.js\033[0m\n"
       exit 1
@@ -69,7 +69,7 @@ fi
 # environment
 echo ""
 
-export FLASK_APP=goodvotes
+export FLASK_APP=goodvotex
 export FLASK_DEBUG=true
 
 mkdir storage
@@ -87,7 +87,7 @@ fi
 echo ""
 echo "Starting App"
 
-flask goodvotes create-db
-flask auth add-user admin "Armin Admin" "${GOODVOTES_ADMIN_EMAIL}" "${GOODVOTES_ADMIN_PASSWORD}"
+flask goodvotex create-db
+flask auth add-user admin "Armin Admin" "${GOODVOTEX_ADMIN_EMAIL}" "${GOODVOTEX_ADMIN_PASSWORD}"
 
 flask run

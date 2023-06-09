@@ -1,6 +1,6 @@
-# GoodVotes
+# GoodVoteX
 
-GoodVotes allows you to conduct elections with a variety of ballot types and voting rules.
+GoodVoteX allows you to conduct elections with a variety of ballot types and voting rules.
 All voting procedures used have a scientific background.
 That is, their properties have been studied e.g. in Computational Social Choice literature.
 Thus, the platform allows you to choose a suitable voting rule and ballot format for your election.
@@ -38,7 +38,7 @@ After configuring it to your needs, simply run `docker-compose -f PATH_TO_DOCKER
 
 ### Building a Docker Container From Source
 
-Run `docker build . -f docker/Dockerfile --tag goodvotes` from the root of the repository.
+Run `docker build . -f docker/Dockerfile --tag goodvotex` from the root of the repository.
 
 
 ## Contribute
@@ -47,7 +47,7 @@ We welcome everyone who wants to add ballot formats.
 
 First, think of a good name for your ballot format.
 Let's assume you want to call the ballot `Simple Ballot`.
-Next, in the file `goodvotes/voting/models.py` you create a class `SimpleBallot` which inherits from the class `Ballot`.
+Next, in the file `goodvotex/voting/models.py` you create a class `SimpleBallot` which inherits from the class `Ballot`.
 Note that you have to overwrite the following methods:
 
 - `score(self, committee)`: Returns the score `committee` receives from this ballot.
@@ -68,17 +68,17 @@ Further, your class must have the following database attributes:
 
 Of course, you replace `simpleBallot` by the name of your ballot.
 
-Next, go to the file `goodvotes/voting/service.py` and find the function `add_vote_from_json` where you add your instructions for `simpleBallot`.
+Next, go to the file `goodvotex/voting/service.py` and find the function `add_vote_from_json` where you add your instructions for `simpleBallot`.
 
 Finally, you have to create an HTML template for your ballot format.
-Place it in `goodvotes/voting/templates` and name it `vote_simpleBallot.html`.
+Place it in `goodvotex/voting/templates` and name it `vote_simpleBallot.html`.
 You can do whatever you want in this template.
 However, eventually you must POST a JSON formatted object to the URL `/vote/{{election.id}}`.
 You can format it as you like, as you will evaluate it on your own in the function `parse_from_json(self, json)`.
 The only requirement is that it has an attribute `type` with the value `"simpleBallot"`, as this is used to figure out which ballot object should be created.
 
 Now, your new ballot type is registered in the system.
-However, if you want to create an election with this ballot type, you have to add this option in the file `goodvotes/voting/templates/start.html` in the select-form with id `ballot_type`.
+However, if you want to create an election with this ballot type, you have to add this option in the file `goodvotex/voting/templates/start.html` in the select-form with id `ballot_type`.
 That's it.
 
 

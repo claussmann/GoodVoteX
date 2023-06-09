@@ -5,6 +5,6 @@ class DBConfig(object):
 class AuthConfig(object):
     AUTH_ENABLE_REGISTRATION = True
 
-class GoodVotesConfig(object):
-    GOODVOTES_IMPRINT_URL = ""
-    GOODVOTES_PRIVACY_URL = ""
+class GoodVoteXConfig(object):
+    GOODVOTEX_IMPRINT_URL = ""
+    GOODVOTEX_PRIVACY_URL = ""

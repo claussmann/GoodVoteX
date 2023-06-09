@@ -1,7 +1,7 @@
 storage
 tests/storage
 *.db
-goodvotes/static/external/*
+goodvotex/static/external/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

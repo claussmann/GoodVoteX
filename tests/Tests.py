@@ -1,25 +1,10 @@
 from pathlib import Path
 
-from .context import goodvotes
-from goodvotes.voting.models import *
-from goodvotes.auth.models import *
+from .context import goodvotex
+from goodvotex.voting.models import *
+from goodvotex.auth.models import *
 import pytest
 import os
-
-
-
-# @pytest.fixture()
-# def app():
-#     app = goodvotes.create_app()
-#     app.config.update({
-#         "TESTING": True,
-#     })
-#     with app.app_context():
-#         db.create_all()
-    
-#     yield app
-
-
 
 
 

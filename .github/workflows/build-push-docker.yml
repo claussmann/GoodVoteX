@@ -10,7 +10,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: claussmann/goodvotes
+  IMAGE_NAME: claussmann/goodvotex
 
 jobs:
 

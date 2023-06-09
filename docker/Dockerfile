@@ -11,7 +11,7 @@ RUN pip3 install -r requirements.txt
 # create flask app
 RUN mkdir /App
 COPY ./docker/entrypoint.sh /App/
-COPY ./goodvotes /App/goodvotes
+COPY ./goodvotex /App/goodvotex
 COPY ./config /App/config
 
 # download external css and js files
