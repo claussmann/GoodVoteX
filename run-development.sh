@@ -90,4 +90,4 @@ echo "Starting App"
 flask goodvotex create-db
 flask auth add-user admin "Armin Admin" "${GOODVOTEX_ADMIN_EMAIL}" "${GOODVOTEX_ADMIN_PASSWORD}"
 
-flask run
+flask run --port="${GOODVOTEX_PORT}"
