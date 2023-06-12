@@ -50,7 +50,7 @@ def search(search_string):
     """
     if len(search_string) > 60: raise Exception("Search is too long.")
     ret = list()
-    for election in Election.query.all():
+    for election in get_all_elections():
         search_relevance = election.search_relevance(search_string)
         if search_relevance > 0:
             ret.append((search_relevance, election))
@@ -72,7 +72,6 @@ def add_vote_from_json(election_id, json_content):
     }
     if json_content["type"] in constructors:
         ballot = constructors[json_content["type"]](json_content)
-        ballot.parse_from_json(json_content)
     else:
         raise Exception("This ballot type is unknown.")
     e.add_ballot(ballot)
