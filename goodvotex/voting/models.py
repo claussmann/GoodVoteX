@@ -42,7 +42,7 @@ class Election(db.Model):
     def recompute_current_winner(self):
         for c in self.candidates:
             c.is_winner = False
-        for w in self.__compute_winner__():
+        for w in self._compute_winner():
             w.is_winner = True
 
     def get_winners(self):
@@ -53,12 +53,22 @@ class Election(db.Model):
 
     def restart(self):
         self.is_stopped = False
+    
+    def search_relevance(self, search_string):
+        search_string = search_string.lower()
+        if search_string == str(self.id):
+            return 100
+        search_string = re.sub('[^a-zA-Z0-9äöüß]', ' ', search_string)
+        words = set(search_string.split())
+        if len(words) < 1:
+            raise Exception("Search is empty.")
+        return len(words.intersection(self._get_keywords()))
 
-    def __compute_winner__(self):
+    def _compute_winner(self):
         best_score = 0
         committees_with_score = list()
         for committee in itertools.combinations(self.candidates, self.committeesize):
-            current_score = self.score(committee)
+            current_score = self._score(committee)
             if current_score > best_score:
                 best_score = current_score
                 committees_with_score = list()
@@ -68,20 +78,10 @@ class Election(db.Model):
         ret = random.choice(committees_with_score)
         return ret
 
-    def score(self, committee):
+    def _score(self, committee):
         return sum(ballot.score({str(c.id) for c in committee}) for ballot in self.ballots)
 
-    def search_relevance(self, search_string):
-        search_string = search_string.lower()
-        if search_string == str(self.id):
-            return 100
-        search_string = re.sub('[^a-zA-Z0-9äöüß]', ' ', search_string)
-        words = set(search_string.split())
-        if len(words) < 1:
-            raise Exception("Search is empty.")
-        return len(words.intersection(self.__get_keywords()))
-
-    def __get_keywords(self):
+    def _get_keywords(self):
         if not hasattr(self, 'keywords'):
             keywords = self.title.lower() + " " + self.description.lower() + " " + str(self.id)
             keywords = re.sub('[^a-zA-Z0-9äöüß]', ' ', keywords)
@@ -114,8 +114,8 @@ class Ballot(db.Model):
 
     def __init__(self, json_content, **kwargs):
         super(Ballot, self).__init__(**kwargs)
-        self.parse_from_json(json_content)
-        if not self.check_validity():
+        self._parse_from_json(json_content)
+        if not self._check_validity():
             raise Exception("Ballot does not seem to be valid.") 
 
     # Overwrite!
@@ -123,7 +123,7 @@ class Ballot(db.Model):
         pass
 
     # Optional Overwrite.
-    def check_validity(self):
+    def _check_validity(self):
         return True
     
     # Overwrite!
@@ -131,7 +131,7 @@ class Ballot(db.Model):
         pass
     
     # Overwrite!
-    def parse_from_json(self, json_content):
+    def _parse_from_json(self, json_content):
         pass
     
     # Overwrite!
@@ -159,7 +159,7 @@ class BoundedApprovalBallot(Ballot):
         sets = self._decode()
         return sum(bs.phi(committee) * bs.intersection_size(committee) for bs in sets)
 
-    def check_validity(self):
+    def _check_validity(self):
         sets = self._decode()
         for i in range(1, len(sets)):
             for j in range(i):
@@ -168,9 +168,9 @@ class BoundedApprovalBallot(Ballot):
         return True
     
     def is_of_type(self, ballot_type):
-        return ballot_type == "boundedApprovalBallot"
+        return ballot_type == "boundedApprovalBallot" or ballot_type == "any"
 
-    def parse_from_json(self, json_content):
+    def _parse_from_json(self, json_content):
         sets = json_content["sets"]
         bounds = json_content["bounds"]
         bounded_sets = list()
@@ -181,19 +181,19 @@ class BoundedApprovalBallot(Ballot):
             bounded_sets.append(BoundedSet(bounds[s][0], bounds[s][1], bounds[s][2], items_in_set))
         bounded_sets_encoded = {"bsets": [bs.serialize() for bs in bounded_sets]}
         self.json_encoded = json.dumps(bounded_sets_encoded)
-
-    def _decode(self):
-        raw_obj = json.loads(self.json_encoded)
-        ret = list()
-        for bs in raw_obj["bsets"]:
-            ret.append(BoundedSet(bs["lower"], bs["saturation"], bs["upper"], *bs["set"]))
-        return ret
     
     def get_involved_candidates(self):
         ret = set()
         sets = self._decode()
         for s in sets:
             ret = ret.union(s)
+        return ret
+    
+    def _decode(self):
+        raw_obj = json.loads(self.json_encoded)
+        ret = list()
+        for bs in raw_obj["bsets"]:
+            ret.append(BoundedSet(bs["lower"], bs["saturation"], bs["upper"], *bs["set"]))
         return ret
 
 
@@ -263,16 +263,15 @@ class ApprovalBallot(Ballot):
         return len(app_candidates.intersection(committee))
     
     def is_of_type(self, ballot_type):
-        return ballot_type == "approvalBallot"
+        return ballot_type == "approvalBallot"  or ballot_type == "any"
 
-    def parse_from_json(self, json_content):
+    def _parse_from_json(self, json_content):
         app_candidates = json_content["app_candidates"]
         self.json_encoded = json.dumps({"app_candidates" : app_candidates})
-
-
-    def _decode(self):
-        raw_obj = json.loads(self.json_encoded)
-        return set(raw_obj["app_candidates"])
     
     def get_involved_candidates(self):
         return self._decode()
+    
+    def _decode(self):
+        raw_obj = json.loads(self.json_encoded)
+        return set(raw_obj["app_candidates"])
