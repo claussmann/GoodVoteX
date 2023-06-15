@@ -8,6 +8,7 @@ name: Test application
 on:
   pull_request:
     branches: [ "testing" ]
+    branches: [ "production" ]
 
 permissions:
   contents: read
