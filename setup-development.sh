@@ -16,11 +16,11 @@ echo ""
 export FLASK_APP=goodvotex
 export FLASK_DEBUG=true
 
-mkdir storage
+mkdir -p storage
 
 if [ -e ".env" ]; then
   printf "loading environment variables... "
-  export "$(grep "^[^#;]" .env | xargs)"
+  export $(grep "^[^#;]" .env)
   printf "\033[0;32mOK\033[0m\n"
 else
   printf "\033[0;31mPlease create a .env file from .env.example\033[0m\n"
@@ -44,5 +44,17 @@ if [[ -z "$VIRTUAL_ENV" ]]; then
 fi
 
 echo "Installing requirements from requirements.txt ..."
-pip install -r "$SCRIPTPATH"/requirement.txt
+pip install -r "$SCRIPTPATH"/requirements.txt
+
+read -p "Start GoodVoteX in development mode now? (y/n)" start_prompt
+case $start_prompt in
+    y )
+      echo "Starting GoodVoteX"
+      flask run --port="${GOODVOTEX_PORT}"
+      ;;
+    n )
+      echo "You can start GoodVoteX at any time by exporting the environment variables and running:"
+      echo "flask run --port='\${GOODVOTEX_PORT}'"
+      ;;
+esac
 
