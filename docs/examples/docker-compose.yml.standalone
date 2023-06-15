@@ -4,7 +4,7 @@ services:
     image: ghcr.io/claussmann/goodvotex:latest
     container_name: goodvotex-webservice
     ports: 
-        - "$GOODVOTEX_HOST:$GOODVOTEX_PORT:80"
+      - "80:80"
     volumes: 
-        - ./storage:/App/storage
+      - ./storage:/App/storage
     env_file: .env

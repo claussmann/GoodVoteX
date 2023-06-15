@@ -15,8 +15,8 @@ COPY ./goodvotex /App/goodvotex
 COPY ./config /App/config
 
 # download external css and js files
-COPY ./docker/install-dependencies.sh .
-RUN bash install-dependencies.sh
+COPY ./download-static-dependencies.sh .
+RUN bash download-static-dependencies.sh TARGET=/App/goodvotex/static/external/
 
 
 WORKDIR /App

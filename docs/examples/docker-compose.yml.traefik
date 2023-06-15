@@ -1,0 +1,22 @@
+---
+version: "3"
+services:
+  webserver:
+    image: ghcr.io/claussmann/goodvotex:latest
+    container_name: goodvotex-webservice
+    expose:
+      - 80
+    volumes:
+      - ./storage:/App/storage
+    env_file: .env
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.goodvotex.rule=Host(`example.org`)"
+      - "traefik.http.routers.goodvotex.tls=true"
+
+networks:
+  web:
+    external: true
