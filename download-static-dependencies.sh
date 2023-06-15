@@ -1,6 +1,6 @@
 
 SCRIPTPATH="$( cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 || exit ; pwd -P )"
-TARGET=${TARGET:-"$SCRIPTPATH"/goodvotex/static/external/}
+TARGET=${1:-"$SCRIPTPATH"/goodvotex/static/external/}
 
 
 mkdir -p "${TARGET}"

@@ -16,7 +16,7 @@ COPY ./config /App/config
 
 # download external css and js files
 COPY ./download-static-dependencies.sh .
-RUN bash download-static-dependencies.sh TARGET=/App/goodvotex/static/external/
+RUN bash download-static-dependencies.sh /App/goodvotex/static/external/
 
 
 WORKDIR /App
