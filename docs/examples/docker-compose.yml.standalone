@@ -1,0 +1,10 @@
+version: "3"
+services:
+  webserver:
+    image: ghcr.io/claussmann/goodvotex:latest
+    container_name: goodvotex-webservice
+    ports: 
+      - "80:80"
+    volumes: 
+      - ./storage:/App/storage
+    env_file: .env

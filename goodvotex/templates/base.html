@@ -1,0 +1,142 @@
+<!-- Created by Christian Laußmann in 2022 and 2023 at Heinrich-Heine-University Düsseldorf-->
+<!-- Copyrigth (C) 2022, 2023 Christian Laußmann -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>GoodVoteX</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename= 'img/favicon.png') }}">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="{{ url_for('static', filename= 'external/bootstrap.min.css') }}" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+
+    <script src="{{ url_for('static', filename= 'external/jquery-3.7.0.min.js') }}" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename= 'external/bootstrap.bundle.min.js') }}" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+    {% block head %}
+    {% endblock %}
+</head>
+
+<body>
+
+    <nav class="navbar navbar-dark bg-light mb-5">
+        <div class="container">
+            <a class="navbar-brand" href="/"><img src="{{ url_for('static', filename= 'img/logo.png') }}" height="80"></a>
+
+            <div>
+                <form class="float-start" role="search" action="/searchforelection" method="get">
+                    <input id="keyword" name="keyword" type="search" class="form-control form-control-dark text-bg-light" placeholder="Search Election..." aria-label="Search">
+                </form>
+
+                {% if user is defined and user.is_authenticated %}
+                    <button type="button" class="btn btn-warning ms-2" data-bs-toggle="modal" data-bs-target="#userinfo-modal">{{ user.username }}</button>
+
+                    <!-- Userinfo window -->
+                    <div class="modal fade" id="userinfo-modal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h4 class="modal-title">{{ user.name }}</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <h4>User Info:</h4>
+                                <b>Username:</b> {{user.username}}
+                                <br>
+                                <b>Mail:</b> {{user.email}}
+                                <br>
+                                <hr>
+                                <br>
+                                <h4>Your elections:</h4>
+                                {% if elections|length > 0 %}
+                                    <ul>
+                                        {% for e in user.elections %}
+                                            <li><a href="/details/{{ e.id }}">{{ e.title }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p>You don't have elections yet.</p>
+                                {% endif %}
+                                <br>
+                                <a href="/create"><button type="button" class="btn btn-info">New Election</button></a>
+                                <br>
+                                <hr>
+                                <br>
+                                <h4>Change Password:</h4>
+                                <form action="/changepasswd" method="post">
+                                    <input type="password" id="passwd_old" name="passwd" class="form-control" placeholder="Password" required>
+                                    <input type="password" id="passwd_new" name="new_passwd" class="form-control" placeholder="New Password" required>
+                                    <input type="password" id="passwd_confirm" name="confirm_passwd" class="form-control"
+                                        placeholder="Confirm New Password" required>
+                                    <br>
+                                    <input type="submit" value="Change Password" class="btn btn-secondary">
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <a href="/logout"><button type="button" class="btn btn-danger">Logout</button></a>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#login-modal">Login</button>
+                    <a href="/register"><button type="button" class="btn btn-outline-success ms-2">Register</button></a>
+
+                    <!-- Login window -->
+                    <div class="modal fade" id="login-modal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h4 class="modal-title">Login</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="/login" method="post">
+                                    <input type="text" id="username" name="username" class="form-control" placeholder="Username" required>
+                                    <input type="password" id="passwd" name="passwd" class="form-control" placeholder="Password" required>
+                                    <br><br>
+                                    <input type="submit" id="logintbtn" value="Login" class="btn btn-success">
+                                </form>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    
+
+    <main class="container">
+  
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{category}}" role="alert">
+                {{message}}
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+    
+    <div class="mb-3" style="clear: both;"></div>
+
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container">
+            <a href="{{config.GOODVOTEX_IMPRINT_URL}}" style="color:rgb(83, 83, 83)">Impressum/Imprint</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;        
+            <a href="{{config.GOODVOTEX_PRIVACY_URL}}" style="color:rgb(83, 83, 83)">Datenschutz/Privacy</a>
+        </div>
+    </footer>
+
+</body>
+
+{% block scripts %}
+{% endblock %}
+</html>

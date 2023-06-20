@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block content %}
+        <div class="center"><h1>Welcome to GoodVoteX</h1></div>
+        <p>
+            You are interested in sophisticated committee elections?
+            This site is exactly what you are searching for!
+        </p>
+        <p>
+            With this tool you can easily create a committee election, and let your voters vote.
+            Our goal is to allow the voters to express what they <i>actually want to express.</i>
+            That is, we provide ballot formats which allow expressing more than just <i>yes</i> or <i>no</i>.
+        </p>
+
+        <div class="center"><h2>We caught your attention?</h2></div>
+        <p>
+            {% if user.is_authenticated %}
+                Click on your name in the top right corner to create an own election.
+            {% else %}
+                Sign up <a href="/register">here</a> or login to create an own election.
+                You can participate in existing elections without signing up.
+            {% endif %}
+        </p>
+        <div class="sep"></div>
+
+
+        <div>
+            <div class="center">
+                <h2>Trending Elections</h2>
+            </div>
+            <div class="sep"></div>
+
+            {% if trending_elections|length > 0 %}
+            <div id="featuredCarousel" class="carousel slide mb-5" data-bs-ride="carousel" data-interval="false">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <div class="col-sm-8 mx-auto">
+                            <div class="card text-dark bg-light">
+                                <div class="card-header">
+                                    <b>{{ trending_elections[0].title }}</b>
+                                    <div class="float-end">
+                                        <a href="/details/{{ trending_elections[0].id }}"><button class="btn btn-secondary">Details</button></a>
+                                        {% if trending_elections[0].is_stopped %} 
+                                            <button class="btn btn-success" disabled>Vote</button>
+                                        {% else %}
+                                            <a href="/vote/{{ trending_elections[0].id }}"><button class="btn btn-success">Vote</button></a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <b>Description:</b>
+                                    <p>
+                                        {% for line in trending_elections[0].description.split("\n") %}
+                                            {{ line }}<br>
+                                        {% endfor %}
+                                    </p>
+                                    <br>
+                                    <b>Committee Size:</b> {{trending_elections[0].committeesize}}
+                                    <br>
+                                    <b>Candidates:</b>
+                                    <p>
+                                        {% for candidate in trending_elections[0].candidates %}
+                                            <div class="is-candidate">
+                                                {{candidate.name}}
+                                            </div>
+                                        {% endfor %}
+                                    </p>
+                                    <div style="clear: both;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% for e in trending_elections[1:] %}
+                        <div class="carousel-item">
+                            <div class="col-sm-8 mx-auto">
+                                <div class="card text-dark bg-light">
+                                    <div class="card-header">
+                                        <b>{{ e.title }}</b>
+                                        <div class="float-end">
+                                            <a href="/details/{{ e.id }}"><button class="btn btn-secondary">Details</button></a>
+                                            {% if e.is_stopped %} 
+                                                <button class="btn btn-success" disabled>Vote</button>
+                                            {% else %}
+                                                <a href="/vote/{{ e.id }}"><button class="btn btn-success">Vote</button></a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <b>Description:</b>
+                                        <p>
+                                            {% for line in e.description.split("\n") %}
+                                                {{ line }}<br>
+                                            {% endfor %}
+                                        </p>
+                                        <br>
+                                        <b>Committee Size:</b> {{e.committeesize}}
+                                        <br>
+                                        <b>Candidates:</b>
+                                        <p>
+                                            {% for candidate in e.candidates %}
+                                                <div class="is-candidate">
+                                                    {{candidate.name}}
+                                                </div>
+                                            {% endfor %}
+                                        </p>
+                                        <div style="clear: both;"></div>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>            
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev text-bg-dark" type="button" data-bs-target="#featuredCarousel" data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                </button>
+                <button class="carousel-control-next text-bg-dark" type="button" data-bs-target="#featuredCarousel" data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                </button>
+            </div>
+            {% else %}
+            <div class="alert alert-info" role="alert">
+                There are currently no active elections.
+            </div>
+            {% endif %}
+        </div>
+
+
+{% endblock %}
+

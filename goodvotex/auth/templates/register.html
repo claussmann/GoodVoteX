@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+
+        <div class="center">
+            <div class="createcard">
+                <form action="/register" method="post">
+                    <input type="text" id="username" name="username" style="width: 96%;" placeholder="Username"
+                           class="textfield" required>
+                    <input type="email" id="email" name="email" style="width: 96%;" placeholder="E-Mail"
+                           class="textfield" required>
+                    <input type="text" id="name" name="name" style="width: 96%;" placeholder="Name"
+                           class="textfield" required>
+                    <input type="password" id="passwd" name="passwd" style="width: 96%;" placeholder="Password"
+                           class="textfield" required>
+                    <br><br>
+                    <input type="submit" value="Register" style="width: 96%;" class="login-submitbtn">
+                </form>
+            </div>
+        </div>
+
+{% endblock %}
