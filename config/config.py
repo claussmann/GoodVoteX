@@ -8,3 +8,4 @@ class AuthConfig(object):
 class GoodVoteXConfig(object):
     GOODVOTEX_IMPRINT_URL = ""
     GOODVOTEX_PRIVACY_URL = ""
+    GOODVOTEX_TERMS_CONDITIONS_URL = ""

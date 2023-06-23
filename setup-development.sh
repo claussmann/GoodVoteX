@@ -7,7 +7,7 @@ echo "Checking if external JS and CSS libraries are present..."
 SCRIPTPATH="$( cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 || exit ; pwd -P )"
 
 
-bash "$SCRIPTPATH"/download-static-dependencies.sh TARGET="${SCRIPTPATH}/goodvotex/static/external/"
+bash "$SCRIPTPATH"/download-static-dependencies.sh "${SCRIPTPATH}/goodvotex/static/external/"
 
 
 # environment
