@@ -3,14 +3,14 @@
 # Edited by @claussmann: Remove lint
 
 
-name: Test application
+name: Run Unit-Tests
 
 on:
   pull_request:
     branches: [ "testing" ]
     
   push:
-    branches: [ "testing" ]
+    branches: [ "testing", "production" ]
 
 permissions:
   contents: read
