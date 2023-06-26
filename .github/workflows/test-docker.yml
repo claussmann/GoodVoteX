@@ -1,4 +1,4 @@
-name: Test if Docker works
+name: Test if docker image can be produced.
 
 on:
   pull_request:
