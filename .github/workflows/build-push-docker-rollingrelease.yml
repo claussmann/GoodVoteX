@@ -1,7 +1,6 @@
 # From: https://docs.github.com/en/actions/publishing-packages/publishing-docker-images
 # and https://github.com/marketplace/actions/build-and-push-docker-images
 
-
 name: Build docker:rolling image (rolling release)
 
 on:
