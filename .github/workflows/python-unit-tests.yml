@@ -10,7 +10,7 @@ on:
     branches: [ "testing" ]
     
   push:
-    branches: [ "testing" ]
+    branches: [ "testing", "production" ]
 
 permissions:
   contents: read
