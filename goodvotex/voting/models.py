@@ -275,3 +275,35 @@ class ApprovalBallot(Ballot):
     def _decode(self):
         raw_obj = json.loads(self.json_encoded)
         return set(raw_obj["app_candidates"])
+
+
+
+#################################################################################
+#                 SAV Ballots
+#################################################################################
+
+class SAVBallot(Ballot):
+    id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
+    json_encoded = db.Column(db.String(1000), nullable=False)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "savBallot",
+    }
+
+    def score(self, committee):
+        app_candidates = self._decode()
+        return len(app_candidates.intersection(committee))/len(app_candidates)
+    
+    def is_of_type(self, ballot_type):
+        return ballot_type == "savBallot"  or ballot_type == "any"
+
+    def _parse_from_json(self, json_content):
+        app_candidates = json_content["app_candidates"]
+        self.json_encoded = json.dumps({"app_candidates" : app_candidates})
+    
+    def get_involved_candidates(self):
+        return self._decode()
+    
+    def _decode(self):
+        raw_obj = json.loads(self.json_encoded)
+        return set(raw_obj["app_candidates"])
