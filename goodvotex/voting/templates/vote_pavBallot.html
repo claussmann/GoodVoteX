@@ -1,0 +1,95 @@
+{%extends "base.html" %}
+
+{% block head %}
+{% endblock %}
+
+{%block content%}
+
+<div class="col-sm-8 mx-auto mb-3">
+  <div class="card text-dark bg-light">
+      <div class="card-header">
+          <b>{{ election.title }}</b>
+      </div>
+      <div class="card-body">
+          <b>Description:</b>
+          <p>
+              {% for line in election.description.split("\n") %}
+                  {{ line }}<br>
+              {% endfor %}
+          </p>
+          <br>
+          <b>Committee Size:</b> {{election.committeesize}}
+      </div>
+  </div>
+</div>
+
+
+{% if election.is_stopped %} 
+
+  <div class="alert alert-danger" role="alert">
+    This election was closed already.
+  </div>
+
+{% else %}
+
+  <div class="mb-2" id="step0">
+    <h2>Please select all candidates you want in the committee.</h2>
+    
+    <div id="candidateSelection" class="mb-3">
+      {% for candidate in election.candidates %}
+        <button id="{{candidate.id}}" type="button" class="btn btn-outline-primary" data-bs-toggle="button" autocomplete="off">{{candidate.name}}</button>
+      {% endfor %}
+    </div>
+
+    <button id="submit" type="button" class="btn btn-success" onclick="sendBallot()">Submit Vote!</button>
+    
+  </div>
+
+{% endif %} 
+
+
+    
+{% endblock %}
+
+
+
+
+{%block scripts%}
+  <!-- This is the required script for drag and drop actions, and the form filling and sending. -->
+  <script>
+    var url = "/vote/{{election.id}}";
+
+    function sendBallot(){
+      var btns = document.querySelectorAll('#candidateSelection button');
+      var app_candidates = [];
+      for(i = 0; i < btns.length; i++){
+        var btn = btns[i];
+        if (btn.classList.contains("active")) {
+          app_candidates.push(btn.id);
+        }
+      }
+      console.log("Approving following candidates:")
+      console.log(app_candidates);
+
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onreadystatechange = function() { 
+        if (this.readyState == 4) {
+          if(this.status == 200){
+            window.location.href = '/done';
+          }
+          else{
+            console.log(this.responseText)
+            alert("Something went wrong. Please reload the page and try again.");
+          }
+        } 
+      };
+      xhr.send(JSON.stringify({
+          "type" : "pavBallot",
+          "app_candidates" : app_candidates,
+      }));
+    }
+
+  </script>
+{% endblock %}
