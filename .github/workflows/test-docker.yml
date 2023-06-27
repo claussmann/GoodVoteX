@@ -2,7 +2,7 @@ name: Test if docker image can be produced.
 
 on:
   pull_request:
-    branches: [ "testing" ]
+    branches: [ "testing", "production" ]
 
 jobs:
 

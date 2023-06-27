@@ -6,7 +6,7 @@ name: Run Unit-Tests
 
 on:
   pull_request:
-    branches: [ "testing" ]
+    branches: [ "testing", "production" ]
     
   push:
     branches: [ "testing", "production" ]
