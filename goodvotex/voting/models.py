@@ -154,22 +154,66 @@ class Ballot(db.Model):
 
     # Overwrite!
     def score(self, committee):
+        """"
+        Compute the score for committee. The score is a numerical value. The 
+        interpretation is: higher the score <=> better the committee. Note that
+        this is only the score according to this ballot. The total score for
+        a committee will be computed within the Election class as the sum over
+        the scores for all committees.
+
+        :param committee: a set of candidate ids
+        :return: an integer
+        """"
         pass
 
     # Optional Overwrite.
     def _check_validity(self):
+        """"
+        Check whether this ballot is valid (e.g. any conditions are violated).
+        This will be called at the end of constucting this object.
+
+        :return: True/False
+        """"
         return True
     
     # Overwrite!
     def is_of_type(self, ballot_type):
+        """"
+        Checks whether this ballot works with the given ballot_type. Usually,
+        this function should return True only for the ballot type of this class,
+        as well as for the ballot type `any`. But there might be situations where
+        this ballot is also a subtype of ballot_type, i.e., it works with
+        ballot_type, too. This function is called when a ballot is added to an
+        election to check whether the ballot makes sense for the election type.
+
+        :param ballot_type: a string
+        :return: True/False
+        """"
         pass
     
     # Overwrite!
     def _parse_from_json(self, json_content):
+        """"
+        Compute the score for committee. The score is a numerical value. The 
+        interpretation is: higher the score <=> better the committee. Note that
+        this is only the score according to this ballot. The total score for
+        a committee will be computed within the Election class as the sum over
+        the scores for all committees.
+
+        :param committee: a set of candidate ids
+        :return: an integer
+        """"
         pass
     
     # Overwrite!
     def get_involved_candidates(self):
+        """"
+        Get the candidates which are involved in this ballot.
+        This function will be called when a ballot is added to an election to
+        check whether the involved candidates match the candidates of the election.
+
+        :return: The set of candidate ids.
+        """"
         pass
 
 
