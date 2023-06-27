@@ -55,7 +55,7 @@ def logout():
     return redirect(url_for('voting.start_page'))
 
 
-@auth.route('/changepasswd')
+@auth.route('/changepasswd', methods=['POST'])
 @login_required
 def change_password():
     password = request.form.get('passwd')
