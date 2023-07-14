@@ -86,7 +86,7 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingRegularApproval">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRegularApproval" aria-expanded="true" aria-controls="collapseRegularApproval">
-                Regular Approval Ballots
+                Regular Approval Ballots Election
             </button>
           </h2>
           <div id="collapseRegularApproval" class="accordion-collapse collapse show" aria-labelledby="headingRegularApproval" data-bs-parent="#ballotAccordion">
@@ -106,7 +106,7 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingBoundedBallot">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBoundedBallot" aria-expanded="false" aria-controls="collapseBoundedBallot">
-                Bounded Approval Ballots
+                Bounded Approval Ballots Election
             </button>
           </h2>
           <div id="collapseBoundedBallot" class="accordion-collapse collapse" aria-labelledby="headingBoundedBallot" data-bs-parent="#ballotAccordion">
@@ -126,6 +126,36 @@
                 </p>
             </div>
           </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingBorda">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBorda" aria-expanded="false" aria-controls="collapseBorda">
+                  Borda Election
+              </button>
+            </h2>
+            <div id="collapseBorda" class="accordion-collapse collapse" aria-labelledby="headingBorda" data-bs-parent="#ballotAccordion">
+              <div class="accordion-body">
+                  This election allows voters to submit a ranking over the candidates.
+                  The higher ranked a candidate is in a voters ballot, the more points will the candidate receive from that ballot.
+                  The committee contains the candidates with highest total points.
+              </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingBordaCC">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBordaCC" aria-expanded="false" aria-controls="collapseBordaCC">
+                  Borda Chamberlin-Courant Election
+              </button>
+            </h2>
+            <div id="collapseBordaCC" class="accordion-collapse collapse" aria-labelledby="headingBordaCC" data-bs-parent="#ballotAccordion">
+              <div class="accordion-body">
+                  This election allows voters to submit a ranking over the candidates.
+                  The higher ranked a candidate is in a voters ballot, the more points will the candidate receive from that ballot.
+                  <br><br>
+                  In contrast to usual Borda elections, in Borda Chamberlin-Courant each voter contributes only the points to the total points of the committee for the candidate the voter likes most in the committee.
+                  This increases the diversity of the committee.
+              </div>
+            </div>
         </div>
     </div>
 
