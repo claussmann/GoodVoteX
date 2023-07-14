@@ -2,12 +2,11 @@
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 # Edited by @claussmann: Remove lint
 
-
-name: Test application
+name: Run Unit-Tests
 
 on:
   pull_request:
-    branches: [ "testing" ]
+    branches: [ "testing", "production" ]
     
   push:
     branches: [ "testing", "production" ]

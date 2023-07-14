@@ -2,7 +2,7 @@
 # and https://github.com/marketplace/actions/build-and-push-docker-images
 
 
-name: Build and publish the docker container for testing stage
+name: Build docker:testing image.
 
 on:
   push:

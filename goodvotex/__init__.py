@@ -29,7 +29,7 @@ def create_app():
     BOOLEAN_CONFIG_KEYS = ["AUTH_ENABLE_REGISTRATION"]
     for key in BOOLEAN_CONFIG_KEYS:
         if not isinstance(app.config[key], bool):
-            app.config[key] = True if app.config[key].lower in ['true', 'yes', '1'] else False
+            app.config[key] = True if app.config[key].lower() in ['true', 'yes', '1'] else False
 
     db.init_app(app)
 
