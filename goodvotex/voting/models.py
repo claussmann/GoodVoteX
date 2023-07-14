@@ -456,3 +456,39 @@ class BordaBallot(Ballot):
     def _decode(self):
         raw_obj = json.loads(self.json_encoded)
         return list(raw_obj["order"])
+
+
+#################################################################################
+#                 Borda-CC Ballots
+#################################################################################
+
+class BordaChamberlinCourantBallot(Ballot):
+    id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
+    json_encoded = db.Column(db.String(1000), nullable=False)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "bordaCCBallot",
+    }
+
+    def score(self, committee):
+        order = self._decode()
+        num_candidates = len(order)
+        return max([(num_candidates - order.index(c) - 1) for c in committee])
+    
+    def is_of_type(self, ballot_type):
+        return ballot_type == "bordaCCBallot"  or ballot_type == "any"
+    
+    def _check_validity(self):
+        order = self._decode()
+        return len(order) == len(set(order)) # No dublicates
+
+    def _parse_from_json(self, json_content):
+        order = json_content["order"]
+        self.json_encoded = json.dumps({"order" : order})
+    
+    def get_involved_candidates(self):
+        return set(self._decode())
+    
+    def _decode(self):
+        raw_obj = json.loads(self.json_encoded)
+        return list(raw_obj["order"])
