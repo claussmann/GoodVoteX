@@ -441,6 +441,10 @@ class BordaBallot(Ballot):
     
     def is_of_type(self, ballot_type):
         return ballot_type == "bordaBallot"  or ballot_type == "any"
+    
+    def _check_validity(self):
+        order = self._decode()
+        return len(order) == len(set(order)) # No dublicates
 
     def _parse_from_json(self, json_content):
         order = json_content["order"]
