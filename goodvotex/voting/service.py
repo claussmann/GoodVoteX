@@ -67,12 +67,13 @@ def add_vote_from_json(election_id, json_content):
     """
     e = get_election(election_id)
     constructors = {
-        "boundedApprovalBallot" : BoundedApprovalBallot,
-        "approvalBallot" : ApprovalBallot,
-        "savBallot" : SAVBallot,
-        "pavBallot" : PAVBallot,
-        "bordaCCBallot" : BordaChamberlinCourantBallot,
-        "bordaBallot": BordaBallot
+        "boundedApprovalBallot": BoundedApprovalBallot,
+        "approvalBallot": ApprovalBallot,
+        "savBallot": SAVBallot,
+        "pavBallot": PAVBallot,
+        "bordaCCBallot": BordaChamberlinCourantBallot,
+        "bordaBallot": BordaBallot,
+        "utilitarianBallot": UtilitarianBallot
     }
     if json_content["type"] in constructors:
         ballot = constructors[json_content["type"]](json_content)

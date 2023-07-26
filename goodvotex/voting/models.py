@@ -492,3 +492,43 @@ class BordaChamberlinCourantBallot(Ballot):
     def _decode(self):
         raw_obj = json.loads(self.json_encoded)
         return list(raw_obj["order"])
+
+
+#################################################################################
+#                 Utilitarian Ballots
+#################################################################################
+
+class UtilitarianBallot(Ballot):
+    id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
+    json_encoded = db.Column(db.String(1000), nullable=False)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "utilitarianBallot",
+    }
+
+    def score(self, committee):
+        rating = self._decode()
+        return sum(rating[x] for x in committee.intersection(set(rating)))
+    
+    def is_of_type(self, ballot_type):
+        return ballot_type == "utilitarianBallot" or ballot_type == "any"
+    
+    def _check_validity(self):
+        rating = self._decode()
+        for candidate in rating:
+            if rating[candidate] > 10 or rating[candidate] < -10:
+                return False
+        return True
+
+    def _parse_from_json(self, json_content):
+        ratings = json_content["ratings"]
+        for c in ratings:
+            ratings[c] = int(ratings[c])
+        self.json_encoded = json.dumps({"ratings" : ratings})
+    
+    def get_involved_candidates(self):
+        return set(self._decode())
+    
+    def _decode(self):
+        raw_obj = json.loads(self.json_encoded)
+        return raw_obj["ratings"]

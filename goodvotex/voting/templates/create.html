@@ -16,6 +16,7 @@
                         <option value="pavBallot">Proportional Approval Voting Election</option>
                         <option value="bordaBallot">Borda Election</option>
                         <option value="bordaCCBallot">Borda Chamberlin-Courant Election</option>
+                        <option value="utilitarianBallot">Utilitarian Election</option>
                     </select>
                     <small class="form-text text-muted">Select the ballot type/evaluation method for your election.</small>
                 </div>
@@ -154,6 +155,18 @@
                   <br><br>
                   In contrast to usual Borda elections, in Borda Chamberlin-Courant each voter contributes only the points to the total points of the committee for the candidate the voter likes most in the committee.
                   This increases the diversity of the committee.
+              </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingUtilitarian">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUtilitarian" aria-expanded="false" aria-controls="collapseUtilitarian">
+                  Utilitarian Election
+              </button>
+            </h2>
+            <div id="collapseUtilitarian" class="accordion-collapse collapse" aria-labelledby="headingUtilitarian" data-bs-parent="#ballotAccordion">
+              <div class="accordion-body">
+                  This election allows voters to submit a numerical utility value for each candidate.
               </div>
             </div>
         </div>

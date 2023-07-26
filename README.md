@@ -7,11 +7,12 @@ Thus, the platform allows you to choose a suitable voting rule and ballot format
 
 We currently support the following ballot types and voting rules:
 
-| Ballot Type                         | Available Voting Rules | Reference                                                                                                                                                   |
-|-------------------------------------|------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Bounded approval ballots (disjoint) | Total Scoring          | AAMAS-2023: "Bounded Approval Ballots: Balancing Expressiveness and Simplicity for Multiwinner Elections" by D. Baumeister, L. Boes, C. Laußmann and S. Rey |
-| Approval ballots                    | Approval, SAV, PAV     | -                                                                                                                                                           |
-| Ordinal ranks                       | Borda, Borda-CC        | -                                                                                                                                                           |
+| Ballot Type                           | Available Voting Rules | Reference                                                                                 |
+|---------------------------------------|------------------------|-------------------------------------------------------------------------------------------|
+| Bounded approval ballots (disjoint)   | Total Scoring          | AAMAS-2023: "Bounded Approval Ballots: Balancing Expressiveness and Simplicity for Multiwinner Elections" by D. Baumeister, L. Boes, C. Laußmann and S. Rey |
+| Approval ballots                      | Approval, SAV, PAV     | -                                                                                        |
+| Ordinal ranks                         | Borda, Borda-CC        | -                                                                                        |
+| Cardinal ballot (numerical -10 to 10) | Welfare Maximization   | -                                                                                        |
 
 ## Run (Production)
 
