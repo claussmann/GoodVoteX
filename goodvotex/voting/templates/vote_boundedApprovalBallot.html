@@ -1,34 +1,7 @@
-{%extends "base.html" %}
+{%extends "vote.html" %}
 
 
-{%block content%}
-
-<div class="col-sm-8 mx-auto mb-3">
-  <div class="card text-dark bg-light">
-      <div class="card-header">
-          <b>{{ election.title }}</b>
-      </div>
-      <div class="card-body">
-          <b>Description:</b>
-          <p>
-              {% for line in election.description.split("\n") %}
-                  {{ line }}<br>
-              {% endfor %}
-          </p>
-          <br>
-          <b>Committee Size:</b> {{election.committeesize}}
-      </div>
-  </div>
-</div>
-
-
-{% if election.is_stopped %} 
-
-  <div class="alert alert-danger" role="alert">
-    This election was closed already.
-  </div>
-
-{% else %}
+{%block votingguide%}
 
   <div class="accordion" id="faq">
     <div class="accordion-item">
@@ -58,6 +31,10 @@
     </div>
   </div>
 
+{% endblock %}
+
+
+{%block votingprocess%}
 
   <!-- Step 1 -->
   <div id="step1" class="mb-2 mt-5">
@@ -143,11 +120,6 @@
   </div>
   <!-- End Step 2 -->
 
-
-{% endif %} 
-
-
-    
 {% endblock %}
 
 

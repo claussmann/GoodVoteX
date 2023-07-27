@@ -1,36 +1,27 @@
-{%extends "base.html" %}
+{%extends "vote.html" %}
 
-{% block head %}
-{% endblock %}
 
-{%block content%}
+{%block votingguide%}
 
-<div class="col-sm-8 mx-auto mb-3">
-  <div class="card text-dark bg-light">
-      <div class="card-header">
-          <b>{{ election.title }}</b>
+<div class="accordion" id="faq">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headinghowitworks">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapsehowitworks" aria-expanded="false" aria-controls="collapsehowitworks">
+          How It Works
+      </button>
+    </h2>
+    <div id="collapsehowitworks" class="accordion-collapse collapse show" aria-labelledby="headinghowitworks" data-bs-parent="#faq">
+      <div class="accordion-body">
+        Simply click all the candidates you like.
       </div>
-      <div class="card-body">
-          <b>Description:</b>
-          <p>
-              {% for line in election.description.split("\n") %}
-                  {{ line }}<br>
-              {% endfor %}
-          </p>
-          <br>
-          <b>Committee Size:</b> {{election.committeesize}}
-      </div>
+    </div>
   </div>
 </div>
 
+{% endblock %}
 
-{% if election.is_stopped %} 
 
-  <div class="alert alert-danger" role="alert">
-    This election was closed already.
-  </div>
-
-{% else %}
+{%block votingprocess%}
 
   <div class="mb-2" id="step0">
     <h2>Please select all candidates you like. Note: This is an SAV (satisfaction approval voting) election. Thus, the fewer options you select, the higher the priority for each of them.</h2>
@@ -45,10 +36,6 @@
     
   </div>
 
-{% endif %} 
-
-
-    
 {% endblock %}
 
 
