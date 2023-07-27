@@ -67,7 +67,7 @@
     var url = "/vote/{{election.id}}";    
 
     function sendBallot(){
-      var json_to_send = JSON.stringify({"type" : "utilitarianBallot",
+      var json_to_send = JSON.stringify({"type" : "cardinalBallot",
                                          "ratings" : get_rating()});
       console.log("sending ballot:");
       console.log(json_to_send);

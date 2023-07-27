@@ -10,6 +10,12 @@ from sqlalchemy.orm import Mapped, mapped_column
 from .. import db
 
 
+
+#################################################################################
+#                 Elections
+#################################################################################
+
+
 class Election(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(60), nullable=False)
@@ -19,14 +25,18 @@ class Election(db.Model):
     votecount = db.Column(db.Integer, default=0)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     owner = db.relationship('User', backref=db.backref('elections', lazy=True))
-    ballot_type = db.Column(db.String(60), nullable=False)
+    type: Mapped[str]
+
+    __mapper_args__ = {
+        "polymorphic_identity": "election",
+        "polymorphic_on": "type",
+    }
 
     def __eq__(self, other):
         try:
             return self.id == other.id
         except:
             return False
-        return False
 
     def add_ballot(self, ballot):
         """
@@ -37,13 +47,9 @@ class Election(db.Model):
         """
         if self.is_stopped:
             raise Exception("The creator stopped the voting process. You can no longer vote.")
-        self.ballots.append(ballot)
-        if not ballot.is_of_type(self.ballot_type):
-            raise Exception("This election does not accept this type of ballot.")
-        if len(ballot.get_involved_candidates().difference([str(c.id) for c in self.candidates])) > 0:
-            self.ballots.remove(ballot)
-            raise Exception("Ballot seems to involve candidates not participating in this election.")
-        self.votecount += 1
+        if self._check_validity(ballot):
+            self.ballots.append(ballot)
+            self.votecount += 1
 
     def recompute_current_winner(self):
         """
@@ -53,9 +59,11 @@ class Election(db.Model):
 
         :return:
         """
+        if len(self.ballots) == 0:
+            return
         for c in self.candidates:
             c.is_winner = False
-        for w in self._compute_winner():
+        for w in self._compute_winners():
             w.is_winner = True
 
     def get_winners(self):
@@ -65,6 +73,7 @@ class Election(db.Model):
         :return: List of candidates
         """
         return [c for c in self.candidates if c.is_winner]
+        
 
     def stop(self):
         """
@@ -98,23 +107,6 @@ class Election(db.Model):
             raise Exception("Search is empty.")
         return len(words.intersection(self._get_keywords()))
 
-    def _compute_winner(self):
-        best_score = 0
-        committees_with_score = list()
-        for committee in itertools.combinations(self.candidates, self.committeesize):
-            current_score = self._score(committee)
-            if current_score > best_score:
-                best_score = current_score
-                committees_with_score = list()
-                committees_with_score.append(committee)
-            elif current_score == best_score:
-                committees_with_score.append(committee)
-        ret = random.choice(committees_with_score)
-        return ret
-
-    def _score(self, committee):
-        return sum(ballot.score({str(c.id) for c in committee}) for ballot in self.ballots)
-
     def _get_keywords(self):
         if not hasattr(self, 'keywords'):
             keywords = self.title.lower() + " " + self.description.lower() + " " + str(self.id)
@@ -124,7 +116,234 @@ class Election(db.Model):
             keywords.add(self.title.lower())
             self.keywords = keywords
         return self.keywords
+    
+    # Overwrite!
+    def _compute_winners(self):
+        """
+        Overwrite this function.
+        This function should compute a committee of winners.
 
+        :return: Set
+        """
+        pass
+
+    # Overwrite!
+    def _check_validity(self, ballot):
+        """
+        Overwrite this function.
+        This function should check if the given ballot is valid.
+
+        :return: True/False
+        """
+        pass
+
+    # Overwrite!
+    def get_ballot_type(self):
+        """
+        Overwrite this function.
+        This function should return one of approvalBallot, ordinalBallot, cardinalBallot,
+        and boundedApprovalBallot.
+
+        :return: String
+        """
+        pass
+
+
+class ApprovalElection(Election):
+    id: Mapped[int] = mapped_column(ForeignKey("election.id"), primary_key=True)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "approvalElection",
+    }
+
+    def _compute_winners(self):
+        mapping = {str(c.id): c for c in self.candidates}
+        scores = {c: 0 for c in [str(x.id) for x in self.candidates]}
+        for ballot in self.ballots:
+            for c in ballot.get_involved_candidates():
+                scores[c] += 1
+        ret = set()
+        for i in range(self.committeesize):
+            best = max(scores.keys(), key=scores.get)
+            scores[best] = -1
+            ret.add(best)
+        return {mapping[c] for c in ret}
+
+    def _check_validity(self, ballot):
+        return True
+    
+    def get_ballot_type(self):
+        return "approvalBallot"
+
+class SAVElection(Election):
+    id: Mapped[int] = mapped_column(ForeignKey("election.id"), primary_key=True)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "savElection",
+    }
+
+    def _compute_winners(self):
+        mapping = {str(c.id): c for c in self.candidates}
+        scores = {c: 0 for c in [str(x.id) for x in self.candidates]}
+        for ballot in self.ballots:
+            for c in ballot.get_involved_candidates():
+                scores[c] += 1/len(ballot.get_involved_candidates())
+        ret = set()
+        for i in range(self.committeesize):
+            best = max(scores.keys(), key=scores.get)
+            scores[best] = -1
+            ret.add(best)
+        return {mapping[c] for c in ret}
+
+    def _check_validity(self, ballot):
+        return True
+    
+    def get_ballot_type(self):
+        return "approvalBallot"
+
+class PAVElection(Election):
+    id: Mapped[int] = mapped_column(ForeignKey("election.id"), primary_key=True)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "pavElection",
+    }
+
+    def _compute_winners(self):
+        ids = [str(c.id) for c in self.candidates]
+        mapping = {str(c.id): c for c in self.candidates}
+        best_committee = None
+        best_score = -1
+        for committee in itertools.combinations(ids, self.committeesize):
+            curr_score = 0
+            for ballot in self.ballots:
+                intersec_size = len(ballot.get_involved_candidates().intersection(set(committee)))
+                curr_score += sum(1/(i+1) for i in range(intersec_size))
+            if curr_score > best_score:
+                best_score = curr_score
+                best_committee = committee
+        return [mapping[c] for c in best_committee]
+
+    def _check_validity(self, ballot):
+        return True
+    
+    def get_ballot_type(self):
+        return "approvalBallot"
+
+class BoundedApprovalElection(Election):
+    id: Mapped[int] = mapped_column(ForeignKey("election.id"), primary_key=True)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "boundedApprovalElection",
+    }
+
+    def _compute_winners(self):
+        ids = [str(c.id) for c in self.candidates]
+        mapping = {str(c.id): c for c in self.candidates}
+        best_committee = None
+        best_score = -1
+        for committee in itertools.combinations(ids, self.committeesize):
+            curr_score = sum(ballot.score(committee) for ballot in self.ballots)
+            if curr_score > best_score:
+                best_score = curr_score
+                best_committee = committee
+        return [mapping[c] for c in best_committee]
+
+    def _check_validity(self, ballot):
+        return True
+    
+    def get_ballot_type(self):
+        return "boundedApprovalBallot"
+
+class BordaElection(Election):
+    id: Mapped[int] = mapped_column(ForeignKey("election.id"), primary_key=True)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "bordaElection",
+    }
+
+    def _compute_winners(self):
+        mapping = {str(c.id): c for c in self.candidates}
+        scores = {c: 0 for c in [str(x.id) for x in self.candidates]}
+        m = len(self.candidates)
+        for ballot in self.ballots:
+            for c in scores:
+                scores[c] += m - ballot.position_of(c)
+        ret = set()
+        for i in range(self.committeesize):
+            best = max(scores.keys(), key=scores.get)
+            scores[best] = -1
+            ret.add(best)
+        return {mapping[c] for c in ret}
+
+    def _check_validity(self, ballot):
+        return True
+    
+    def get_ballot_type(self):
+        return "ordinalBallot"
+
+class BordaCCElection(Election):
+    id: Mapped[int] = mapped_column(ForeignKey("election.id"), primary_key=True)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "bordaCCElection",
+    }
+
+    def _compute_winners(self):
+        ids = [str(c.id) for c in self.candidates]
+        mapping = {str(c.id): c for c in self.candidates}
+        m = len(ids)
+        best_committee = None
+        best_score = -1
+        for committee in itertools.combinations(ids, self.committeesize):
+            curr_score = sum(max(m - ballot.position_of(c) for c in ids) for ballot in self.ballots)
+            if curr_score > best_score:
+                best_score = curr_score
+                best_committee = committee
+        return [mapping[c] for c in best_committee]
+
+    def _check_validity(self, ballot):
+        return True
+    
+    def get_ballot_type(self):
+        return "ordinalBallot"
+
+
+class UtilitarianElection(Election):
+    id: Mapped[int] = mapped_column(ForeignKey("election.id"), primary_key=True)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "utilitarianElection",
+    }
+
+    def _compute_winners(self):
+        mapping = {str(c.id): c for c in self.candidates}
+        scores = {c: 0 for c in [str(x.id) for x in self.candidates]}
+        m = len(self.candidates)
+        for ballot in self.ballots:
+            for c in scores:
+                scores[c] += ballot.utility_for(c)
+        ret = set()
+        for i in range(self.committeesize):
+            best = max(scores.keys(), key=scores.get)
+            scores[best] = -1
+            ret.add(best)
+        return {mapping[c] for c in ret}
+
+    def _check_validity(self, ballot):
+        return True
+    
+    def get_ballot_type(self):
+        return "cardinalBallot"
+
+
+
+
+
+
+
+#################################################################################
+#                 Candidate
+#################################################################################
 
 class Candidate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -133,6 +352,11 @@ class Candidate(db.Model):
     election = db.relationship('Election', backref=db.backref('candidates', lazy=True))
     is_winner = db.Column(db.Boolean, default=False)
 
+
+
+#################################################################################
+#                 Ballots
+#################################################################################
 
 class Ballot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -152,20 +376,6 @@ class Ballot(db.Model):
         if not self._check_validity():
             raise Exception("Ballot does not seem to be valid.") 
 
-    # Overwrite!
-    def score(self, committee):
-        """
-        Compute the score for committee. The score is a numerical value. The 
-        interpretation is: higher the score <=> better the committee. Note that
-        this is only the score according to this ballot. The total score for
-        a committee will be computed within the Election class as the sum over
-        the scores for all committees.
-
-        :param committee: a set of candidate ids
-        :return: an integer
-        """
-        pass
-
     # Optional Overwrite.
     def _check_validity(self):
         """
@@ -175,21 +385,6 @@ class Ballot(db.Model):
         :return: True/False
         """
         return True
-    
-    # Overwrite!
-    def is_of_type(self, ballot_type):
-        """
-        Checks whether this ballot works with the given ballot_type. Usually,
-        this function should return True only for the ballot type of this class,
-        as well as for the ballot type `any`. But there might be situations where
-        this ballot is also a subtype of ballot_type, i.e., it works with
-        ballot_type, too. This function is called when a ballot is added to an
-        election to check whether the ballot makes sense for the election type.
-
-        :param ballot_type: a string
-        :return: True/False
-        """
-        pass
     
     # Overwrite!
     def _parse_from_json(self, json_content):
@@ -204,26 +399,84 @@ class Ballot(db.Model):
         :return: an integer
         """
         pass
-    
-    # Overwrite!
+
+
+class ApprovalBallot(Ballot):
+    id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
+    json_encoded = db.Column(db.String(1000), nullable=False)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "approvalBallot",
+    }
+
     def get_involved_candidates(self):
-        """
-        Get the candidates which are involved in this ballot.
-        This function will be called when a ballot is added to an election to
-        check whether the involved candidates match the candidates of the election.
+        return set(self._decode())
 
-        :return: The set of candidate ids.
-        """
-        pass
-
-
-
+    def _parse_from_json(self, json_content):
+        app_candidates = json_content["app_candidates"]
+        self.json_encoded = json.dumps({"app_candidates" : app_candidates})
+    
+    def _decode(self):
+        raw_obj = json.loads(self.json_encoded)
+        return set(raw_obj["app_candidates"])
 
 
+class OrdinalBallot(Ballot):
+    id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
+    json_encoded = db.Column(db.String(1000), nullable=False)
 
-#################################################################################
-#                 Bounded Approval Ballots
-#################################################################################
+    __mapper_args__ = {
+        "polymorphic_identity": "ordinalBallot",
+    }
+
+    def _check_validity(self):
+        order = self._decode()
+        return len(order) == len(set(order)) # No dublicates
+    
+    def position_of(self, candidate):
+        order = self._decode()
+        return order.index(candidate) + 1
+
+    def _parse_from_json(self, json_content):
+        order = json_content["order"]
+        self.json_encoded = json.dumps({"order" : order})
+    
+    def _decode(self):
+        raw_obj = json.loads(self.json_encoded)
+        return list(raw_obj["order"])
+
+
+class CardinalBallot(Ballot):
+    id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
+    json_encoded = db.Column(db.String(1000), nullable=False)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "cardinalBallot",
+    }
+
+    def utility_for(self, candidate):
+        rating = self._decode()
+        if candidate in rating:
+            return rating[candidate]
+        return 0
+
+    def _check_validity(self):
+        rating = self._decode()
+        for candidate in rating:
+            if rating[candidate] > 10 or rating[candidate] < -10:
+                return False
+        return True
+
+    def _parse_from_json(self, json_content):
+        ratings = json_content["ratings"]
+        for c in ratings:
+            ratings[c] = int(ratings[c])
+        self.json_encoded = json.dumps({"ratings" : ratings})
+    
+    def _decode(self):
+        raw_obj = json.loads(self.json_encoded)
+        return raw_obj["ratings"]
+    
 
 class BoundedApprovalBallot(Ballot):
     id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
@@ -245,9 +498,6 @@ class BoundedApprovalBallot(Ballot):
                     return False
         return True
     
-    def is_of_type(self, ballot_type):
-        return ballot_type == "boundedApprovalBallot" or ballot_type == "any"
-
     def _parse_from_json(self, json_content):
         sets = json_content["sets"]
         bounds = json_content["bounds"]
@@ -259,13 +509,6 @@ class BoundedApprovalBallot(Ballot):
             bounded_sets.append(BoundedSet(bounds[s][0], bounds[s][1], bounds[s][2], items_in_set))
         bounded_sets_encoded = {"bsets": [bs.serialize() for bs in bounded_sets]}
         self.json_encoded = json.dumps(bounded_sets_encoded)
-    
-    def get_involved_candidates(self):
-        ret = set()
-        sets = self._decode()
-        for s in sets:
-            ret = ret.union(s)
-        return ret
     
     def _decode(self):
         raw_obj = json.loads(self.json_encoded)
@@ -322,213 +565,3 @@ class BoundedSet(frozenset):
 
     def serialize(self):
         return {"set": list(self), "lower": self.lower, "saturation": self.saturation, "upper": self.upper}
-
-
-#################################################################################
-#                 Regular Approval Ballots
-#################################################################################
-
-class ApprovalBallot(Ballot):
-    id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
-    json_encoded = db.Column(db.String(1000), nullable=False)
-
-    __mapper_args__ = {
-        "polymorphic_identity": "approvalBallot",
-    }
-
-    def score(self, committee):
-        app_candidates = self._decode()
-        return len(app_candidates.intersection(committee))
-    
-    def is_of_type(self, ballot_type):
-        return ballot_type == "approvalBallot"  or ballot_type == "any"
-
-    def _parse_from_json(self, json_content):
-        app_candidates = json_content["app_candidates"]
-        self.json_encoded = json.dumps({"app_candidates" : app_candidates})
-    
-    def get_involved_candidates(self):
-        return self._decode()
-    
-    def _decode(self):
-        raw_obj = json.loads(self.json_encoded)
-        return set(raw_obj["app_candidates"])
-
-
-
-#################################################################################
-#                 SAV Ballots
-#################################################################################
-
-class SAVBallot(Ballot):
-    id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
-    json_encoded = db.Column(db.String(1000), nullable=False)
-
-    __mapper_args__ = {
-        "polymorphic_identity": "savBallot",
-    }
-
-    def score(self, committee):
-        app_candidates = self._decode()
-        return len(app_candidates.intersection(committee))/len(app_candidates)
-    
-    def is_of_type(self, ballot_type):
-        return ballot_type == "savBallot"  or ballot_type == "any"
-
-    def _parse_from_json(self, json_content):
-        app_candidates = json_content["app_candidates"]
-        self.json_encoded = json.dumps({"app_candidates" : app_candidates})
-    
-    def get_involved_candidates(self):
-        return self._decode()
-    
-    def _decode(self):
-        raw_obj = json.loads(self.json_encoded)
-        return set(raw_obj["app_candidates"])
-
-
-
-
-#################################################################################
-#                 PAV Ballots
-#################################################################################
-
-class PAVBallot(Ballot):
-    id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
-    json_encoded = db.Column(db.String(1000), nullable=False)
-
-    __mapper_args__ = {
-        "polymorphic_identity": "pavBallot",
-    }
-
-    def score(self, committee):
-        app_candidates = self._decode()
-        intersec_size = len(app_candidates.intersection(committee))
-        return sum([1/i for i in range(1, intersec_size+1)])
-    
-    def is_of_type(self, ballot_type):
-        return ballot_type == "pavBallot"  or ballot_type == "any"
-
-    def _parse_from_json(self, json_content):
-        app_candidates = json_content["app_candidates"]
-        self.json_encoded = json.dumps({"app_candidates" : app_candidates})
-    
-    def get_involved_candidates(self):
-        return self._decode()
-    
-    def _decode(self):
-        raw_obj = json.loads(self.json_encoded)
-        return set(raw_obj["app_candidates"])
-
-
-
-#################################################################################
-#                 Borda Ballots
-#################################################################################
-
-class BordaBallot(Ballot):
-    id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
-    json_encoded = db.Column(db.String(1000), nullable=False)
-
-    __mapper_args__ = {
-        "polymorphic_identity": "bordaBallot",
-    }
-
-    def score(self, committee):
-        order = self._decode()
-        num_candidates = len(order)
-        return sum([(num_candidates - order.index(c) - 1) for c in committee])
-    
-    def is_of_type(self, ballot_type):
-        return ballot_type == "bordaBallot"  or ballot_type == "any"
-    
-    def _check_validity(self):
-        order = self._decode()
-        return len(order) == len(set(order)) # No dublicates
-
-    def _parse_from_json(self, json_content):
-        order = json_content["order"]
-        self.json_encoded = json.dumps({"order" : order})
-    
-    def get_involved_candidates(self):
-        return set(self._decode())
-    
-    def _decode(self):
-        raw_obj = json.loads(self.json_encoded)
-        return list(raw_obj["order"])
-
-
-#################################################################################
-#                 Borda-CC Ballots
-#################################################################################
-
-class BordaChamberlinCourantBallot(Ballot):
-    id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
-    json_encoded = db.Column(db.String(1000), nullable=False)
-
-    __mapper_args__ = {
-        "polymorphic_identity": "bordaCCBallot",
-    }
-
-    def score(self, committee):
-        order = self._decode()
-        num_candidates = len(order)
-        return max([(num_candidates - order.index(c) - 1) for c in committee])
-    
-    def is_of_type(self, ballot_type):
-        return ballot_type == "bordaCCBallot"  or ballot_type == "any"
-    
-    def _check_validity(self):
-        order = self._decode()
-        return len(order) == len(set(order)) # No dublicates
-
-    def _parse_from_json(self, json_content):
-        order = json_content["order"]
-        self.json_encoded = json.dumps({"order" : order})
-    
-    def get_involved_candidates(self):
-        return set(self._decode())
-    
-    def _decode(self):
-        raw_obj = json.loads(self.json_encoded)
-        return list(raw_obj["order"])
-
-
-#################################################################################
-#                 Utilitarian Ballots
-#################################################################################
-
-class UtilitarianBallot(Ballot):
-    id: Mapped[int] = mapped_column(ForeignKey("ballot.id"), primary_key=True)
-    json_encoded = db.Column(db.String(1000), nullable=False)
-
-    __mapper_args__ = {
-        "polymorphic_identity": "utilitarianBallot",
-    }
-
-    def score(self, committee):
-        rating = self._decode()
-        return sum(rating[x] for x in committee.intersection(set(rating)))
-    
-    def is_of_type(self, ballot_type):
-        return ballot_type == "utilitarianBallot" or ballot_type == "any"
-    
-    def _check_validity(self):
-        rating = self._decode()
-        for candidate in rating:
-            if rating[candidate] > 10 or rating[candidate] < -10:
-                return False
-        return True
-
-    def _parse_from_json(self, json_content):
-        ratings = json_content["ratings"]
-        for c in ratings:
-            ratings[c] = int(ratings[c])
-        self.json_encoded = json.dumps({"ratings" : ratings})
-    
-    def get_involved_candidates(self):
-        return set(self._decode())
-    
-    def _decode(self):
-        raw_obj = json.loads(self.json_encoded)
-        return raw_obj["ratings"]

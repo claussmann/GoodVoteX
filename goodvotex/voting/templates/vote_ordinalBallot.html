@@ -50,7 +50,7 @@
     var url = "/vote/{{election.id}}";    
 
     function sendBallot(){
-      var json_to_send = JSON.stringify({"type" : "bordaBallot",
+      var json_to_send = JSON.stringify({"type" : "ordinalBallot",
                                          "order" : get_sequence()});
       console.log("sending ballot:");
       console.log(json_to_send);
