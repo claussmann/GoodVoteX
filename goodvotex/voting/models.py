@@ -50,6 +50,8 @@ class Election(db.Model):
         if self._check_validity(ballot):
             self.ballots.append(ballot)
             self.votecount += 1
+        else:
+            raise Exception("The ballot doesn't seem to be valid.")
 
     def recompute_current_winner(self):
         """
@@ -170,6 +172,10 @@ class ApprovalElection(Election):
         return {mapping[c] for c in ret}
 
     def _check_validity(self, ballot):
+        ids = [str(c.id) for c in self.candidates]
+        for id in ballot.get_involved_candidates():
+            if id not in ids:
+                return False
         return True
     
     def get_ballot_type(self):
@@ -196,6 +202,10 @@ class SAVElection(Election):
         return {mapping[c] for c in ret}
 
     def _check_validity(self, ballot):
+        ids = [str(c.id) for c in self.candidates]
+        for id in ballot.get_involved_candidates():
+            if id not in ids:
+                return False
         return True
     
     def get_ballot_type(self):
@@ -224,6 +234,10 @@ class PAVElection(Election):
         return [mapping[c] for c in best_committee]
 
     def _check_validity(self, ballot):
+        ids = [str(c.id) for c in self.candidates]
+        for id in ballot.get_involved_candidates():
+            if id not in ids:
+                return False
         return True
     
     def get_ballot_type(self):
@@ -249,7 +263,11 @@ class BoundedApprovalElection(Election):
         return [mapping[c] for c in best_committee]
 
     def _check_validity(self, ballot):
-        return True
+        ids = [str(c.id) for c in self.candidates]
+        for id in ballot.get_involved_candidates():
+            if id not in ids:
+                return False
+        return ballot._check_validity()
     
     def get_ballot_type(self):
         return "boundedApprovalBallot"
@@ -276,7 +294,11 @@ class BordaElection(Election):
         return {mapping[c] for c in ret}
 
     def _check_validity(self, ballot):
-        return True
+        ids = [str(c.id) for c in self.candidates]
+        for id in ballot.get_involved_candidates():
+            if id not in ids:
+                return False
+        return len(ballot.get_involved_candidates()) == len(ids)
     
     def get_ballot_type(self):
         return "ordinalBallot"
@@ -302,7 +324,11 @@ class BordaCCElection(Election):
         return [mapping[c] for c in best_committee]
 
     def _check_validity(self, ballot):
-        return True
+        ids = [str(c.id) for c in self.candidates]
+        for id in ballot.get_involved_candidates():
+            if id not in ids:
+                return False
+        return len(ballot.get_involved_candidates()) == len(ids)
     
     def get_ballot_type(self):
         return "ordinalBallot"
@@ -330,7 +356,11 @@ class UtilitarianElection(Election):
         return {mapping[c] for c in ret}
 
     def _check_validity(self, ballot):
-        return True
+        ids = [str(c.id) for c in self.candidates]
+        for id in ballot.get_involved_candidates():
+            if id not in ids:
+                return False
+        return ballot._check_validity()
     
     def get_ballot_type(self):
         return "cardinalBallot"
@@ -351,6 +381,9 @@ class Candidate(db.Model):
     election_id = db.Column(db.Integer, db.ForeignKey('election.id'), nullable=False)
     election = db.relationship('Election', backref=db.backref('candidates', lazy=True))
     is_winner = db.Column(db.Boolean, default=False)
+
+
+
 
 
 
@@ -429,9 +462,8 @@ class OrdinalBallot(Ballot):
         "polymorphic_identity": "ordinalBallot",
     }
 
-    def _check_validity(self):
-        order = self._decode()
-        return len(order) == len(set(order)) # No dublicates
+    def get_involved_candidates(self):
+        return set(self._decode())
     
     def position_of(self, candidate):
         order = self._decode()
@@ -459,6 +491,9 @@ class CardinalBallot(Ballot):
         if candidate in rating:
             return rating[candidate]
         return 0
+    
+    def get_involved_candidates(self):
+        return set(self._decode())
 
     def _check_validity(self):
         rating = self._decode()
@@ -509,6 +544,13 @@ class BoundedApprovalBallot(Ballot):
             bounded_sets.append(BoundedSet(bounds[s][0], bounds[s][1], bounds[s][2], items_in_set))
         bounded_sets_encoded = {"bsets": [bs.serialize() for bs in bounded_sets]}
         self.json_encoded = json.dumps(bounded_sets_encoded)
+    
+    def get_involved_candidates(self):
+        ret = set()
+        sets = self._decode()
+        for s in sets:
+            ret = ret.union(s)
+        return ret
     
     def _decode(self):
         raw_obj = json.loads(self.json_encoded)
