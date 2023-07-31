@@ -11,7 +11,7 @@ We currently support the following ballot types and voting rules:
 |---------------------------------------|------------------------|-------------------------------------------------------------------------------------------|
 | Bounded approval ballots (disjoint)   | Total Scoring          | AAMAS-2023: "Bounded Approval Ballots: Balancing Expressiveness and Simplicity for Multiwinner Elections" by D. Baumeister, L. Boes, C. Laußmann and S. Rey |
 | Approval ballots                      | Approval, SAV, PAV     | -                                                                                        |
-| Ordinal ranks                         | Borda, Borda-CC        | -                                                                                        |
+| Ordinal ranks                         | Borda, Borda-CC, STV   | -                                                                                        |
 | Cardinal ballot (numerical -10 to 10) | Welfare Maximization   | -                                                                                        |
 
 ## Run (Production)
@@ -102,20 +102,20 @@ However, checksums are checked for all files.
 
 ## Contribute
 
-We welcome everyone who wants to add ballot formats.
+We welcome everyone who wants to add ballot formats or new voting rules.
+The process is described in the subsequent paragraphs.
+Note that, if you have started the app before, you will most likely need to alter the database tables after implementing your changes.
+We are working on a better option, but right now the only option is to delete the database (`storage/database.db`) and recreate it (e.g. using the `setup-development.sh`).
 
-First, think of a good name for your ballot format.
+### New Ballot Format
 Let's assume you want to call the ballot `Simple Ballot`.
-Next, in the file `goodvotex/voting/models.py` you create a class `SimpleBallot` which inherits from the class `Ballot`.
+In the file `goodvotex/voting/models.py` you create a class `SimpleBallot` which inherits from the class `Ballot`.
 Note that you have to overwrite the following methods:
 
-- `score(self, committee)`: Returns the score `committee` receives from this ballot. Note that the total score of `committee` is the sum of `score(self, committee)` of all ballots.
-- `check_validity(self)`: Returns `True` if and only if this ballot is valid (OPTIONAL; as a default every ballot is considered valid).
-- `is_of_type(self, ballot_type)`: Returns `True` if and only if this ballot is of type `ballot_type`, which is a string.
-- `parse_from_json(self, json)`: This function is called immediately after construction. 
- It is given a dict in a JSON like structure. 
- The format of this dict is defined by you when you write the HTML/JS form later.
-- `get_involved_candidates(self)`: Returns a set of all involved candidates in this ballot.
+- `_check_validity(self)`: Returns `True` if and only if this ballot is valid (OPTIONAL; as a default every ballot is considered valid).
+- `_parse_from_json(self, json)`: This function is called immediately after construction. It is given a dict in a JSON like structure. The format of this dict is defined by you when you write the HTML/JS form later.
+
+You may need to introduce further methods depending on your needs.
 
 Further, your class must have the following database attributes:
 
@@ -138,13 +138,27 @@ You can format it as you like, as you will evaluate it on your own in the functi
 The only requirement is that it has an attribute `type` with the value `"simpleBallot"`, 
 as this is used to figure out which ballot object should be created.
 
-Now, your new ballot type is registered in the system.
-However, if you want to create an election with this ballot type, 
-you have to add this option in the file `goodvotex/voting/templates/create.html` in the select-form with id `ballot_type`.
-That's it.
+### New Voting Rule
+We assume you call your voting rule `SimpleVoteElection`.
+In the file `goodvotex/voting/models.py` you create a class `SimpleVoteElection` which inherits from the class `Election`.
+Note that you have to overwrite the following methods:
 
-If you have started the app before creating a new ballot type, you will most likely need to alter the database tables.
-We are working on a better option, but right now the only option is to delete the database (`storage/database.db`) and recreate it (e.g. using the `setup-development.sh`).
+- `_compute_winners(self)`: Returns the set of winners.
+- `_check_validity(self, ballot)`: This function is called before adding a ballot and should return True/False depending on whether the ballot is valid (and accepted in this election).
+- `get_ballot_type(self)`: Returns the type of accepted ballots in this election.
+
+Further, your class must have the following database attributes:
+
+    id: Mapped[int] = mapped_column(ForeignKey("election.id"), primary_key=True)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "simpleVoteElection",
+    }
+
+Next, go to the file `goodvotex/voting/service.py` and find the function `register_election` where you add your instructions for `SimpleVoteElection`.
+Finally, to make your voting rule available for the user, got to `goodvotex/voting/templates/create.html` and add it to the options.
+Please also write a paragraph about you voting rule in the accordion below.
+
 
 ## Copyright notice
 
