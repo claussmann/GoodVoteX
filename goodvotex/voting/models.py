@@ -334,6 +334,61 @@ class BordaCCElection(Election):
         return "ordinalBallot"
 
 
+class STVElection(Election):
+    id: Mapped[int] = mapped_column(ForeignKey("election.id"), primary_key=True)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "stvElection",
+    }
+
+    def _compute_winners(self):
+        mapping = {str(c.id): c for c in self.candidates}
+        voting_abilities = {v: 1 for v in self.ballots}
+        candidates_left = [str(c.id) for c in self.candidates]
+
+        committee = set()
+        quota = len(self.ballots) // (self.committeesize + 1) + 1 # Droop Quota
+
+        def plurality_winner_loser():
+            plur_scores = {c: 0 for c in candidates_left}
+            for b in self.ballots:
+                votes_for = min(candidates_left, key=b.position_of)
+                plur_scores[votes_for] += voting_abilities[b]
+            best = max(candidates_left, key=plur_scores.get)
+            worst = min(candidates_left, key=plur_scores.get)
+            return (best, plur_scores[best], worst, plur_scores[worst])
+        
+        def reduce_voting_ability(elected_candidate, score_of_elected):
+            exceed = score_of_elected - quota
+            avg_voting_ability_afterwards = exceed / score_of_elected
+            for b in self.ballots:
+                votes_for = min(candidates_left, key=b.position_of)
+                if votes_for == elected_candidate:
+                    voting_abilities[b] = voting_abilities[b] * avg_voting_ability_afterwards
+
+        while len(committee) < self.committeesize:
+            if sum(voting_abilities.values()) < quota:
+                break # This usually happens when there are fewer voters than the committee size.
+            winner, win_score, loser, los_score = plurality_winner_loser()
+            if win_score >= quota:
+                reduce_voting_ability(winner, win_score)
+                committee.add(winner)
+                candidates_left.remove(winner)
+            else:
+                candidates_left.remove(loser)
+        return [mapping[c] for c in committee]
+
+    def _check_validity(self, ballot):
+        ids = [str(c.id) for c in self.candidates]
+        for id in ballot.get_involved_candidates():
+            if id not in ids:
+                return False
+        return len(ballot.get_involved_candidates()) == len(ids)
+    
+    def get_ballot_type(self):
+        return "ordinalBallot"
+    
+
 class UtilitarianElection(Election):
     id: Mapped[int] = mapped_column(ForeignKey("election.id"), primary_key=True)
 

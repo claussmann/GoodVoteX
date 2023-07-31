@@ -18,6 +18,7 @@ def register_election(election_type, title, description, candidates, K, user_own
         "approvalElection": ApprovalElection,
         "bordaElection": BordaElection,
         "bordaCCElection": BordaCCElection,
+        "stvElection": STVElection,
         "savElection": SAVElection,
         "pavElection": PAVElection,
         "boundedApprovalElection": BoundedApprovalElection,
