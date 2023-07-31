@@ -19,13 +19,16 @@ def register():
         elif request.form.get('passwd') != request.form.get('passwd_confirm'):
             flash("Passwords do not match.", "danger")
         else:
-            service.register_user(
-                request.form.get('username'),
-                request.form.get('name'),
-                request.form.get('email'),
-                request.form.get('passwd')
-            )
-            flash("Registration successful.", "info")
+            try:
+                service.register_user(
+                    request.form.get('username'),
+                    request.form.get('name'),
+                    request.form.get('email'),
+                    request.form.get('passwd')
+                )
+                flash("Registration successful.", "info")
+            except:
+                flash("Something went wrong. Maybe username is already taken?") 
             return redirect(url_for('auth.login'))
 
     return render_template('register.html')
