@@ -29,6 +29,12 @@ class Election(db.Model):
         return False
 
     def add_ballot(self, ballot):
+        """
+        Adds a ballot to this election.
+
+        :param ballot:
+        :return:
+        """
         if self.is_stopped:
             raise Exception("The creator stopped the voting process. You can no longer vote.")
         self.ballots.append(ballot)
@@ -40,21 +46,49 @@ class Election(db.Model):
         self.votecount += 1
 
     def recompute_current_winner(self):
+        """
+        Recomputes the currently best committee.
+        Note that this should be called as rarely as possible, as it checks
+        all ( |candidates| \choose committeesize ) many committees' scores.
+
+        :return:
+        """
         for c in self.candidates:
             c.is_winner = False
         for w in self._compute_winner():
             w.is_winner = True
 
     def get_winners(self):
+        """
+        Get the (current) winners of this election.
+
+        :return: List of candidates
+        """
         return [c for c in self.candidates if c.is_winner]
 
     def stop(self):
+        """
+        Prevent further votes from being submitted.
+
+        :return:
+        """
         self.is_stopped = True
 
     def restart(self):
+        """
+        Allow votes to be submitted again.
+
+        :return:
+        """
         self.is_stopped = False
     
     def search_relevance(self, search_string):
+        """
+        Compute how likely this election fits the search string.
+
+        :param search_string:
+        :return: an integer
+        """
         search_string = search_string.lower()
         if search_string == str(self.id):
             return 100
@@ -120,22 +154,66 @@ class Ballot(db.Model):
 
     # Overwrite!
     def score(self, committee):
+        """
+        Compute the score for committee. The score is a numerical value. The 
+        interpretation is: higher the score <=> better the committee. Note that
+        this is only the score according to this ballot. The total score for
+        a committee will be computed within the Election class as the sum over
+        the scores for all committees.
+
+        :param committee: a set of candidate ids
+        :return: an integer
+        """
         pass
 
     # Optional Overwrite.
     def _check_validity(self):
+        """
+        Check whether this ballot is valid (e.g. any conditions are violated).
+        This will be called at the end of constucting this object.
+
+        :return: True/False
+        """
         return True
     
     # Overwrite!
     def is_of_type(self, ballot_type):
+        """
+        Checks whether this ballot works with the given ballot_type. Usually,
+        this function should return True only for the ballot type of this class,
+        as well as for the ballot type `any`. But there might be situations where
+        this ballot is also a subtype of ballot_type, i.e., it works with
+        ballot_type, too. This function is called when a ballot is added to an
+        election to check whether the ballot makes sense for the election type.
+
+        :param ballot_type: a string
+        :return: True/False
+        """
         pass
     
     # Overwrite!
     def _parse_from_json(self, json_content):
+        """
+        Compute the score for committee. The score is a numerical value. The 
+        interpretation is: higher the score <=> better the committee. Note that
+        this is only the score according to this ballot. The total score for
+        a committee will be computed within the Election class as the sum over
+        the scores for all committees.
+
+        :param committee: a set of candidate ids
+        :return: an integer
+        """
         pass
     
     # Overwrite!
     def get_involved_candidates(self):
+        """
+        Get the candidates which are involved in this ballot.
+        This function will be called when a ballot is added to an election to
+        check whether the involved candidates match the candidates of the election.
+
+        :return: The set of candidate ids.
+        """
         pass
 
 

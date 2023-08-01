@@ -1,8 +1,7 @@
 # From: https://docs.github.com/en/actions/publishing-packages/publishing-docker-images
 # and https://github.com/marketplace/actions/build-and-push-docker-images
 
-
-name: Build and publish the docker container
+name: Build docker:latest image (with version numbers).
 
 on:
   release:

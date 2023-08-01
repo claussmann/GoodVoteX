@@ -14,18 +14,24 @@ def register():
         return redirect(url_for('voting.start_page'))
 
     if request.method == 'POST':
-        try:
-            service.register_user(
-                request.form.get('username'),
-                request.form.get('name'),
-                request.form.get('email'),
-                request.form.get('passwd')
-            )
-            flash("Registration successful.", "info")
-        except:
-            return render_template('register.html')
+        if request.form.get('tnc_accept') != "accept":
+            flash("You must accept our Terms and Conditions.", "danger")
+        elif request.form.get('passwd') != request.form.get('passwd_confirm'):
+            flash("Passwords do not match.", "danger")
+        else:
+            try:
+                service.register_user(
+                    request.form.get('username'),
+                    request.form.get('name'),
+                    request.form.get('email'),
+                    request.form.get('passwd')
+                )
+                flash("Registration successful.", "info")
+            except:
+                flash("Something went wrong. Maybe username is already taken?") 
+            return redirect(url_for('auth.login'))
 
-    return redirect(url_for('auth.login'))
+    return render_template('register.html')
 
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -52,7 +58,7 @@ def logout():
     return redirect(url_for('voting.start_page'))
 
 
-@auth.route('/changepasswd')
+@auth.route('/changepasswd', methods=['POST'])
 @login_required
 def change_password():
     password = request.form.get('passwd')
