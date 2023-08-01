@@ -57,7 +57,7 @@ class Election(db.Model):
         """
         Recomputes the currently best committee.
         Note that this should be called as rarely as possible, as it checks
-        all ( |candidates| \choose committeesize ) many committees' scores.
+        all ( |candidates| choose committeesize ) many committees' scores.
 
         :return:
         """
@@ -176,7 +176,7 @@ class ApprovalElection(Election):
         for id in ballot.get_involved_candidates():
             if id not in ids:
                 return False
-        return True
+        return ballot.type == "approvalBallot"
     
     def get_ballot_type(self):
         return "approvalBallot"
@@ -206,7 +206,7 @@ class SAVElection(Election):
         for id in ballot.get_involved_candidates():
             if id not in ids:
                 return False
-        return True
+        return ballot.type == "approvalBallot"
     
     def get_ballot_type(self):
         return "approvalBallot"
@@ -238,7 +238,7 @@ class PAVElection(Election):
         for id in ballot.get_involved_candidates():
             if id not in ids:
                 return False
-        return True
+        return ballot.type == "approvalBallot"
     
     def get_ballot_type(self):
         return "approvalBallot"
@@ -267,7 +267,7 @@ class BoundedApprovalElection(Election):
         for id in ballot.get_involved_candidates():
             if id not in ids:
                 return False
-        return ballot._check_validity()
+        return ballot._check_validity() and ballot.type == "boundedApprovalBallot"
     
     def get_ballot_type(self):
         return "boundedApprovalBallot"
@@ -298,6 +298,8 @@ class BordaElection(Election):
         for id in ballot.get_involved_candidates():
             if id not in ids:
                 return False
+        if ballot.type != "cardinalBallot":
+            return False
         return len(ballot.get_involved_candidates()) == len(ids)
     
     def get_ballot_type(self):
@@ -328,6 +330,8 @@ class BordaCCElection(Election):
         for id in ballot.get_involved_candidates():
             if id not in ids:
                 return False
+        if ballot.type != "cardinalBallot":
+            return False
         return len(ballot.get_involved_candidates()) == len(ids)
     
     def get_ballot_type(self):
@@ -383,6 +387,8 @@ class STVElection(Election):
         for id in ballot.get_involved_candidates():
             if id not in ids:
                 return False
+        if ballot.type != "cardinalBallot":
+            return False
         return len(ballot.get_involved_candidates()) == len(ids)
     
     def get_ballot_type(self):
@@ -415,7 +421,7 @@ class UtilitarianElection(Election):
         for id in ballot.get_involved_candidates():
             if id not in ids:
                 return False
-        return ballot._check_validity()
+        return ballot._check_validity() and ballot.type == "cardinalBallot"
     
     def get_ballot_type(self):
         return "cardinalBallot"
@@ -461,8 +467,6 @@ class Ballot(db.Model):
     def __init__(self, json_content, **kwargs):
         super(Ballot, self).__init__(**kwargs)
         self._parse_from_json(json_content)
-        if not self._check_validity():
-            raise Exception("Ballot does not seem to be valid.") 
 
     # Optional Overwrite.
     def _check_validity(self):
