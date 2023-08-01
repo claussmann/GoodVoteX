@@ -581,88 +581,53 @@ class BoundedApprovalBallot(Ballot):
     }
 
     def score(self, committee):
-        sets = self._decode()
-        return sum(bs.phi(committee) * bs.intersection_size(committee) for bs in sets)
+        def phi(bset, bound, committee):
+            intersect_size = len(bset.intersection(committee))
+            if intersect_size < bound[0] or intersect_size > bound[2]:
+                return 0 # out of lower or upper bound
+            if intersect_size > bound[1]:
+                return bound[1] / intersect_size # in substitution area
+            return 1 # in approval area
+        
+        pairs = self._decode()
+        return sum(phi(set(s), b, committee) * len(set(s).intersection(committee)) for s,b in pairs)
 
     def _check_validity(self):
-        sets = self._decode()
-        for i in range(1, len(sets)):
-            for j in range(i):
-                if not sets[i].is_disjoint(sets[j]):
-                    return False
+        pairs = self._decode()
+        sets = [set(pair[0]) for pair in pairs]
+        bounds = [pair[1] for pair in pairs]
+        # Check for disjointness
+        for i,j in itertools.combinations(sets, 2):
+            if i.intersection(j) != set():
+                print(i.intersection(j))
+                return False
+        # Check all bounds are present
+        for b in bounds:
+            if len(b) != 3:
+                return False
+        # Check ballot is satisfiable
+        for s,b in pairs:
+            if len(s) < b[0]:
+                return False
+            if b[0] > b[1] or b[1] > b[2] or b[0] > b[2]:
+                return False
         return True
     
     def _parse_from_json(self, json_content):
         sets = json_content["sets"]
         bounds = json_content["bounds"]
-        bounded_sets = list()
-        for s in sets:
-            items_in_set = set(sets[s])
-            if len(items_in_set) == 0:
-                continue
-            bounded_sets.append(BoundedSet(bounds[s][0], bounds[s][1], bounds[s][2], items_in_set))
-        bounded_sets_encoded = {"bsets": [bs.serialize() for bs in bounded_sets]}
-        self.json_encoded = json.dumps(bounded_sets_encoded)
+        re_encoded = []
+        for name,s in sets.items():
+            s = list(set(s)) # make sure no element is dublicate
+            re_encoded.append([s, bounds[name]])
+        self.json_encoded = json.dumps(re_encoded)
     
     def get_involved_candidates(self):
+        pairs = self._decode()
         ret = set()
-        sets = self._decode()
-        for s in sets:
+        for s in [set(pair[0]) for pair in pairs]:
             ret = ret.union(s)
         return ret
     
     def _decode(self):
-        raw_obj = json.loads(self.json_encoded)
-        ret = list()
-        for bs in raw_obj["bsets"]:
-            ret.append(BoundedSet(bs["lower"], bs["saturation"], bs["upper"], *bs["set"]))
-        return ret
-
-
-class BoundedSet(frozenset):
-    def __new__(cls, lower, saturation, upper, *items):
-        if len(items) == 1 and type(*items) == type(set()):
-            this_set = super(BoundedSet, cls).__new__(cls, *items)
-        else:
-            this_set = super(BoundedSet, cls).__new__(cls, items)
-        this_set.lower = lower
-        this_set.saturation = saturation
-        this_set.upper = upper
-        return this_set
-
-    def __eq__(self, other):
-        if type(other) != type(self):
-            return False
-        if self.lower != other.lower or self.upper != other.upper or self.saturation != other.saturation:
-            return False
-        if len(other) != len(self):
-            return False
-        for a in self:
-            if a not in other:
-                return False
-        return True
-    
-    def __str__(self):
-        items = str(sorted(self)) # sort alternatives (easier debugging)
-        items = items[1:-1] # cut breakets
-        return "<{%s}, %d, %d, %d>" %(items, self.lower, self.saturation, self.upper)
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def is_disjoint(self, other):
-        return len(self.intersection(other)) == 0
-
-    def intersection_size(self, committee):
-        return len(self.intersection(committee))
-
-    def phi(self, committee):
-        intersect_size = self.intersection_size(committee)
-        if intersect_size < self.lower or intersect_size > self.upper:
-            return 0
-        if intersect_size > self.saturation:
-            return self.saturation / intersect_size
-        return 1
-
-    def serialize(self):
-        return {"set": list(self), "lower": self.lower, "saturation": self.saturation, "upper": self.upper}
+        return json.loads(self.json_encoded)

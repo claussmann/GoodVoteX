@@ -62,7 +62,7 @@ def test_cardinal_ballot():
 
 def test_bounded_approval_ballot():
     json_content = {
-        'sets' : {"bs1": ["a", "b", "c"], "bs2": ["x", "y"], "bs3": ["d"], "bs4": ["e", "f", "g"]},
+        'sets' : {"bs1": ["a", "a", "b", "c"], "bs2": ["x", "y"], "bs3": ["d"], "bs4": ["e", "f", "g"]},
         'bounds' : {"bs1": [1, 2, 3], "bs2": [1, 1, 1], "bs3": [1, 1, 1], "bs4": [1, 3, 3]}
     }
     ballot = BoundedApprovalBallot(json_content)
@@ -74,6 +74,35 @@ def test_bounded_approval_ballot():
     assert ballot.score({"y", "d"}) == 2
     assert ballot.score({"e", "f", "g"}) == 3
 
+def test_bounded_approval_ballot_forbidden_ballots():
+    json_content1 = {
+        'sets' : {"bs1": ["a", "b", "c"], "bs2": ["a", "b"], "bs3": ["d"]},
+        'bounds' : {"bs1": [1, 2, 3], "bs2": [1, 1, 1], "bs3": [1, 1, 1]}
+    }
+    ballot = BoundedApprovalBallot(json_content1)
+    assert not ballot._check_validity() # not disjoint
+
+    json_content2 = {
+        'sets' : {"bs1": ["a", "b", "c"], "bs2": ["d", "e"], "bs3": ["f"]},
+        'bounds' : {"bs1": [1, 2, 3], "bs2": [1, 1, 1], "bs3": [2, 2, 2]}
+    }
+    ballot = BoundedApprovalBallot(json_content2)
+    assert not ballot._check_validity() # lower bound too high
+
+    json_content3 = {
+        'sets' : {"bs1": ["a", "b", "c"], "bs2": ["d", "e"]},
+        'bounds' : {"bs1": [1, 2, 3], "bs2": [2, 1, 2]}
+    }
+    ballot = BoundedApprovalBallot(json_content3)
+    assert not ballot._check_validity() # lower bound higher than saturation
+
+    json_content4 = {
+        'sets' : {"bs1": ["a", "b", "c"], "bs2": ["d", "e"]},
+        'bounds' : {"bs1": [1, 2, 3], "bs2": [1, 1]}
+    }
+    ballot = BoundedApprovalBallot(json_content4)
+    assert not ballot._check_validity() # incomplete bounds
+    
 
 # """
 #     Tests for Election
