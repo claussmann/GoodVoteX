@@ -8,25 +8,9 @@ import pytest
 #                 Helpers
 #################################################################################
 
-def make_approval_ballot(candidates):
-    json_content = {'app_candidates' : [str(c) for c in candidates], 'type' : 'approvalBallot'}
-    return ApprovalBallot(json_content)
-
-def make_bounded_ballot(*bounded_sets):
-    json_content = {
-        'sets' : dict(),
-        'bounds' : dict()
-    }
-    i = 0
-    for bs in bounded_sets:
-        json_content['sets'][str(i)] = [str(c) for c in bs]
-        json_content['bounds'][str(i)] = [bs.lower, bs.saturation, bs.upper]
-        i += 1
-    return BoundedApprovalBallot(json_content)
-
-def make_dummy_election(committeesize, ballot_type, candidate_ids):
-    e = Election(title="Test", description="test", committeesize=committeesize,
-                is_stopped=False, ballot_type=ballot_type, votecount=0, ballots=list())
+def make_dummy_election(cosntructor, committeesize, candidate_ids):
+    e = cosntructor(title="Test", description="test", committeesize=committeesize,
+                is_stopped=False, votecount=0, ballots=list())
     e.candidates = [Candidate(name=cid, id=cid) for cid in candidate_ids]
     return e
 
@@ -102,71 +86,192 @@ def test_bounded_approval_ballot_forbidden_ballots():
     }
     ballot = BoundedApprovalBallot(json_content4)
     assert not ballot._check_validity() # incomplete bounds
-    
 
-# """
-#     Tests for Election
-# """
 
-# def test_stopped_election_doesnt_accept_ballots():
-#     e = make_dummy_election(2, "any", [1,2,3])
-#     e.stop()
-#     b = make_approval_ballot([1,2,3])
-#     with pytest.raises(Exception):
-#         e.add_ballot(b)
+#################################################################################
+#                 Elections
+#################################################################################
 
-# def test_stopped_election_can_be_restarted():
-#     e = make_dummy_election(2, "any", [1,2,3,4,5])
-#     e.stop()
-#     e.restart()
-#     b = make_approval_ballot([1,2,3])
-#     e.add_ballot(b)
+def test_general_election_methods_start_stop():
+    e = Election(title="Test", description="test", committeesize=2, is_stopped=False, ballots=list(), votecount=0)
+    e.stop()
+    assert e.is_stopped == True
+    with pytest.raises(Exception):
+        e.add_ballot(ApprovalBallot({"app_candidates" : ["1", "2", "3"]}))
+    e.restart()
+    assert e.is_stopped == False
+    e.add_ballot(ApprovalBallot({"app_candidates" : ["1", "2", "3"]}))
+    assert e.votecount == 1
 
-# def test_election_accepts_only_correct_ballots():
-#     e = make_dummy_election(2, "approvalBallot", [1,2,3,4])
-#     b = make_bounded_ballot(BoundedSet(1,2,3,{'a', 'b', 'c', 'd'}))
-#     with pytest.raises(Exception): # bounded ballots cannot be added
-#         e.add_ballot(b)
+def test_general_election_methods_search_relevance():
+    e = Election(title="This Year Food Selection: What should be served?",
+                 description="You decide on Food: Banana, or Fish? Döner",
+                 id=42)
+    assert e.search_relevance("Food") == 1
+    assert e.search_relevance("fOod") == 1
+    assert e.search_relevance("Food Selection?") == 2
+    assert e.search_relevance("You be or Banana") == 1
+    assert e.search_relevance("Apple") == 0
+    assert e.search_relevance("be") == 0  # short words are ignored
+    assert e.search_relevance("döner") == 1
+    assert e.search_relevance("What should be served? Banana or Fish?") == 5
+    assert e.search_relevance("42") == 100
 
-# def test_election_accepts_only_ballots_ith_valid_candidates():
-#     e = make_dummy_election(2, "any", [1,2,3,4])
-#     b = make_approval_ballot([1,5])
-#     with pytest.raises(Exception): # candidate with id 5 doesnt exist
-#         e.add_ballot(b)
+def test_approval_election_compute_winners():
+    e = make_dummy_election(ApprovalElection, 3, ["a", "b", "c", "d", "e", "f"])
+    e.add_ballot(ApprovalBallot({"app_candidates" : ["a", "b", "e"]}))
+    e.add_ballot(ApprovalBallot({"app_candidates" : ["a", "e"]}))
+    e.add_ballot(ApprovalBallot({"app_candidates" : ["c", "f"]}))
+    e.add_ballot(ApprovalBallot({"app_candidates" : ["e"]}))
+    e.add_ballot(ApprovalBallot({"app_candidates" : ["c"]}))
+    e.recompute_current_winner()
+    winners = {c.id for c in e.get_winners()}
+    assert winners == {"a", "c", "e"}
 
-# def test_search_relevance():
-#     e = Election()
-#     e.id = 42
-#     e.title = "This Year Food Selection: What should be served?"
-#     e.description = "You decide on Food: Banana, or Fish? Döner?"
-#     assert e.search_relevance("Food") == 1
-#     assert e.search_relevance("fOod") == 1
-#     assert e.search_relevance("Food Selection?") == 2
-#     assert e.search_relevance("You be or Banana") == 1
-#     assert e.search_relevance("Apple") == 0
-#     assert e.search_relevance("be") == 0  # short words are ignored
-#     assert e.search_relevance("döner") == 1
-#     assert e.search_relevance("What should be served? Banana or Fish?") == 5
-#     assert e.search_relevance("42") == 100
+def test_approval_election_doesnt_accept_invalid_ballots():
+    e = make_dummy_election(ApprovalElection, 3, ["a", "b", "c", "d", "e", "f"])
+    with pytest.raises(Exception):
+        e.add_ballot(ApprovalBallot({"app_candidates" : ["x", "b"]})) # x is no candidate
+    with pytest.raises(Exception):
+        e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1}})) # no approval ballot
 
-# def test_score():
-#     e = make_dummy_election(3, "boundedApprovalBallot", ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'])
-#     b1 = make_bounded_ballot(BoundedSet(1,2,3,{'a', 'b', 'c', 'd'}), BoundedSet(1,2,2,{'e', 'f'}))
-#     b2 = make_bounded_ballot(BoundedSet(1,2,3,{'a', 'b', 'c', 'd'}), BoundedSet(2,3,3,{'g', 'h', 'i'}))
-#     e.ballots = [b1, b2]
-#     assert e._score({e.candidates[0], e.candidates[1], e.candidates[2], e.candidates[5], e.candidates[7]}) == 5
+def test_sav_election_compute_winners():
+    e = make_dummy_election(SAVElection, 2, ["a", "b", "c", "d", "e", "f"])
+    e.add_ballot(ApprovalBallot({"app_candidates" : ["a", "b", "e"]}))
+    e.add_ballot(ApprovalBallot({"app_candidates" : ["a", "e"]}))
+    e.add_ballot(ApprovalBallot({"app_candidates" : ["d", "e", "f"]}))
+    e.add_ballot(ApprovalBallot({"app_candidates" : ["c"]}))
+    e.recompute_current_winner()
+    winners = {c.id for c in e.get_winners()}
+    assert winners == {"c", "e"}
 
-# def test_winners():
-#     e = make_dummy_election(3, "approvalBallot", ['a', 'b', 'c', 'd', 'e'])
-#     e.add_ballot(make_approval_ballot(['a', 'b']))
-#     e.add_ballot(make_approval_ballot(['c', 'b', 'e']))
-#     e.add_ballot(make_approval_ballot(['c', 'e']))
-#     e.add_ballot(make_approval_ballot(['b']))
-#     e.add_ballot(make_approval_ballot(['c']))
-#     e.add_ballot(make_approval_ballot(['e', 'd', 'c']))
+def test_sav_election_doesnt_accept_invalid_ballots():
+    e = make_dummy_election(SAVElection, 3, ["a", "b", "c", "d", "e", "f"])
+    with pytest.raises(Exception):
+        e.add_ballot(ApprovalBallot({"app_candidates" : ["x", "b"]})) # x is no candidate
+    with pytest.raises(Exception):
+        e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1}})) # no approval ballot
 
-#     e.recompute_current_winner()
-#     winners = e.get_winners()
-#     assert len(winners) == 3
-#     assert {str(c.id) for c in winners} == {'b', 'c', 'e'}
+def test_pav_election_compute_winners():
+    e = make_dummy_election(PAVElection, 3, ["a", "b", "c", "d", "e"])
+    e.add_ballot(ApprovalBallot({"app_candidates" : ["a", "b", "e"]}))
+    e.add_ballot(ApprovalBallot({"app_candidates" : ["a", "e"]}))
+    e.add_ballot(ApprovalBallot({"app_candidates" : ["d", "e"]}))
+    e.add_ballot(ApprovalBallot({"app_candidates" : ["c"]}))
+    e.recompute_current_winner()
+    winners = {c.id for c in e.get_winners()}
+    assert winners == {"a", "e", "c"}
 
+def test_pav_election_doesnt_accept_invalid_ballots():
+    e = make_dummy_election(PAVElection, 3, ["a", "b", "c", "d", "e", "f"])
+    with pytest.raises(Exception):
+        e.add_ballot(ApprovalBallot({"app_candidates" : ["x", "b"]})) # x is no candidate
+    with pytest.raises(Exception):
+        e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1}})) # no approval ballot
+
+def test_bounded_ballot_election_compute_winners():
+    e = make_dummy_election(BoundedApprovalElection, 3, ["a", "b", "c", "d", "e"])
+    json_content1 = {
+        'sets' : {"bs1": ["a", "c"], "bs2": ["d", "e"]},
+        'bounds' : {"bs1": [1, 2, 2], "bs2": [1, 1, 1]}
+    }
+    json_content2 = {
+        'sets' : {"bs2": ["a", "b"], "bs3": ["c", "d"]},
+        'bounds' : {"bs2": [1, 1, 2], "bs3": [2, 2, 2]}
+    }
+    e.add_ballot(BoundedApprovalBallot(json_content1))
+    e.add_ballot(BoundedApprovalBallot(json_content2))
+    e.recompute_current_winner()
+    winners = {c.id for c in e.get_winners()}
+    assert winners == {"a", "c", "d"}
+
+def test_bounded_ballot_election_doesnt_accept_invalid_ballots():
+    e = make_dummy_election(BoundedApprovalElection, 3, ["a", "b", "c", "d"])
+    with pytest.raises(Exception):
+        json_content = {
+            'sets' : {"bs1": ["a", "x"], "bs2": ["d", "y"]},
+            'bounds' : {"bs1": [1, 2, 2], "bs2": [1, 1, 1]}
+        }
+        e.add_ballot(BoundedApprovalBallot(json_content)) # x, y are no candidates
+    with pytest.raises(Exception):
+        json_content = {
+            'sets' : {"bs1": ["a", "b"], "bs2": ["b", "d"]},
+            'bounds' : {"bs1": [1, 2, 2], "bs2": [1, 1, 1]}
+        }
+        e.add_ballot(BoundedApprovalBallot(json_content)) # not disjoint
+    with pytest.raises(Exception):
+        e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1}})) # no bounded ballot
+
+def test_borda_election_compute_winners():
+    e = make_dummy_election(BordaElection, 2, ["a", "b", "c", "d", "e"])
+    e.add_ballot(OrdinalBallot({"order" : ["b", "a", "d", "c", "e"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["e", "b", "a", "d", "c"]}))
+    e.recompute_current_winner()
+    winners = {c.id for c in e.get_winners()}
+    assert winners == {"a", "b"}
+
+def test_borda_election_doesnt_accept_invalid_ballots():
+    e = make_dummy_election(BordaElection, 3, ["a", "b", "c", "d"])
+    with pytest.raises(Exception):
+        e.add_ballot(OrdinalBallot({"order" : ["b", "x", "d", "y", "e"]})) # x, y are no candidates
+    with pytest.raises(Exception):
+        e.add_ballot(OrdinalBallot({"order" : ["b", "a", "d"]})) # not complete
+    with pytest.raises(Exception):
+        e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1}})) # no ordinal ballot
+
+def test_borda_cc_election_compute_winners():
+    e = make_dummy_election(BordaCCElection, 2, ["a", "b", "c", "d", "e"])
+    e.add_ballot(OrdinalBallot({"order" : ["c", "a", "d", "b", "e"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["e", "b", "a", "d", "c"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["e", "b", "a", "d", "c"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["e", "b", "a", "d", "c"]}))
+    e.recompute_current_winner()
+    winners = {c.id for c in e.get_winners()}
+    assert winners == {"c", "e"}
+
+def test_borda_cc_election_doesnt_accept_invalid_ballots():
+    e = make_dummy_election(BordaCCElection, 3, ["a", "b", "c", "d"])
+    with pytest.raises(Exception):
+        e.add_ballot(OrdinalBallot({"order" : ["b", "x", "d", "y", "e"]})) # x, y are no candidates
+    with pytest.raises(Exception):
+        e.add_ballot(OrdinalBallot({"order" : ["b", "a", "d"]})) # not complete
+    with pytest.raises(Exception):
+        e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1}})) # no ordinal ballot
+
+def test_stv_election_compute_winners():
+    e = make_dummy_election(STVElection, 2, ["a", "b", "c", "d", "e"])
+    e.add_ballot(OrdinalBallot({"order" : ["c", "a", "d", "b", "e"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["e", "c", "a", "d", "b"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["e", "b", "a", "d", "c"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["e", "b", "a", "d", "c"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["e", "b", "a", "d", "c"]}))
+    e.recompute_current_winner()
+    winners = {c.id for c in e.get_winners()}
+    assert winners == {"e", "c"}
+
+def test_stv_election_doesnt_accept_invalid_ballots():
+    e = make_dummy_election(STVElection, 3, ["a", "b", "c", "d"])
+    with pytest.raises(Exception):
+        e.add_ballot(OrdinalBallot({"order" : ["b", "x", "d", "y", "e"]})) # x, y are no candidates
+    with pytest.raises(Exception):
+        e.add_ballot(OrdinalBallot({"order" : ["b", "a", "d"]})) # not complete
+    with pytest.raises(Exception):
+        e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1}})) # no ordinal ballot
+
+def test_utilitarian_election_compute_winners():
+    e = make_dummy_election(UtilitarianElection, 2, ["a", "b", "c", "d", "e"])
+    e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1, "c":5}}))
+    e.add_ballot(CardinalBallot({"ratings" : {"a":3, "b":-1, "c":-1}}))
+    e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1, "c":-1, "e":4}}))
+    e.recompute_current_winner()
+    winners = {c.id for c in e.get_winners()}
+    assert winners == {"a", "e"}
+
+def test_utilitarian_election_doesnt_accept_invalid_ballots():
+    e = make_dummy_election(UtilitarianElection, 3, ["a", "b", "c", "d"])
+    with pytest.raises(Exception):
+        e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1, "x":5}})) # x is no candidate
+    with pytest.raises(Exception):
+        e.add_ballot(CardinalBallot({"ratings" : {"a":100, "b":-1}})) # value too high
+    with pytest.raises(Exception):
+        e.add_ballot(OrdinalBallot({"order" : ["e", "b", "a", "d", "c"]})) # no cardinal ballot

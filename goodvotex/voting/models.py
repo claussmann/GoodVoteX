@@ -127,7 +127,7 @@ class Election(db.Model):
 
         :return: Set
         """
-        pass
+        return {}
 
     # Overwrite!
     def _check_validity(self, ballot):
@@ -137,7 +137,7 @@ class Election(db.Model):
 
         :return: True/False
         """
-        pass
+        return True
 
     # Overwrite!
     def get_ballot_type(self):
@@ -148,7 +148,7 @@ class Election(db.Model):
 
         :return: String
         """
-        pass
+        return "any"
 
 
 class ApprovalElection(Election):
@@ -298,7 +298,7 @@ class BordaElection(Election):
         for id in ballot.get_involved_candidates():
             if id not in ids:
                 return False
-        if ballot.type != "cardinalBallot":
+        if ballot.type != "ordinalBallot":
             return False
         return len(ballot.get_involved_candidates()) == len(ids)
     
@@ -319,7 +319,7 @@ class BordaCCElection(Election):
         best_committee = None
         best_score = -1
         for committee in itertools.combinations(ids, self.committeesize):
-            curr_score = sum(max(m - ballot.position_of(c) for c in ids) for ballot in self.ballots)
+            curr_score = sum(max((m - ballot.position_of(c)) for c in committee) for ballot in self.ballots)
             if curr_score > best_score:
                 best_score = curr_score
                 best_committee = committee
@@ -330,7 +330,7 @@ class BordaCCElection(Election):
         for id in ballot.get_involved_candidates():
             if id not in ids:
                 return False
-        if ballot.type != "cardinalBallot":
+        if ballot.type != "ordinalBallot":
             return False
         return len(ballot.get_involved_candidates()) == len(ids)
     
@@ -387,7 +387,7 @@ class STVElection(Election):
         for id in ballot.get_involved_candidates():
             if id not in ids:
                 return False
-        if ballot.type != "cardinalBallot":
+        if ballot.type != "ordinalBallot":
             return False
         return len(ballot.get_involved_candidates()) == len(ids)
     
