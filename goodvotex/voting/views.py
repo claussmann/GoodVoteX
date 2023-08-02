@@ -63,7 +63,7 @@ def details_page(electionID):
 @voting.route('/vote/<electionID>')
 def voting_page(electionID):
     election=service.get_election(electionID)
-    return render_template('vote_%s.html' % election.ballot_type, election=election)
+    return render_template('vote_%s.html' % election.get_ballot_type(), election=election)
 
 
 @voting.route('/vote/<electionID>', methods=['POST'])

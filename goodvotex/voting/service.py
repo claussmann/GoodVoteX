@@ -3,7 +3,7 @@ from .models import *
 from .. import db
 
 
-def register_election(ballot_type, title, description, candidates, K, user_owner):
+def register_election(election_type, title, description, candidates, K, user_owner):
     """
     Registers a new election.
 
@@ -14,7 +14,17 @@ def register_election(ballot_type, title, description, candidates, K, user_owner
     :param user_owner:
     :return: When registration successful, returns the election object.
     """
-    e = Election(ballot_type=ballot_type, title=title, description=description, committeesize=K)
+    constructors = {
+        "approvalElection": ApprovalElection,
+        "bordaElection": BordaElection,
+        "bordaCCElection": BordaCCElection,
+        "stvElection": STVElection,
+        "savElection": SAVElection,
+        "pavElection": PAVElection,
+        "boundedApprovalElection": BoundedApprovalElection,
+        "utilitarianElection": UtilitarianElection
+    }
+    e = constructors[election_type](title=title, description=description, committeesize=K)
     for c in candidates:
         e.candidates.append(Candidate(name=c))
     user_owner.elections.append(e)
@@ -67,8 +77,10 @@ def add_vote_from_json(election_id, json_content):
     """
     e = get_election(election_id)
     constructors = {
-        "boundedApprovalBallot" : BoundedApprovalBallot,
-        "approvalBallot" : ApprovalBallot
+        "boundedApprovalBallot": BoundedApprovalBallot,
+        "approvalBallot": ApprovalBallot,
+        "cardinalBallot": CardinalBallot,
+        "ordinalBallot": OrdinalBallot
     }
     if json_content["type"] in constructors:
         ballot = constructors[json_content["type"]](json_content)
