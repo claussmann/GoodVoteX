@@ -31,7 +31,7 @@
     {% for candidate in election.candidates %}
     <div class="candidate mb-1" id="{{candidate.id}}">
       <button id="{{candidate.id}}_up" type="button" class="btn btn-light mr-2 btn-lg" onclick="move_up(this)">Up</button>
-      <button type="button" class="btn btn-primary btn-lg" disabled>{{candidate.name}} {{candidate.id}}</button>
+      <button type="button" class="btn btn-primary btn-lg" disabled>{{candidate.name}}</button>
       <button id="{{candidate.id}}_down" type="button" class="btn btn-light mr-2 btn-lg" onclick="move_down(this)">Down</button>
     </div>
     {% endfor %}
