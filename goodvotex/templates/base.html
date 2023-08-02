@@ -48,7 +48,7 @@
                                 <hr>
                                 <br>
                                 <h4>Your elections:</h4>
-                                {% if elections|length > 0 %}
+                                {% if user.elections|length > 0 %}
                                     <ul>
                                         {% for e in user.elections %}
                                             <li><a href="/details/{{ e.id }}">{{ e.title }}</a></li>
