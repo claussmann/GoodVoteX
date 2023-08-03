@@ -371,6 +371,35 @@ class BordaCCElection(Election):
     def get_ballot_type(self):
         return "ordinalBallot"
 
+class BucklinElection(Election):
+    id: Mapped[int] = mapped_column(ForeignKey("election.id"), primary_key=True)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "bucklinElection",
+    }
+
+    def _compute_winners(self):
+        mapping = {str(c.id): c for c in self.candidates}
+        scores = {c: 0 for c in [str(x.id) for x in self.candidates]}
+        n = len(self.ballots)
+        i = 0
+        while max(scores.values()) < n//2 + 1:
+            i += 1
+            for c in [str(x.id) for x in self.candidates]:
+                scores[c] = len([v for v in self.ballots if v.position_of(c) <= i])
+        return {mapping[max(scores.keys(), key=scores.get)]}
+
+    def _check_validity(self, ballot):
+        ids = [str(c.id) for c in self.candidates]
+        for id in ballot.get_involved_candidates():
+            if id not in ids:
+                return False
+        if ballot.type != "ordinalBallot":
+            return False
+        return len(ballot.get_involved_candidates()) == len(ids)
+    
+    def get_ballot_type(self):
+        return "ordinalBallot"
 
 class STVElection(Election):
     id: Mapped[int] = mapped_column(ForeignKey("election.id"), primary_key=True)

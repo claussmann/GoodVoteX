@@ -136,6 +136,7 @@
                             <option value="savElection">Satisfaction Approval Voting</option>
                             <option value="bordaElection">Borda Election</option>
                             <option value="copelandElection">Copeland Election</option>
+                            <option value="bucklinElection">Bucklin Election</option>
                             <option value="stvElection">Single Transferable Vote</option>
                             <option value="utilitarianElection">Utilitarian Election</option>
                         </select>
@@ -319,6 +320,32 @@
                         <li><b>Pros:</b> Relatively expressive; relatively easy to use, Condorcet-consistent</li>
                         <li><b>Cons:</b> -</li>
                         <li><b>Use Cases:</b> -</li>
+                        <li><b>Available For:</b> Single-Winner</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingBucklin">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBucklin" aria-expanded="false" aria-controls="collapseBucklin">
+                  Copeland Election
+              </button>
+            </h2>
+            <div id="collapseBucklin" class="accordion-collapse collapse" aria-labelledby="headingBucklin" data-bs-parent="#ballotAccordion">
+                <div class="accordion-body">
+                    <p>
+                        Bucklin voting works as follows.
+                        In the first round we consider every first places of the candidates.
+                        If any candidate receives a majority (i.e., more than <i>n/2</i> when there are <i>n</i> voters) of first places, it wins.
+                        Otherwise, in the second round we consider all first and second places and check whether any candidate has more than <i>n/2</i> of them.
+                        If not, we consider every first to third place, and so on.
+                        Should two candidates at the same time exceed <i>n/2</i> of the votes, the one with more places (first to x place) wins.
+                    </p>
+                    <ul>
+                        <li><b>Ballots:</b> Ordinal Ranks</li>
+                        <li><b>Pros:</b> Relatively expressive; relatively easy to use, resistence against manipulation</li>
+                        <li><b>Cons:</b> -</li>
+                        <li><b>Use Cases:</b> A similar system is used in skating and dance sport.</li>
                         <li><b>Available For:</b> Single-Winner</li>
                     </ul>
                 </div>

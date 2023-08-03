@@ -17,6 +17,7 @@ We currently support the following voting rules:
 | Borda-Chamberlin-Courant              | Ordinal Ranks            | -                                                                                        |
 | Single Transferable Vote              | Ordinal Ranks            | -                                                                                        |
 | Copeland                              | Ordinal Ranks            | -                                                                                        |
+| Bucklin                               | Ordinal Ranks            | -                                                                                        |
 | Welfare Maximization                  | Cardinal ballot          | -                                                                                        |
 
 ## Run (Production)

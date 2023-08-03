@@ -22,6 +22,7 @@ def register_election(election_type, title, description, candidates, K, user_own
         "savElection": SAVElection,
         "copelandElection": CopelandElection,
         "pavElection": PAVElection,
+        "bucklinElection": BucklinElection,
         "boundedApprovalElection": BoundedApprovalElection,
         "utilitarianElection": UtilitarianElection
     }
