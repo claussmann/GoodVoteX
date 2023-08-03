@@ -1,67 +1,77 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="col-sm-11 mx-auto">
-    <div class="card text-dark bg-warning">
+<div class="col-sm-12 mx-auto">
+    <div class="card text-dark">
         <div class="card-header">
-            <b>Create New Election</b>
+            <ul class="nav nav-tabs card-header-tabs">
+            <li class="nav-item">
+              <a id="nav-mw" class="nav-link active" href="#" onclick="showMultiWinner()">Multiwinner Election</a>
+            </li>
+            <li class="nav-item">
+              <a id="nav-sw" class="nav-link" href="#" onclick="showSingleWinner()">Single-Winner Election</a>
+            </li>
+          </ul>
         </div>
         <div class="card-body">
-            <form action="/create" method="post">
-                <div class="form-group">
-                    <select name="type" class="form-select">
-                        <option value="approvalElection">Approval Voting</option>
-                        <option value="savElection">Satisfaction Approval Voting</option>
-                        <option value="pavElection">Proportional Approval Voting</option>
-                        <option value="boundedApprovalElection">Bounded Approval Election</option>
-                        <option value="bordaElection">Borda Election</option>
-                        <option value="bordaCCElection">Borda Chamberlin-Courant</option>
-                        <option value="stvElection">Single Transferable Vote</option>
-                        <option value="utilitarianElection">Utilitarian Election</option>
-                    </select>
-                    <small class="form-text text-muted">Select the voting method for your election. You can find descriptions below.</small>
-                </div>
 
-                <div class="form-group">
-                    <input type="text" id="name" name="name" placeholder="Election Title*" required class="form-control">
-                    <small class="form-text text-muted">Give your election an easy to remember name.</small>
-                </div>
-                <div class="form-group">
-                    <textarea id="description" name="description" placeholder="Description*" required class="form-control" rows="5"></textarea>
-                    <small class="form-text text-muted">Briefly describe your election.</small>
-                </div>
-                <div id="form-hidden" style="display: none;">
-                    <div class="form-group">
-                        <input type="text" id="candidate1" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;" placeholder="First Candidate*"
-                            required class="form-control float-start">
-                        <input type="text" id="candidate2" name="candidates[]" style="width: 49%; margin-bottom: 2px;" placeholder="Second Candidate*"
-                            required class="form-control float-start">
-                        <input type="text" id="candidate3" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;" placeholder="Third Candidate*"
-                            required class="form-control float-start">
-                        <input type="text" id="candidate4" name="candidates[]" style="width: 49%; margin-bottom: 2px;" placeholder="Candidate"
-                            class="form-control float-start">
-                        <input type="text" id="candidate5" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;" placeholder="Candidate"
-                            class="form-control float-start">
-                        <input type="text" id="candidate6" name="candidates[]" style="width: 49%; margin-bottom: 2px;" placeholder="Candidate"
-                            class="form-control float-start">
-                        <div id="candidates-hidden" style="display: none;">
-                            <input type="text" id="candidate7" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;"
-                                placeholder="Candidate" class="form-control float-start">
-                            <input type="text" id="candidate8" name="candidates[]" style="width: 49%; margin-bottom: 2px;"
-                                placeholder="Candidate" class="form-control float-start">
-                            <input type="text" id="candidate9" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;"
-                                placeholder="Candidate" class="form-control float-start">
-                            <input type="text" id="candidate10" name="candidates[]" style="width: 49%; margin-bottom: 2px;"
-                                placeholder="Candidate" class="form-control float-start">
-                            <input type="text" id="candidate11" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;"
-                                placeholder="Candidate" class="form-control float-start">
-                            <input type="text" id="candidate12" name="candidates[]" style="width: 49%; margin-bottom: 2px;"
-                                placeholder="Candidate" class="form-control float-start">
-                        </div>
-                        <small class="form-text text-muted">We currently support up to 12 candidates.</small>
+            <!-- Begin Multiwinner Form -->
+            <div id="multiwinner">
+                <form action="/create" method="post">
+                    <div class="form-group mb-3">
+                        <input type="text" id="name" name="name" placeholder="Election Title*" required class="form-control">
+                        <small class="form-text text-muted">Give your election an easy to remember name.</small>
                     </div>
-                    <div class="clearfix"></div>
-                    <div class="form-group">
+                    <div class="form-group mb-3">
+                        <textarea id="description" name="description" placeholder="Description*" required class="form-control" rows="5"></textarea>
+                        <small class="form-text text-muted">Briefly describe your election.</small>
+                    </div>
+                    <div id="candidates-form" class="mb-3">
+                        <div class="form-group">
+                            <input type="text" id="candidate1" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;" placeholder="First Candidate*"
+                                required class="form-control float-start">
+                            <input type="text" id="candidate2" name="candidates[]" style="width: 49%; margin-bottom: 2px;" placeholder="Second Candidate*"
+                                required class="form-control float-start">
+                            <input type="text" id="candidate3" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;" placeholder="Third Candidate*"
+                                required class="form-control float-start">
+                            <input type="text" id="candidate4" name="candidates[]" style="width: 49%; margin-bottom: 2px;" placeholder="Candidate"
+                                class="form-control float-start">
+                            <input type="text" id="candidate5" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;" placeholder="Candidate"
+                                class="form-control float-start">
+                            <input type="text" id="candidate6-mw" name="candidates[]" style="width: 49%; margin-bottom: 2px;" placeholder="Candidate"
+                                class="form-control float-start">
+                            <div id="candidates-hidden-mw" style="display: none;">
+                                <input type="text" id="candidate7" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;"
+                                    placeholder="Candidate" class="form-control float-start">
+                                <input type="text" id="candidate8" name="candidates[]" style="width: 49%; margin-bottom: 2px;"
+                                    placeholder="Candidate" class="form-control float-start">
+                                <input type="text" id="candidate9" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;"
+                                    placeholder="Candidate" class="form-control float-start">
+                                <input type="text" id="candidate10" name="candidates[]" style="width: 49%; margin-bottom: 2px;"
+                                    placeholder="Candidate" class="form-control float-start">
+                                <input type="text" id="candidate11" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;"
+                                    placeholder="Candidate" class="form-control float-start">
+                                <input type="text" id="candidate12" name="candidates[]" style="width: 49%; margin-bottom: 2px;"
+                                    placeholder="Candidate" class="form-control float-start">
+                            </div>
+                            <small class="form-text text-muted">We currently support up to 12 candidates.</small>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <select name="type" class="form-select">
+                            <option value="approvalElection">Approval Voting</option>
+                            <option value="savElection">Satisfaction Approval Voting</option>
+                            <option value="pavElection">Proportional Approval Voting</option>
+                            <option value="boundedApprovalElection">Bounded Approval Election</option>
+                            <option value="bordaElection">Borda Election</option>
+                            <option value="bordaCCElection">Borda Chamberlin-Courant</option>
+                            <option value="stvElection">Single Transferable Vote</option>
+                            <option value="utilitarianElection">Utilitarian Election</option>
+                        </select>
+                        <small class="form-text text-muted">Select the voting method for your election. You can find descriptions below.</small>
+                    </div>
+                    <div class="form-group mb-3">
                         <select id="committeesize" name="committeesize" class="form-select">
                             <option value="2">2</option>
                             <option value="3">3</option>
@@ -73,9 +83,71 @@
                         </select>
                         <small class="form-text text-muted">Select the size for your committee. It must be less than the number of candidates.</small>
                     </div>
-                </div>
-                <input type="submit" id="submitbtn" value="Submit" class="btn btn-success">
-            </form>
+                    <input type="submit" id="submitbtn" value="Submit" class="btn btn-success">
+                </form>
+            </div>
+
+            <!-- Begin Single-Winner Form -->
+            <div id="singlewinner" style="display: none;">
+                <form action="/create" method="post">
+                    <div class="form-group mb-3">
+                        <input type="text" id="name" name="name" placeholder="Election Title*" required class="form-control">
+                        <small class="form-text text-muted">Give your election an easy to remember name.</small>
+                    </div>
+                    <div class="form-group mb-3">
+                        <textarea id="description" name="description" placeholder="Description*" required class="form-control" rows="5"></textarea>
+                        <small class="form-text text-muted">Briefly describe your election.</small>
+                    </div>
+                    <div id="candidates-form" class="mb-3">
+                        <div class="form-group">
+                            <input type="text" id="candidate1" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;" placeholder="First Candidate*"
+                                required class="form-control float-start">
+                            <input type="text" id="candidate2" name="candidates[]" style="width: 49%; margin-bottom: 2px;" placeholder="Second Candidate*"
+                                required class="form-control float-start">
+                            <input type="text" id="candidate3" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;" placeholder="Third Candidate*"
+                                required class="form-control float-start">
+                            <input type="text" id="candidate4" name="candidates[]" style="width: 49%; margin-bottom: 2px;" placeholder="Candidate"
+                                class="form-control float-start">
+                            <input type="text" id="candidate5" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;" placeholder="Candidate"
+                                class="form-control float-start">
+                            <input type="text" id="candidate6-sw" name="candidates[]" style="width: 49%; margin-bottom: 2px;" placeholder="Candidate"
+                                class="form-control float-start">
+                            <div id="candidates-hidden-sw" style="display: none;">
+                                <input type="text" id="candidate7" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;"
+                                    placeholder="Candidate" class="form-control float-start">
+                                <input type="text" id="candidate8" name="candidates[]" style="width: 49%; margin-bottom: 2px;"
+                                    placeholder="Candidate" class="form-control float-start">
+                                <input type="text" id="candidate9" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;"
+                                    placeholder="Candidate" class="form-control float-start">
+                                <input type="text" id="candidate10" name="candidates[]" style="width: 49%; margin-bottom: 2px;"
+                                    placeholder="Candidate" class="form-control float-start">
+                                <input type="text" id="candidate11" name="candidates[]" style="width: 49%; margin-right: 2%; margin-bottom: 2px;"
+                                    placeholder="Candidate" class="form-control float-start">
+                                <input type="text" id="candidate12" name="candidates[]" style="width: 49%; margin-bottom: 2px;"
+                                    placeholder="Candidate" class="form-control float-start">
+                            </div>
+                            <small class="form-text text-muted">We currently support up to 12 candidates.</small>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <select name="type" class="form-select">
+                            <option value="approvalElection">Approval Voting</option>
+                            <option value="savElection">Satisfaction Approval Voting</option>
+                            <option value="bordaElection">Borda Election</option>
+                            <option value="stvElection">Single Transferable Vote</option>
+                            <option value="utilitarianElection">Utilitarian Election</option>
+                        </select>
+                        <small class="form-text text-muted">Select the voting method for your election. You can find descriptions below.</small>
+                    </div>
+                    <div class="form-group mb-3">
+                        <select id="committeesize" name="committeesize" class="form-select" hidden>
+                            <option value="1">1</option>
+                        </select>
+                    </div>
+                    <input type="submit" id="submitbtn" value="Submit" class="btn btn-success">
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -281,11 +353,26 @@
 
 {% block scripts %}
     <script>
-        document.getElementById("description").addEventListener('input', function () {
-            $("div#form-hidden").css('display', 'block');
+        document.getElementById("candidate6-sw").addEventListener('input', function () {
+            $("div#candidates-hidden-sw").css('display', 'block');
         });
-        document.getElementById("candidate6").addEventListener('input', function () {
-            $("div#candidates-hidden").css('display', 'block');
+
+        document.getElementById("candidate6-mw").addEventListener('input', function () {
+            $("div#candidates-hidden-mw").css('display', 'block');
         });
+
+        function showSingleWinner() {
+            $("div#singlewinner").css('display', 'block');
+            $("div#multiwinner").css('display', 'none');
+            document.getElementById("nav-mw").classList.remove('active');
+            document.getElementById("nav-sw").classList.add('active');
+        }
+
+        function showMultiWinner() {
+            $("div#singlewinner").css('display', 'none');
+            $("div#multiwinner").css('display', 'block');
+            document.getElementById("nav-mw").classList.add('active');
+            document.getElementById("nav-sw").classList.remove('active');
+        }
     </script>
 {% endblock %}
