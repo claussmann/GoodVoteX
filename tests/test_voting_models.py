@@ -219,6 +219,26 @@ def test_borda_election_doesnt_accept_invalid_ballots():
     with pytest.raises(Exception):
         e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1}})) # no ordinal ballot
 
+def test_copeland_election_compute_winners():
+    e = make_dummy_election(CopelandElection, 1, ["a", "b", "c", "d"])
+    e.add_ballot(OrdinalBallot({"order" : ["b", "a", "d", "c"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["c", "a", "d", "b"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["b", "a", "d", "c"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["c", "a", "d", "b"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["b", "a", "d", "c"]}))
+    e.recompute_current_winner()
+    winners = {c.id for c in e.get_winners()}
+    assert winners == {"b"}
+
+def test_copeland_election_doesnt_accept_invalid_ballots():
+    e = make_dummy_election(BordaElection, 3, ["a", "b", "c", "d"])
+    with pytest.raises(Exception):
+        e.add_ballot(OrdinalBallot({"order" : ["b", "x", "d", "y", "e"]})) # x, y are no candidates
+    with pytest.raises(Exception):
+        e.add_ballot(OrdinalBallot({"order" : ["b", "a", "d"]})) # not complete
+    with pytest.raises(Exception):
+        e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1}})) # no ordinal ballot
+
 def test_borda_cc_election_compute_winners():
     e = make_dummy_election(BordaCCElection, 2, ["a", "b", "c", "d", "e"])
     e.add_ballot(OrdinalBallot({"order" : ["c", "a", "d", "b", "e"]}))

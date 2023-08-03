@@ -305,6 +305,40 @@ class BordaElection(Election):
     def get_ballot_type(self):
         return "ordinalBallot"
 
+class CopelandElection(Election):
+    id: Mapped[int] = mapped_column(ForeignKey("election.id"), primary_key=True)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "copelandElection",
+    }
+
+    def _compute_winners(self):
+        mapping = {str(c.id): c for c in self.candidates}
+        scores = {c: 0 for c in [str(x.id) for x in self.candidates]}
+        n = len(self.ballots)
+        for a,b in itertools.combinations(mapping, 2):
+            prefers_a = len([v for v in self.ballots if v.position_of(a) < v.position_of(b)])
+            if prefers_a > n/2:
+                scores[a] += 1
+            elif prefers_a == n/2:
+                scores[a] += 1/2
+                scores[b] += 1/2
+            elif prefers_a < n/2:
+                scores[b] += 1
+        return {mapping[max(scores.keys(), key=scores.get)]}
+
+    def _check_validity(self, ballot):
+        ids = [str(c.id) for c in self.candidates]
+        for id in ballot.get_involved_candidates():
+            if id not in ids:
+                return False
+        if ballot.type != "ordinalBallot":
+            return False
+        return len(ballot.get_involved_candidates()) == len(ids)
+    
+    def get_ballot_type(self):
+        return "ordinalBallot"
+
 class BordaCCElection(Election):
     id: Mapped[int] = mapped_column(ForeignKey("election.id"), primary_key=True)
 

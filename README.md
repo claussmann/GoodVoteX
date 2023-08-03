@@ -5,14 +5,19 @@ All voting procedures used have a scientific background.
 That is, their properties have been studied e.g. in Computational Social Choice literature.
 Thus, the platform allows you to choose a suitable voting rule and ballot format for your election.
 
-We currently support the following ballot types and voting rules:
+We currently support the following voting rules:
 
-| Ballot Type                           | Available Voting Rules | Reference                                                                                 |
-|---------------------------------------|------------------------|-------------------------------------------------------------------------------------------|
-| Bounded approval ballots (disjoint)   | Total Scoring          | AAMAS-2023: "Bounded Approval Ballots: Balancing Expressiveness and Simplicity for Multiwinner Elections" by D. Baumeister, L. Boes, C. Laußmann and S. Rey |
-| Approval ballots                      | Approval, SAV, PAV     | -                                                                                        |
-| Ordinal ranks                         | Borda, Borda-CC, STV   | -                                                                                        |
-| Cardinal ballot (numerical -10 to 10) | Welfare Maximization   | -                                                                                        |
+| Voting Rule                           | Ballots                  | Reference                                                                                 |
+|---------------------------------------|--------------------------|-------------------------------------------------------------------------------------------|
+| Bounded Approval Voting               | Bounded Approval Ballots | AAMAS-2023: "Bounded Approval Ballots: Balancing Expressiveness and Simplicity for Multiwinner Elections" by D. Baumeister, L. Boes, C. Laußmann and S. Rey |
+| Approval Voting                       | Approval Ballots         | -                                                                                        |
+| Satisfaction Approval Voting          | Approval Ballots         | -                                                                                        |
+| Proportional Approval Voting          | Approval Ballots         | -                                                                                        |
+| Borda                                 | Ordinal Ranks            | -                                                                                        |
+| Borda-Chamberlin-Courant              | Ordinal Ranks            | -                                                                                        |
+| Single Transferable Vote              | Ordinal Ranks            | -                                                                                        |
+| Copeland                              | Ordinal Ranks            | -                                                                                        |
+| Welfare Maximization                  | Cardinal ballot          | -                                                                                        |
 
 ## Run (Production)
 

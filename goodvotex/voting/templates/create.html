@@ -135,6 +135,7 @@
                             <option value="approvalElection">Approval Voting</option>
                             <option value="savElection">Satisfaction Approval Voting</option>
                             <option value="bordaElection">Borda Election</option>
+                            <option value="copelandElection">Copeland Election</option>
                             <option value="stvElection">Single Transferable Vote</option>
                             <option value="utilitarianElection">Utilitarian Election</option>
                         </select>
@@ -291,6 +292,34 @@
                         <li><b>Cons:</b> -</li>
                         <li><b>Use Cases:</b> -</li>
                         <li><b>Available For:</b> Multiwinner</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingCopeland">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCopeland" aria-expanded="false" aria-controls="collapseCopeland">
+                  Copeland Election
+              </button>
+            </h2>
+            <div id="collapseCopeland" class="accordion-collapse collapse" aria-labelledby="headingCopeland" data-bs-parent="#ballotAccordion">
+                <div class="accordion-body">
+                    <p>
+                        Copeland is a Condorcet method.
+                        That is, it is based on pairwise comparisons between candidates.
+                        In a pairwise comparison, a hypothetical duel between two candidates (say <i>a</i> and <i>b</i>) is conducted.
+                        Each voter votes for either <i>a</i> or <i>b</i> depending on which of the two the voter prefers.
+                        If <i>a</i> has more votes than <i>b</i>, <i>a</i> wins the comparison (and vice versa).
+                        Ties count as half a victory for both.
+                        In Copeland every candidate is pairwise compared against every other candidate.
+                        The candidate winning the most pairwise comparisons, wins the election.
+                    </p>
+                    <ul>
+                        <li><b>Ballots:</b> Ordinal Ranks</li>
+                        <li><b>Pros:</b> Relatively expressive; relatively easy to use, Condorcet-consistent</li>
+                        <li><b>Cons:</b> -</li>
+                        <li><b>Use Cases:</b> -</li>
+                        <li><b>Available For:</b> Single-Winner</li>
                     </ul>
                 </div>
             </div>
