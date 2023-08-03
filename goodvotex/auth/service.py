@@ -55,4 +55,5 @@ def change_password(user, password, new_password, confirm_password, force=False)
         if not user.check_password(password):
             raise Exception("Incorrect password!")
     user.set_password(new_password)
-    db.sync_user(user.username)
+    db.session.add(user)
+    db.session.commit()
