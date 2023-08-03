@@ -7,7 +7,7 @@ from . import service, voting, logger
 
 @voting.route('/', methods=['GET'])
 def start_page():
-    return render_template('start.html', trending_elections=service.get_all_elections())
+    return render_template('start.html', trending_elections=service.get_trending_elections())
 
 @voting.route('/create', methods=['GET', 'POST'])
 def create_election_page():

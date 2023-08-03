@@ -3,6 +3,7 @@ import itertools
 import json
 import random
 import re
+import time
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
@@ -22,6 +23,7 @@ class Election(db.Model):
     description = db.Column(db.String(500), nullable=False)
     committeesize = db.Column(db.Integer)
     is_stopped = db.Column(db.Boolean, default=False)
+    last_votetime = db.Column(db.Integer, default=0)
     votecount = db.Column(db.Integer, default=0)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     owner = db.relationship('User', backref=db.backref('elections', lazy=True))
@@ -50,6 +52,7 @@ class Election(db.Model):
         if self._check_validity(ballot):
             self.ballots.append(ballot)
             self.votecount += 1
+            self.last_votetime = int(time.time())
         else:
             raise Exception("The ballot doesn't seem to be valid.")
 

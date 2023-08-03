@@ -1,3 +1,5 @@
+import time
+
 from ..auth.service import get_user
 from .models import *
 from .. import db
@@ -50,6 +52,22 @@ def get_all_elections():
     :return:
     """
     return Election.query.all()
+
+def get_trending_elections():
+    """
+    Get up to 5 elections which received a lot of attention recently.
+
+    :return:
+    """
+    active_elections = Election.query.filter(Election.is_stopped == False).all()
+    i = 1024
+    current_time = int(time.time())
+    ret = list()
+    while len(ret) < min(len(active_elections), 15):
+        ret = [e for e in active_elections if e.last_votetime >= current_time - i]
+        i = i*2
+    ret = sorted(ret, key=lambda x: x.votecount, reverse=True)
+    return ret[:min(len(ret), 5)]
 
 
 def search(search_string):
