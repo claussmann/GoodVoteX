@@ -9,17 +9,17 @@ We currently support the following voting rules:
 
 | Voting Rule                           | Ballots                  | Reference                                                                                 |
 |---------------------------------------|--------------------------|-------------------------------------------------------------------------------------------|
-| Bounded Approval Voting               | Bounded Approval Ballots | AAMAS-2023: "Bounded Approval Ballots: Balancing Expressiveness and Simplicity for Multiwinner Elections" by D. Baumeister, L. Boes, C. Laußmann and S. Rey |
-| Approval Voting                       | Approval Ballots         | -                                                                                        |
-| Satisfaction Approval Voting          | Approval Ballots         | -                                                                                        |
-| Proportional Approval Voting          | Approval Ballots         | -                                                                                        |
-| Borda                                 | Ordinal Ranks            | -                                                                                        |
-| Borda-Chamberlin-Courant              | Ordinal Ranks            | -                                                                                        |
-| Single Transferable Vote              | Ordinal Ranks            | -                                                                                        |
-| Copeland                              | Ordinal Ranks            | -                                                                                        |
-| Bucklin                               | Ordinal Ranks            | -                                                                                        |
-| Fallback                              | Truncated Ordinal Ranks  | -                                                                                        |
-| Welfare Maximization                  | Cardinal ballot          | -                                                                                        |
+| Bounded Approval Voting               | Bounded Approval Ballots | "Bounded Approval Ballots: Balancing Expressiveness and Simplicity for Multiwinner Elections" by D. Baumeister, L. Boes, C. Laußmann and S. Rey, 2023. In: AAMAS-2023 |
+| Approval Voting                       | Approval Ballots         | -                                                                                         |
+| Satisfaction Approval Voting          | Approval Ballots         | "Satisfaction Approval Voting" by S. Brams and M. Kilgour, 2010.                          |
+| Proportional Approval Voting          | Approval Ballots         | T. Thiele, around 1900                                                                    |
+| Borda                                 | Ordinal Ranks            | J. Borda, 1784                                                                            |
+| Borda-Chamberlin-Courant              | Ordinal Ranks            | "Representative Deliberations and Representative Decisions: Proportional Representation and the Borda Rule", J. Chamberlin and P. Courant, 1983. |
+| Single Transferable Vote              | Ordinal Ranks            | -                                                                                         |
+| Copeland                              | Ordinal Ranks            | R. Llull, 1299 and A. Copeland, around 1950                                               |
+| Bucklin                               | Ordinal Ranks            | -                                                                                         |
+| Fallback                              | Truncated Ordinal Ranks  | "Voting systems that combine approval and preferences" by S. Brams and R. Sanver, 2009. In: "The mathematics of preference, choice and order" Spinger. |
+| Welfare Maximization                  | Cardinal ballot          | -                                                                                         |
 
 ## Run (Production)
 
