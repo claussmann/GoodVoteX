@@ -33,6 +33,15 @@ def test_ordinal_ballot():
     assert ballot.type == "ordinalBallot"
     assert ballot.position_of("2") == 3
 
+def test_truncated_ordinal_ballot():
+    json_content = {"order" : ["1", "7", "4"]}
+    ballot = TruncatedOrdinalBallot(json_content)
+    assert ballot.get_involved_candidates() == {"1", "4", "7"}
+    assert ballot.has_candidate("7")
+    assert not ballot.has_candidate("5")
+    assert ballot.type == "truncatedOrdinalBallot"
+    assert ballot.position_of("4") == 3
+
 def test_cardinal_ballot():
     json_content = {"ratings" : {"1":5, "7":1, "2":-3, "5":-8, "3":0}}
     json_content2 = {"ratings" : {"1":-12, "7":1, "3":0}}
@@ -219,6 +228,26 @@ def test_borda_election_doesnt_accept_invalid_ballots():
     with pytest.raises(Exception):
         e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1}})) # no ordinal ballot
 
+def test_copeland_election_compute_winners():
+    e = make_dummy_election(CopelandElection, 1, ["a", "b", "c", "d"])
+    e.add_ballot(OrdinalBallot({"order" : ["b", "a", "d", "c"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["c", "a", "d", "b"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["b", "a", "d", "c"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["c", "a", "d", "b"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["b", "a", "d", "c"]}))
+    e.recompute_current_winner()
+    winners = {c.id for c in e.get_winners()}
+    assert winners == {"b"}
+
+def test_copeland_election_doesnt_accept_invalid_ballots():
+    e = make_dummy_election(CopelandElection, 3, ["a", "b", "c", "d"])
+    with pytest.raises(Exception):
+        e.add_ballot(OrdinalBallot({"order" : ["b", "x", "d", "y", "e"]})) # x, y are no candidates
+    with pytest.raises(Exception):
+        e.add_ballot(OrdinalBallot({"order" : ["b", "a", "d"]})) # not complete
+    with pytest.raises(Exception):
+        e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1}})) # no ordinal ballot
+
 def test_borda_cc_election_compute_winners():
     e = make_dummy_election(BordaCCElection, 2, ["a", "b", "c", "d", "e"])
     e.add_ballot(OrdinalBallot({"order" : ["c", "a", "d", "b", "e"]}))
@@ -275,3 +304,63 @@ def test_utilitarian_election_doesnt_accept_invalid_ballots():
         e.add_ballot(CardinalBallot({"ratings" : {"a":100, "b":-1}})) # value too high
     with pytest.raises(Exception):
         e.add_ballot(OrdinalBallot({"order" : ["e", "b", "a", "d", "c"]})) # no cardinal ballot
+
+def test_bucklin_election_compute_winners():
+    e = make_dummy_election(BucklinElection, 1, ["a", "b", "c", "d", "e"])
+    e.add_ballot(OrdinalBallot({"order" : ["b", "e", "d", "c", "a"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["c", "a", "d", "b", "e"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["b", "e", "c", "d", "a"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["c", "d", "a", "b", "e"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["a", "d", "b", "c", "e"]}))
+    e.recompute_current_winner()
+    winners = {c.id for c in e.get_winners()}
+    assert winners == {"d"}
+
+def test_bucklin_election_compute_winners2():
+    e = make_dummy_election(BucklinElection, 1, ["a", "b", "c", "d", "e"])
+    e.add_ballot(OrdinalBallot({"order" : ["b", "e", "d", "c", "a"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["b", "a", "d", "c", "e"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["b", "e", "c", "d", "a"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["c", "a", "d", "b", "e"]}))
+    e.add_ballot(OrdinalBallot({"order" : ["a", "d", "b", "c", "e"]}))
+    e.recompute_current_winner()
+    winners = {c.id for c in e.get_winners()}
+    assert winners == {"b"}
+
+def test_bucklin_election_doesnt_accept_invalid_ballots():
+    e = make_dummy_election(BucklinElection, 3, ["a", "b", "c", "d"])
+    with pytest.raises(Exception):
+        e.add_ballot(OrdinalBallot({"order" : ["b", "x", "d", "y", "e"]})) # x, y are no candidates
+    with pytest.raises(Exception):
+        e.add_ballot(OrdinalBallot({"order" : ["b", "a", "d"]})) # not complete
+    with pytest.raises(Exception):
+        e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1}})) # no ordinal ballot
+
+def test_fallback_election_compute_winners():
+    e = make_dummy_election(FallbackElection, 1, ["a", "b", "c", "d", "e"])
+    e.add_ballot(TruncatedOrdinalBallot({"order" : ["b", "e", "d"]}))
+    e.add_ballot(TruncatedOrdinalBallot({"order" : ["c", "a", "b", "e"]}))
+    e.add_ballot(TruncatedOrdinalBallot({"order" : ["d", "e", "a"]}))
+    e.recompute_current_winner()
+    winners = {c.id for c in e.get_winners()}
+    assert winners == {"e"}
+
+def test_fallback_election_compute_winners2():
+    e = make_dummy_election(FallbackElection, 1, ["a", "b", "c", "d", "e"])
+    e.add_ballot(TruncatedOrdinalBallot({"order" : ["a"]}))
+    e.add_ballot(TruncatedOrdinalBallot({"order" : ["b"]}))
+    e.add_ballot(TruncatedOrdinalBallot({"order" : ["c", "b"]}))
+    e.add_ballot(TruncatedOrdinalBallot({"order" : ["d"]}))
+    e.add_ballot(TruncatedOrdinalBallot({"order" : ["e"]}))
+    e.recompute_current_winner()
+    winners = {c.id for c in e.get_winners()}
+    assert winners == {"b"}
+
+def test_fallback_election_doesnt_accept_invalid_ballots():
+    e = make_dummy_election(FallbackElection, 3, ["a", "b", "c", "d"])
+    with pytest.raises(Exception):
+        e.add_ballot(OrdinalBallot({"order" : ["b", "x", "d", "y", "e"]})) # x, y are no candidates
+    with pytest.raises(Exception):
+        e.add_ballot(OrdinalBallot({"order" : ["b", "a", "d"]})) # not complete
+    with pytest.raises(Exception):
+        e.add_ballot(CardinalBallot({"ratings" : {"a":1, "b":-1}})) # no ordinal ballot

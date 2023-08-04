@@ -22,7 +22,10 @@ def register_election(election_type, title, description, candidates, K, user_own
         "bordaCCElection": BordaCCElection,
         "stvElection": STVElection,
         "savElection": SAVElection,
+        "copelandElection": CopelandElection,
         "pavElection": PAVElection,
+        "bucklinElection": BucklinElection,
+        "fallbackElection": FallbackElection,
         "boundedApprovalElection": BoundedApprovalElection,
         "utilitarianElection": UtilitarianElection
     }
@@ -98,6 +101,7 @@ def add_vote_from_json(election_id, json_content):
         "boundedApprovalBallot": BoundedApprovalBallot,
         "approvalBallot": ApprovalBallot,
         "cardinalBallot": CardinalBallot,
+        "truncatedOrdinalBallot": TruncatedOrdinalBallot,
         "ordinalBallot": OrdinalBallot
     }
     if json_content["type"] in constructors:

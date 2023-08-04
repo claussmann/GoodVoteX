@@ -1,0 +1,151 @@
+{%extends "vote.html" %}
+
+
+{%block votingguide%}
+
+  <div class="accordion" id="faq">
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headinghowitworks">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapsehowitworks" aria-expanded="false" aria-controls="collapsehowitworks">
+            How It Works
+        </button>
+      </h2>
+      <div id="collapsehowitworks" class="accordion-collapse collapse show" aria-labelledby="headinghowitworks" data-bs-parent="#faq">
+        <div class="accordion-body">
+          In the first step, you select all candidates you like.
+          In the second step, by clicking on the arrow buttons you can move the candidates up or down in the order.
+          Place your most liked candidate on the top, and your least liked (though still approved) candidate at the bottom.
+          When you're finished, click the submit button.
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+
+{%block votingprocess%}
+
+  <div id="step1" class="mb-2 mt-5">
+    <h3>Step 1: Select all candidates you approve.</h3>
+    <br>
+    
+    <div id="candidateSelection" class="mb-3">
+      {% for candidate in election.candidates %}
+        <button id="{{candidate.id}}" type="button" class="btn btn-outline-primary btn-lg" style="margin-left : 5px; margin-right : 5px;" data-bs-toggle="button" autocomplete="off">{{candidate.name}}</button>
+      {% endfor %}
+    </div>
+    <button class="btn btn-success" onclick="finishFirstStep()">Continue with Step 2</button>
+  </div>
+
+  <div id="step2" style="display: none;" class="mb-2 mt-5">
+    <div class="mb-2 mt-5">
+      <div id="all_candidates" class="mb-2">
+        <!-- Candidates are added here via JS -->
+      </div>
+      <button class="btn btn-success" onclick="sendBallot()">Submit</button>
+    </div>
+  </div>
+    
+{% endblock %}
+
+
+
+
+{%block scripts%}
+  <!-- This is the required script for drag and drop actions, and the form filling and sending. -->
+  <script>
+    var url = "/vote/{{election.id}}";
+    var approved = []
+
+    function sendBallot(){
+      var json_to_send = JSON.stringify({"type" : "truncatedOrdinalBallot",
+                                         "order" : get_sequence()});
+      console.log("sending ballot:");
+      console.log(json_to_send);
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onreadystatechange = function() { 
+        if (this.readyState == 4) {
+          if(this.status == 200){
+            window.location.href = '/done';
+          }
+          else{
+            console.log(this.responseText)
+            alert("Something went wrong. Please reload the page and try again.");
+          }
+        } 
+      };
+      xhr.send(json_to_send);
+    }
+
+    function get_sequence(){
+      var sequence=[];
+      $(".candidate-selected").each(
+        function(){
+          sequence.push(this.id)
+        })
+        return sequence
+    }
+
+    function move_up(){
+      var div_to_move = event.srcElement.parentNode;
+      if(div_to_move.previousElementSibling){
+        div_to_move.parentNode.insertBefore(div_to_move, div_to_move.previousElementSibling);
+      }
+    }
+
+    function move_down(){
+      var div_to_move = event.srcElement.parentNode;
+      if(div_to_move.nextElementSibling){
+        div_to_move.parentNode.insertBefore(div_to_move.nextElementSibling, div_to_move);
+      }
+    }
+
+    function finishFirstStep(){
+      var btns = document.querySelectorAll('#candidateSelection button');
+      for(i = 0; i < btns.length; i++){
+        var btn = btns[i];
+        if (btn.classList.contains("active")) {
+          approved.push(btn.id);
+        }
+      }
+      if(approved.length < 1){
+        console.log("You must approve at least one candidate.")
+        return
+      }
+      $("#step1").slideToggle();
+      $("#step2").slideToggle();
+      for(i = 0; i < approved.length; i++){
+        var candidateid = approved[i];
+        var candidate = document.getElementById(candidateid);
+        candidate.removeAttribute('data-bs-toggle');
+        candidate.classList.add("candidate-selected")
+
+
+        var html_candidate_with_controls = document.createElement("div");
+        html_candidate_with_controls.id = candidateid + "_controls"
+        html_candidate_with_controls.setAttribute('class', 'mb-2');  
+        document.getElementById("all_candidates").appendChild(html_candidate_with_controls);
+
+        var up_btn = document.createElement("BUTTON");
+        up_btn.id = candidateid + "_controls_up"
+        up_btn.setAttribute('class', 'btn btn-light mr-2 btn-lg');  
+        up_btn.textContent = 'up';
+        up_btn.onclick = move_up;
+
+        var down_btn = document.createElement("BUTTON");
+        down_btn.id = candidateid + "_controls_right"
+        down_btn.setAttribute('class', 'btn btn-light ml-2 btn-lg');  
+        down_btn.textContent = 'down';
+        down_btn.onclick = move_down;
+        
+        html_candidate_with_controls.appendChild(up_btn);
+        html_candidate_with_controls.appendChild(candidate);
+        html_candidate_with_controls.appendChild(down_btn);
+      }
+    }
+
+  </script>
+{% endblock %}
