@@ -18,6 +18,7 @@ We currently support the following voting rules:
 | Single Transferable Vote              | Ordinal Ranks            | -                                                                                        |
 | Copeland                              | Ordinal Ranks            | -                                                                                        |
 | Bucklin                               | Ordinal Ranks            | -                                                                                        |
+| Fallback                              | Truncated Ordinal Ranks  | -                                                                                        |
 | Welfare Maximization                  | Cardinal ballot          | -                                                                                        |
 
 ## Run (Production)
