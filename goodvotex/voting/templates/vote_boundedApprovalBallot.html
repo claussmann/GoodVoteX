@@ -57,16 +57,14 @@
 
     <div id="allbins" class="row mb-3 mt-2">
       <!-- Bin 1 -->
-      <div class="card text-light bg-dark" style="width: 30%; margin-left: 1%; margin-right: 2%;">
+      <div class="card" style="width: 32%; margin-left: 1%;">
         <div class="card-header">
           <h2>Bin 1</h2>
-          <hr>
         </div>
         <div class="card-body">
           <div id="bin1items"></div>
         </div>
         <div class="card-footer">
-          <hr>
           <form>
             <input type="radio" id="bin1approval" name="bin1type"> &nbsp; Approval<br>
             <input type="radio" id="bin1substitution" name="bin1type" checked="checked"> &nbsp; Substitution<br>
@@ -77,16 +75,14 @@
       </div>
 
       <!-- Bin 2 -->
-      <div class="card text-light bg-dark" style="width: 30%; margin-left: 1%; margin-right: 2%;">
+      <div class="card" style="width: 32%; margin-left: 1%;">
         <div class="card-header">
           <h2>Bin 2</h2>
-          <hr>
         </div>
         <div class="card-body">
           <div id="bin2items"></div>
         </div>
         <div class="card-footer">
-          <hr>
           <form>
             <input type="radio" id="bin2approval" name="bin1type" checked="checked"> &nbsp; Approval<br>
             <input type="radio" id="bin2substitution" name="bin1type"> &nbsp; Substitution<br>
@@ -97,16 +93,14 @@
       </div>
 
       <!-- Bin 3 -->
-      <div class="card text-light bg-dark" style="width: 30%; margin-left: 1%;">
+      <div class="card" style="width: 33%; margin-left: 1%;">
         <div class="card-header">
           <h2>Bin 3</h2>
-          <hr>
         </div>
         <div class="card-body">
           <div id="bin3items"></div>
         </div>
         <div class="card-footer">
-          <hr>
           <form>
             <input type="radio" id="bin3approval" name="bin1type"> &nbsp; Approval<br>
             <input type="radio" id="bin3substitution" name="bin1type"> &nbsp; Substitution<br>
@@ -209,13 +203,13 @@
 
         var left_btn = document.createElement("BUTTON");
         left_btn.id = candidateid + "_controls_left"
-        left_btn.setAttribute('class', 'btn btn-light mr-2 btn-lg');  
+        left_btn.setAttribute('class', 'btn btn-outline-secondary mr-2 btn-lg');  
         left_btn.textContent = '<';
         left_btn.onclick = move_candidate_left;
 
         var right_btn = document.createElement("BUTTON");
         right_btn.id = candidateid + "_controls_right"
-        right_btn.setAttribute('class', 'btn btn-light ml-2 btn-lg');  
+        right_btn.setAttribute('class', 'btn btn-outline-secondary ml-2 btn-lg');  
         right_btn.textContent = '>';
         right_btn.onclick = move_candidate_right;
         

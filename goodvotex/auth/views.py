@@ -69,3 +69,10 @@ def change_password():
     flash("Password changed successfully!", "info")
 
     return redirect(url_for('voting.start_page'))
+
+
+@auth.route('/toggletheme', methods=['POST'])
+@login_required
+def toggle_theme():
+    service.toggle_theme(current_user)
+    return redirect(url_for('voting.start_page'))

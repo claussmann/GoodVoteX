@@ -57,3 +57,17 @@ def change_password(user, password, new_password, confirm_password, force=False)
     user.set_password(new_password)
     db.session.add(user)
     db.session.commit()
+
+def toggle_theme(user):
+    """
+    Changes a user's theme from light to dark or vice versa.
+
+    :param user:
+    :return:
+    """
+    if user.theme == "dark":
+        user.theme = "light"
+    else:
+        user.theme = "dark"
+    db.session.add(user)
+    db.session.commit()

@@ -1,7 +1,13 @@
-<!-- Created by Christian Laußmann in 2022 and 2023 at Heinrich-Heine-University Düsseldorf-->
-<!-- Copyrigth (C) 2022, 2023 Christian Laußmann -->
+<!-- Created by Christian Laußmann and Paul Nüsken in 2022 and 2023 at Heinrich-Heine-University Düsseldorf-->
+<!-- Copyrigth (C) 2022, 2023 Christian Laußmann, Paul Nüsken -->
 <!DOCTYPE html>
-<html lang="en">
+
+{% if user is defined and user.is_authenticated  and user.theme == "dark" %}
+<html lang="en" data-bs-theme="dark">
+{% else %}
+<html lang="en" data-bs-theme="light">
+{% endif %}
+
 <head>
     <title>GoodVoteX</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename= 'img/favicon.png') }}">
@@ -18,8 +24,11 @@
 </head>
 
 <body>
-
-    <nav class="navbar navbar-dark bg-light mb-5">
+    {% if user is defined and user.is_authenticated  and user.theme == "dark" %}
+    <nav class="navbar navbar-dark mb-5" style="background-color: #353535;">
+    {% else %}
+    <nav class="navbar navbar-light bg-light mb-5">
+    {% endif %}
         <div class="container">
             <a class="navbar-brand" href="/"><img src="{{ url_for('static', filename= 'img/logo.png') }}" height="80"></a>
 
@@ -71,6 +80,12 @@
                                     <br>
                                     <input type="submit" value="Change Password" class="btn btn-secondary">
                                 </form>
+                                <br>
+                                <hr>
+                                <br>
+                                <form action="/toggletheme" method="post">
+                                    <button class="btn btn-info">Toggle Theme {% if user.theme == "dark" %}Light{% else %}Dark{% endif %}</button>
+                                </form>                                
                             </div>
                             <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -127,7 +142,11 @@
     
     <div class="mb-3" style="clear: both;"></div>
 
+    {% if user is defined and user.is_authenticated  and user.theme == "dark" %}
+    <footer class="footer mt-auto py-3" style="background-color: #353535;">
+    {% else %}
     <footer class="footer mt-auto py-3 bg-light">
+    {% endif %}
         <div class="container">
             <a href="{{config.GOODVOTEX_IMPRINT_URL}}" style="color:rgb(83, 83, 83)">Impressum/Imprint</a>
             &nbsp;&nbsp;&nbsp;&nbsp;        
