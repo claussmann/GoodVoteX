@@ -23,11 +23,14 @@
     {% endblock %}
 </head>
 
+{% if user is defined and user.is_authenticated and user.theme == "dark" %}
+<body class="d-flex flex-column h-100" style="background-color:#39393b">
+{% else %}
 <body class="d-flex flex-column h-100">
-
+{% endif %}
     <!-- Navigation Bar, Login/Userinfo Window -->
-    {% if user is defined and user.is_authenticated  and user.theme == "dark" %}
-    <nav class="navbar navbar-dark mb-5" style="background-color: #353535;">
+    {% if user is defined and user.is_authenticated and user.theme == "dark" %}
+    <nav class="navbar navbar-dark mb-5 bg-dark">
     {% else %}
     <nav class="navbar navbar-light bg-light mb-5">
     {% endif %}
@@ -36,7 +39,7 @@
 
             <div>
                 <form class="float-start" role="search" action="/searchforelection" method="get">
-                    <input id="keyword" name="keyword" type="search" class="form-control form-control-dark text-bg-light" placeholder="Search Election..." aria-label="Search">
+                    <input id="keyword" name="keyword" type="search" class="form-control" placeholder="Search Election..." aria-label="Search">
                 </form>
 
                 {% if user is defined and user.is_authenticated %}
@@ -145,16 +148,23 @@
     </main>
     
 
-    <!-- Header -->
+    <!-- Footer -->
     {% if user is defined and user.is_authenticated  and user.theme == "dark" %}
-    <footer class="footer mt-auto py-3" style="background-color: #353535;">
+    <footer class="footer mt-auto py-3 bg-dark">
     {% else %}
     <footer class="footer mt-auto py-3 bg-light">
     {% endif %}
         <div class="container">
-            <a href="{{config.GOODVOTEX_IMPRINT_URL}}" style="color:rgb(83, 83, 83)">Impressum/Imprint</a>
-            &nbsp;&nbsp;&nbsp;&nbsp;        
-            <a href="{{config.GOODVOTEX_PRIVACY_URL}}" style="color:rgb(83, 83, 83)">Datenschutz/Privacy</a>
+            <div class="row mt-3 mb-3">
+                <div class="col">
+                    <a href="{{config.GOODVOTEX_IMPRINT_URL}}">Impressum/Imprint</a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;        
+                    <a href="{{config.GOODVOTEX_PRIVACY_URL}}">Datenschutz/Privacy</a>
+                </div>
+                <div class="col text-end">
+                    <a href="https://github.com/claussmann/GoodVoteX">GoodVoteX on GitHub</a>
+                </div>
+            </div>
         </div>
     </footer>
 

@@ -1,69 +1,61 @@
 {% extends "base.html" %}
 {% block content %}
-        <div class="center"><h1>Welcome to GoodVoteX</h1></div>
-        <p>
-            You are interested in sophisticated committee elections?
-            This site is exactly what you are searching for!
-        </p>
-        <p>
-            With this tool you can easily create a committee election, and let your voters vote.
-            Our goal is to allow the voters to express what they <i>actually want to express.</i>
-            That is, we provide ballot formats which allow expressing more than just <i>yes</i> or <i>no</i>.
-        </p>
-
-        <div class="center"><h2>We caught your attention?</h2></div>
-        <p>
-            {% if user.is_authenticated %}
-                Click on your name in the top right corner to create an own election.
-            {% else %}
-                Sign up <a href="/register">here</a> or login to create an own election.
-                You can participate in existing elections without signing up.
-            {% endif %}
-        </p>
-        <div class="sep"></div>
-
 
         <div>
-            <div class="center">
-                <h2>Trending Elections</h2>
-            </div>
-            <div class="sep"></div>
-
             {% if trending_elections|length > 0 %}
             <div id="featuredCarousel" class="carousel slide mb-5" data-bs-ride="carousel" data-interval="false">
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#featuredCarousel" data-bs-slide-to="0" class="active" aria-current="true"></button>
+                    {% for i in range(trending_elections|length - 1) %}
+                        <button type="button" data-bs-target="#featuredCarousel" data-bs-slide-to="{{i+1}}"></button>
+                    {% endfor %}                    
+                </div>                
                 <div class="carousel-inner">
                     <div class="carousel-item active">
-                        <div class="col-sm-9 mx-auto">
-                            <div class="card">
+                        <div class="col-sm-12 mx-auto">
+                            <div class="card mb-5">
                                 <div class="card-header">
-                                    <b>{{ trending_elections[0].title }}</b>
-                                    <div class="float-end">
-                                        <a href="/details/{{ trending_elections[0].id }}"><button class="btn btn-secondary">Details</button></a>
-                                        {% if trending_elections[0].is_stopped %} 
-                                            <button class="btn btn-success" disabled>Vote</button>
-                                        {% else %}
-                                            <a href="/vote/{{ trending_elections[0].id }}"><button class="btn btn-success">Vote</button></a>
-                                        {% endif %}
+                                    <div class="row">
+                                        <div class="col">
+                                            <h1 class="display-6">{{ trending_elections[0].title }}</h1>
+                                        </div>
+                                        <div class="col">
+                                            <div class="float-end">
+                                                <a href="/details/{{ trending_elections[0].id }}"><button class="btn btn-secondary">Details</button></a>
+                                                {% if trending_elections[0].is_stopped %} 
+                                                    <button class="btn btn-success" disabled>Vote</button>
+                                                {% else %}
+                                                    <a href="/vote/{{ trending_elections[0].id }}"><button class="btn btn-success">Vote</button></a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="card-body">
-                                    <b>Description:</b>
                                     <p>
-                                        {% for line in trending_elections[0].description.split("\n") %}
-                                            {{ line }}<br>
-                                        {% endfor %}
+                                        {% if trending_elections[0].description.split("\n")|length < 2 %}
+                                            {{ trending_elections[0].description.split("\n")[0] }}
+                                            <br>
+                                            <br>
+                                        {% else %}
+                                            {{ trending_elections[0].description.split("\n")[0] }}
+                                            <br>
+                                            {{ trending_elections[0].description.split("\n")[1] }}
+                                            <a href="/details/{{ trending_elections[0].id }}">(read more)</a>
+                                            <br>
+                                        {% endif %}
                                     </p>
                                     <br>
-                                    <b>Committee Size:</b> {{trending_elections[0].committeesize}}
-                                    <br>
-                                    <b>Candidates:</b>
-                                    <p>
+                                    {% if trending_elections[0].candidates|length <= 7 %}
                                         {% for candidate in trending_elections[0].candidates %}
-                                            <div class="is-candidate">
-                                                {{candidate.name}}
-                                            </div>
+                                            <button id="{{candidate.id}}" type="button" class="btn btn-primary" disabled>{{candidate.name}}</button>
                                         {% endfor %}
-                                    </p>
+                                    {% else %}
+                                        {% for candidate in trending_elections[0].candidates[:7] %}
+                                            <button id="{{candidate.id}}" type="button" class="btn btn-primary" disabled>{{candidate.name}}</button>
+                                        {% endfor %}
+                                        <a href="/details/{{ trending_elections[0].id }}">(more)</a>
+                                    {% endif %}
                                     <div style="clear: both;"></div>
                                 </div>
                             </div>
@@ -71,51 +63,57 @@
                     </div>
                     {% for e in trending_elections[1:] %}
                         <div class="carousel-item">
-                            <div class="col-sm-9 mx-auto">
-                                <div class="card">
+                            <div class="col-sm-12 mx-auto">
+                                <div class="card mb-5">
                                     <div class="card-header">
-                                        <b>{{ e.title }}</b>
-                                        <div class="float-end">
-                                            <a href="/details/{{ e.id }}"><button class="btn btn-secondary">Details</button></a>
-                                            {% if e.is_stopped %} 
-                                                <button class="btn btn-success" disabled>Vote</button>
-                                            {% else %}
-                                                <a href="/vote/{{ e.id }}"><button class="btn btn-success">Vote</button></a>
-                                            {% endif %}
+                                        <div class="row">
+                                            <div class="col">
+                                                <h1 class="display-6">{{ e.title }}</h1>
+                                            </div>
+                                            <div class="col">
+                                                <div class="float-end">
+                                                    <a href="/details/{{ e.id }}"><button class="btn btn-secondary">Details</button></a>
+                                                    {% if e.is_stopped %} 
+                                                        <button class="btn btn-success" disabled>Vote</button>
+                                                    {% else %}
+                                                        <a href="/vote/{{ e.id }}"><button class="btn btn-success">Vote</button></a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="card-body">
-                                        <b>Description:</b>
                                         <p>
-                                            {% for line in e.description.split("\n") %}
-                                                {{ line }}<br>
-                                            {% endfor %}
+                                            {% if e.description.split("\n")|length < 2 %}
+                                                {{ e.description.split("\n")[0] }}
+                                                <br>
+                                                <br>
+                                            {% else %}
+                                                {{ e.description.split("\n")[0] }}
+                                                <br>
+                                                {{ e.description.split("\n")[1] }}
+                                                <a href="/details/{{ e.id }}">(read more)</a>
+                                                <br>
+                                            {% endif %}
                                         </p>
                                         <br>
-                                        <b>Committee Size:</b> {{e.committeesize}}
-                                        <br>
-                                        <b>Candidates:</b>
-                                        <p>
+                                        {% if e.candidates|length <= 7 %}
                                             {% for candidate in e.candidates %}
-                                                <div class="is-candidate">
-                                                    {{candidate.name}}
-                                                </div>
+                                                <button id="{{candidate.id}}" type="button" class="btn btn-primary" disabled>{{candidate.name}}</button>
                                             {% endfor %}
-                                        </p>
+                                        {% else %}
+                                            {% for candidate in e.candidates[:7] %}
+                                                <button id="{{candidate.id}}" type="button" class="btn btn-primary" disabled>{{candidate.name}}</button>
+                                            {% endfor %}
+                                            <a href="/details/{{ e.id }}">(more)</a>
+                                        {% endif %}
                                         <div style="clear: both;"></div>
-                                        
                                     </div>
                                 </div>
                             </div>
                         </div>            
                     {% endfor %}
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#featuredCarousel" data-bs-slide="prev">
-                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#featuredCarousel" data-bs-slide="next">
-                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                </button>
             </div>
             {% else %}
             <div class="alert alert-info" role="alert">
@@ -124,6 +122,56 @@
             {% endif %}
         </div>
 
+        <div class="row mb-5 mt-5"></div>
+        <div class="row mb-5 mt-5"></div>
+
+        <div class="row mt-5 mb-5">
+            <div class="col">
+                <img src="{{ url_for('static', filename= 'img/voting.png') }}" width="80%">
+            </div>
+            <div class="col-8 text-end">
+                <h1 class="display-4">Express Your True Opinion.</h1>
+                <p class="lead">
+                    <i>GoodVoteX</i> allows you to vote in elections using a variety of sophisticated ballots.
+                    The times where you were only allowed to say <i>yes</i> or <i>no</i> to each candidate are gone.
+                    With <i>GoodVoteX</i> you can choose between ordinal ranks, approval ballots, bounded approval ballots, and others when creating an election.
+                    Don't worry -- we invested a lot of time in making these ballots easy to use for every voter without requiring any knowledge in advance. 
+                </p>
+                <form role="search" action="/searchforelection" method="get" class="d-flex">
+                    <input id="keyword" name="keyword" type="search" class="form-control form-control-dark text-bg-light" placeholder="Keywork or Election ID..." aria-label="Search">
+                    &nbsp;
+                    <button type="submit" class="btn btn-success">Search</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row mb-5 mt-5"></div>
+        <div class="row mb-5 mt-5"></div>
+
+        <div class="row mt-5 mb-5">
+            <div class="col-8">
+                <h1 class="display-4">Choose From Many Voting Rules.</h1>
+                <p class="lead">
+                    With <i>GoodVoteX</i> you may choose of over 10 voting rules to make the best decision for your specific task.
+                    You want to elect an expert committee with potential dependencies between candidates?
+                    <i>Bounded approval elections</i> may be just right for you.
+                    Your voters rather want to elect a single winner based on their individual rankings?
+                    Consider <i>Borda</i> or <i>Copeland</i> elections.
+                    This is all too complicated for your case?
+                    No problem -- regular <i>approval elections</i> will fit your needs.
+                </p>
+                <p>
+                    {% if user.is_authenticated %}
+                        <a href="/create"><button type="button" class="btn btn-success">Create an Election Now</button></a>
+                    {% else %}
+                        <a href="/register"><button type="button" class="btn btn-success">Register Today to Create an Election</button></a>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col text-end">
+                <img src="{{ url_for('static', filename= 'img/vote_machine.png') }}" width="80%">
+            </div>
+        </div>
 
 {% endblock %}
 

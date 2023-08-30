@@ -1,79 +1,81 @@
 {%extends "base.html" %}
 {%block content%}
-<div class="col-sm-8 mx-auto mb-3">
+<div class="mb-3">
     <div class="card">
         <div class="card-header">
-            <b>{{ election.title }}</b>
-            <div class="float-end">
-                <input hidden type="text" value="{{ url_for('voting.details_page', electionID=election.id, _external=True) }}" id="sharelink" class="textfield" readonly>
-                <button id="sharebutton" onclick="copyShareToClipboard()" class="btn btn-primary">Share</button>
-                {% if election.is_stopped %} 
-                    <button class="btn btn-success" disabled>Vote</button>
-                {% else %}
-                    <a href="/vote/{{ election.id }}"><button class="btn btn-success">Vote</button></a>
-                {% endif %}
+            <div class="row">
+                <div class="col">
+                    <h1 class="display-6">{{ election.title }}</h1>
+                </div>
+                <div class="col">
+                    <div class="float-end">
+                        <input hidden type="text" value="{{ url_for('voting.details_page', electionID=election.id, _external=True) }}" id="sharelink" class="textfield" readonly>
+                        <button id="sharebutton" onclick="copyShareToClipboard()" class="btn btn-primary">Share</button>
+                        {% if election.is_stopped %} 
+                            <button class="btn btn-success" disabled>Vote</button>
+                        {% else %}
+                            <a href="/vote/{{ election.id }}"><button class="btn btn-success">Vote</button></a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
         <div class="card-body">
-            <b>Description:</b>
             <p>
+                <b>Description:</b>
                 {% for line in election.description.split("\n") %}
                     {{ line }}<br>
                 {% endfor %}
             </p>
-            <br>
-            <b>Committee Size:</b> {{election.committeesize}}
-            <br>
-            <b>Candidates:</b>
+
+            <p>
+                <b>Election Type:</b>
+                {% if election.committeesize == 1 %} 
+                    Single-Winner Election.
+                {% else %}
+                    Committee Election (target size: {{election.committeesize}})
+                {% endif %}
+            </p>
+            
             <p>
                 {% for candidate in election.candidates %}
-                    <div class="is-candidate">
-                        {{candidate.name}}
-                    </div>
+                    <button id="{{candidate.id}}" type="button" class="btn btn-primary mb-1 mr-1" disabled>{{candidate.name}}</button>
                 {% endfor %}
             </p>
-            <div style="clear: both;"></div>
+
 
             {% if admin %}
+                <hr>
+                <b>This information is only visible for the owner of the election.</b>
                 <br>
-                <b>Admin Space:</b>
                 {% if election.is_stopped %}
                     <br>
-                    This election was stopped by you (or another administrator).
-                    <br>
-                    A total of <b>{{election.votecount}} voters</b> participated.
+                    A total of <b>{{election.votecount}} voters</b> participated (election is <b>closed</b>).
                     <br>
                     The winner committee is:
                     <div>
                         {% for candidate in election.get_winners() %}
-                        <div class="is-candidate">
-                            {{candidate.name}}
-                        </div>
+                            <button id="{{candidate.id}}" type="button" class="btn btn-primary mb-1 mr-1" disabled>{{candidate.name}}</button>
                         {% endfor %}
                     </div>
                 {% else %}
                     <br>
-                    Voters can still vote in this election. Click the button at the bottom to stop voting.
+                    Currently <b>{{election.votecount}} voters</b> participated (election is still <b>open</b>).
                     <br>
-                    Currently <b>{{election.votecount}} voters</b> participated.
-                    <br>
-                    Currently, the best committee is:
-                    <div>
+                    Currently, the winner(s) is (are):
+                    <div class="mb-2 mt-2">
                         {% for candidate in election.get_winners() %}
-                        <div class="is-candidate">
-                            {{candidate.name}}
-                        </div>
+                            <button id="{{candidate.id}}" type="button" class="btn btn-primary mb-1 mr-1" disabled>{{candidate.name}}</button>
                         {% endfor %}
                     </div>
-                    <div style="clear: both;"></div>
-                    <br>
-                    Please note that some voting rules produce a committee which is smaller than the intended size, e.g., because there were not sufficiently many votes to construct a complete committee.
+                    Please note that some voting rules produce a smaller committee than the intended size, e.g., because there were not sufficiently many votes to construct a complete committee yet.
+                    Further, note that this is not the final result as the election is still open.
                     <div style="clear: both;"></div>
                 {% endif %}
                 <div class="float-end">
                     <form method="post">
                         {% if election.is_stopped %} 
-                            <input value="Stop + Evaluate" class="btn btn-warning" disabled>
+                            <input value="Stop and Evaluate" class="btn btn-warning" disabled>
                         {% else %}
                             <input type="submit" value="Stop and Evaluate" class="btn btn-warning" formaction="/evaluate/{{ election.id }}" onclick="return confirm('By evaluating the election, it will be closed for further votes. Do you want to continue?')">
                         {% endif %}
