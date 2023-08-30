@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 
 {% if user is defined and user.is_authenticated  and user.theme == "dark" %}
-<html lang="en" data-bs-theme="dark">
+<html lang="en" data-bs-theme="dark" class="h-100">
 {% else %}
-<html lang="en" data-bs-theme="light">
+<html lang="en" data-bs-theme="light" class="h-100">
 {% endif %}
 
 <head>
@@ -23,7 +23,9 @@
     {% endblock %}
 </head>
 
-<body>
+<body class="d-flex flex-column h-100">
+
+    <!-- Navigation Bar, Login/Userinfo Window -->
     {% if user is defined and user.is_authenticated  and user.theme == "dark" %}
     <nav class="navbar navbar-dark mb-5" style="background-color: #353535;">
     {% else %}
@@ -123,25 +125,27 @@
     </nav>
 
     
+    <!-- Page Content -->
+    <main class="flex-shrink-0">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{category}}" role="alert">
+                    {{message}}
+                </div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
 
-    <main class="container">
-  
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{category}}" role="alert">
-                {{message}}
-            </div>
-            {% endfor %}
-        {% endif %}
-        {% endwith %}
-
-        {% block content %}
-        {% endblock %}
+            {% block content %}
+            {% endblock %}
+            <div class="mb-3" style="clear: both;"></div>
+        </div>
     </main>
     
-    <div class="mb-3" style="clear: both;"></div>
 
+    <!-- Header -->
     {% if user is defined and user.is_authenticated  and user.theme == "dark" %}
     <footer class="footer mt-auto py-3" style="background-color: #353535;">
     {% else %}
