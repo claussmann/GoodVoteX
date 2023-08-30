@@ -2,10 +2,10 @@
 <!-- Copyrigth (C) 2022, 2023 Christian Laußmann, Paul Nüsken -->
 <!DOCTYPE html>
 
-{% if user is defined and user.is_authenticated  and user.theme == "dark" %}
-<html lang="en" data-bs-theme="dark" class="h-100">
-{% else %}
+{% if user is defined and user.is_authenticated  and user.theme == "light" %}
 <html lang="en" data-bs-theme="light" class="h-100">
+{% else %}
+<html lang="en" data-bs-theme="dark" class="h-100">
 {% endif %}
 
 <head>
@@ -23,16 +23,16 @@
     {% endblock %}
 </head>
 
-{% if user is defined and user.is_authenticated and user.theme == "dark" %}
-<body class="d-flex flex-column h-100" style="background-color:#39393b">
-{% else %}
+{% if user is defined and user.is_authenticated and user.theme == "light" %}
 <body class="d-flex flex-column h-100">
+{% else %}
+<body class="d-flex flex-column h-100" style="background-color:#39393b">
 {% endif %}
     <!-- Navigation Bar, Login/Userinfo Window -->
-    {% if user is defined and user.is_authenticated and user.theme == "dark" %}
-    <nav class="navbar navbar-dark mb-5 bg-dark">
-    {% else %}
+    {% if user is defined and user.is_authenticated and user.theme == "light" %}
     <nav class="navbar navbar-light bg-light mb-5">
+    {% else %}
+    <nav class="navbar navbar-dark mb-5 bg-dark">
     {% endif %}
         <div class="container">
             <a class="navbar-brand" href="/"><img src="{{ url_for('static', filename= 'img/logo.png') }}" height="80"></a>
@@ -149,10 +149,10 @@
     
 
     <!-- Footer -->
-    {% if user is defined and user.is_authenticated  and user.theme == "dark" %}
-    <footer class="footer mt-auto py-3 bg-dark">
-    {% else %}
+    {% if user is defined and user.is_authenticated  and user.theme == "light" %}
     <footer class="footer mt-auto py-3 bg-light">
+    {% else %}
+    <footer class="footer mt-auto py-3 bg-dark">
     {% endif %}
         <div class="container">
             <div class="row mt-3 mb-3">
