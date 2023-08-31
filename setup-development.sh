@@ -80,7 +80,7 @@ else
       y )
         echo "Creating Database ..."
         flask goodvotex create-db
-        flask auth add-user admin "Armin Admin" "${GOODVOTEX_ADMIN_EMAIL}" "${GOODVOTEX_ADMIN_PASSWORD}"
+        flask auth add-user admin "Armin Admin" "${GOODVOTEX_ADMIN_EMAIL}" "${GOODVOTEX_ADMIN_PASSWORD}" True
         ;;
       * )
         echo "You must create a database before starting the application."

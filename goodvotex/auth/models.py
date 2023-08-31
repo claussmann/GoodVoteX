@@ -1,6 +1,6 @@
 from flask_login import UserMixin
 from flask_sqlalchemy.model import Model
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from .. import db
@@ -12,6 +12,8 @@ class User(UserMixin, db.Model):
     email = Column(String(100), nullable=False)
     password_hash = Column(String(300), nullable=False)
     theme = Column(String(15), default="dark")
+    group_id = Column(Integer, ForeignKey('usergroup.id'), nullable=False)
+    group = db.relationship('Usergroup', backref=db.backref('members', lazy=True))
 
     def set_password(self, new_passwd):
         if len(new_passwd) > 40:
@@ -28,3 +30,8 @@ class User(UserMixin, db.Model):
 
     def owns_election(self, election):
         return election in self.elections
+
+class Usergroup(db.Model):
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False, unique=True)
+    displayname = Column(String(100), nullable=False)

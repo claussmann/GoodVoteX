@@ -20,11 +20,15 @@ def register():
             flash("Passwords do not match.", "danger")
         else:
             try:
+                usergroup = service.get_group("user")
+                if usergroup is None:
+                    usergroup = service.register_group("user", "User")
                 service.register_user(
                     request.form.get('username'),
                     request.form.get('name'),
                     request.form.get('email'),
-                    request.form.get('passwd')
+                    request.form.get('passwd'),
+                    usergroup
                 )
                 flash("Registration successful.", "info")
             except:
