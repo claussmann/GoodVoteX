@@ -54,7 +54,7 @@ def search_election():
 @voting.route('/details/<electionID>', methods=['GET', 'POST'])
 def details_page(electionID):
     election = service.get_election(electionID)
-    if current_user.is_authenticated and current_user.owns_election(election):
+    if current_user.is_authenticated and (current_user.owns_election(election) or current_user.group.name == "admin"):
         service.evaluate(electionID, current_user)
         return render_template('details.html', election=election, admin=True)
     return render_template('details.html', election=election, admin=False)
