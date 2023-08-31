@@ -81,4 +81,4 @@ def change_password():
 @login_required
 def toggle_theme():
     service.toggle_theme(current_user)
-    return redirect(url_for('voting.start_page'))
+    return redirect(url_for('auth.userinfo'))
