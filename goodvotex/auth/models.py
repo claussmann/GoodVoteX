@@ -11,6 +11,7 @@ class User(UserMixin, db.Model):
     name = Column(String(100), nullable=False)
     email = Column(String(100), nullable=False)
     password_hash = Column(String(300), nullable=False)
+    theme = Column(String(15), default="dark")
 
     def set_password(self, new_passwd):
         if len(new_passwd) > 40:

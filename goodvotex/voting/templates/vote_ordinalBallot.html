@@ -3,23 +3,11 @@
 
 {%block votingguide%}
 
-  <div class="accordion" id="faq">
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headinghowitworks">
-        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapsehowitworks" aria-expanded="false" aria-controls="collapsehowitworks">
-            How It Works
-        </button>
-      </h2>
-      <div id="collapsehowitworks" class="accordion-collapse collapse show" aria-labelledby="headinghowitworks" data-bs-parent="#faq">
-        <div class="accordion-body">
-          We provide you all candidates in a random order.
-          You click on the arrow buttons to move the candidates up or down in the order.
-          Thereby, the top refers to the best candidate according to your opinion, and the bottom candidate to the worst.
-          When you're finished, click the submit button.
-        </div>
-      </div>
-    </div>
-  </div>
+  We provide you all candidates in a random order.
+  You click on the arrow buttons to move the candidates up or down in the order.
+  Thereby, the top refers to the best candidate according to your opinion, and the bottom candidate to the worst.
+  When you're finished, click the submit button.
+
 
 {% endblock %}
 
@@ -30,9 +18,9 @@
     <div id="all_candidates" class="mb-2">
     {% for candidate in election.candidates %}
     <div class="candidate mb-1" id="{{candidate.id}}">
-      <button id="{{candidate.id}}_up" type="button" class="btn btn-light mr-2 btn-lg" onclick="move_up(this)">Up</button>
+      <button id="{{candidate.id}}_up" type="button" class="btn mr-2 btn-outline-secondary btn-lg" onclick="move_up(this)">&uarr;</button>
       <button type="button" class="btn btn-primary btn-lg" disabled>{{candidate.name}}</button>
-      <button id="{{candidate.id}}_down" type="button" class="btn btn-light mr-2 btn-lg" onclick="move_down(this)">Down</button>
+      <button id="{{candidate.id}}_down" type="button" class="btn btn-outline-secondary mr-2 btn-lg" onclick="move_down(this)">&darr;</button>
     </div>
     {% endfor %}
     </div>

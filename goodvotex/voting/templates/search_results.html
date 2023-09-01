@@ -5,17 +5,23 @@
       <h2>No search results.</h2>
     {% else %}
       {% for e in elections %}
-        <div class="col-sm-8 mx-auto mb-3">
-            <div class="card text-dark bg-light">
+        <div class="col mb-3">
+            <div class="card">
                 <div class="card-header">
-                    <b>{{ e.title }}</b>
-                    <div class="float-end">
-                        <a href="/details/{{ e.id }}"><button class="btn btn-secondary">Details</button></a>
-                        {% if e.is_stopped %} 
-                            <button class="btn btn-success" disabled>Vote</button>
-                        {% else %}
-                            <a href="/vote/{{ e.id }}"><button class="btn btn-success">Vote</button></a>
-                        {% endif %}
+                    <div class="row">
+                        <div class="col">
+                            <h1 class="display-6">{{ e.title }}</h1>
+                        </div>
+                        <div class="col">
+                            <div class="float-end">
+                                <a href="/details/{{ e.id }}"><button class="btn btn-secondary">Details</button></a>
+                                {% if e.is_stopped %} 
+                                    <button class="btn btn-success" disabled>Vote</button>
+                                {% else %}
+                                    <a href="/vote/{{ e.id }}"><button class="btn btn-success">Vote</button></a>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -25,19 +31,6 @@
                             {{ line }}<br>
                         {% endfor %}
                     </p>
-                    <br>
-                    <b>Committee Size:</b> {{e.committeesize}}
-                    <br>
-                    <b>Candidates:</b>
-                    <p>
-                        {% for candidate in e.candidates %}
-                            <div class="is-candidate">
-                                {{candidate.name}}
-                            </div>
-                        {% endfor %}
-                    </p>
-                    <div style="clear: both;"></div>
-                    
                 </div>
             </div>
         </div>

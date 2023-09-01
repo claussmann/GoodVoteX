@@ -1,7 +1,13 @@
-<!-- Created by Christian Laußmann in 2022 and 2023 at Heinrich-Heine-University Düsseldorf-->
-<!-- Copyrigth (C) 2022, 2023 Christian Laußmann -->
+<!-- Created by Christian Laußmann and Paul Nüsken in 2022 and 2023 at Heinrich-Heine-University Düsseldorf-->
+<!-- Copyrigth (C) 2022, 2023 Christian Laußmann, Paul Nüsken -->
 <!DOCTYPE html>
-<html lang="en">
+
+{% if user is defined and user.is_authenticated  and user.theme == "light" %}
+<html lang="en" data-bs-theme="light" class="h-100">
+{% else %}
+<html lang="en" data-bs-theme="dark" class="h-100">
+{% endif %}
+
 <head>
     <title>GoodVoteX</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename= 'img/favicon.png') }}">
@@ -17,15 +23,23 @@
     {% endblock %}
 </head>
 
-<body>
-
-    <nav class="navbar navbar-dark bg-light mb-5">
+{% if user is defined and user.is_authenticated and user.theme == "light" %}
+<body class="d-flex flex-column h-100">
+{% else %}
+<body class="d-flex flex-column h-100" style="background-color:#39393b">
+{% endif %}
+    <!-- Navigation Bar, Login/Userinfo Window -->
+    {% if user is defined and user.is_authenticated and user.theme == "light" %}
+    <nav class="navbar navbar-light bg-light mb-5">
+    {% else %}
+    <nav class="navbar navbar-dark mb-5 bg-dark">
+    {% endif %}
         <div class="container">
             <a class="navbar-brand" href="/"><img src="{{ url_for('static', filename= 'img/logo.png') }}" height="80"></a>
 
             <div>
                 <form class="float-start" role="search" action="/searchforelection" method="get">
-                    <input id="keyword" name="keyword" type="search" class="form-control form-control-dark text-bg-light" placeholder="Search Election..." aria-label="Search">
+                    <input id="keyword" name="keyword" type="search" class="form-control" placeholder="Search Election..." aria-label="Search">
                 </form>
 
                 {% if user is defined and user.is_authenticated %}
@@ -40,41 +54,47 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <h4>User Info:</h4>
+                                <h4>Userinfo:</h4>
                                 <b>Username:</b> {{user.username}}
                                 <br>
                                 <b>Mail:</b> {{user.email}}
                                 <br>
                                 <hr>
-                                <br>
                                 <h4>Your elections:</h4>
                                 {% if user.elections|length > 0 %}
-                                    <ul>
-                                        {% for e in user.elections %}
-                                            <li><a href="/details/{{ e.id }}">{{ e.title }}</a></li>
-                                        {% endfor %}
-                                    </ul>
+                                    {% if user.elections|length < 6 %}
+                                        <ul>
+                                            {% for e in user.elections %}
+                                                <li><a href="/details/{{ e.id }}">{{ e.title }}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <ul>
+                                            <li><a href="/details/{{ user.elections[0].id }}">{{ user.elections[0].title }}</a></li>
+                                            <li><a href="/details/{{ user.elections[1].id }}">{{ user.elections[1].title }}</a></li>
+                                            <li><a href="/details/{{ user.elections[2].id }}">{{ user.elections[2].title }}</a></li>
+                                            <li><a href="/details/{{ user.elections[3].id }}">{{ user.elections[3].title }}</a></li>
+                                            <li><a href="/details/{{ user.elections[4].id }}">{{ user.elections[4].title }}</a></li>
+                                            <li><a href="/userinfo">...</a></li>
+                                        </ul>
+                                    {% endif %}
                                 {% else %}
                                     <p>You don't have elections yet.</p>
                                 {% endif %}
-                                <br>
-                                <a href="/create"><button type="button" class="btn btn-info">New Election</button></a>
-                                <br>
                                 <hr>
-                                <br>
-                                <h4>Change Password:</h4>
-                                <form action="/changepasswd" method="post">
-                                    <input type="password" id="passwd_old" name="passwd" class="form-control" placeholder="Password" required>
-                                    <input type="password" id="passwd_new" name="new_passwd" class="form-control" placeholder="New Password" required>
-                                    <input type="password" id="passwd_confirm" name="confirm_passwd" class="form-control"
-                                        placeholder="Confirm New Password" required>
-                                    <br>
-                                    <input type="submit" value="Change Password" class="btn btn-secondary">
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <a href="/logout"><button type="button" class="btn btn-danger">Logout</button></a>
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="float-start">
+                                            <a href="/userinfo"><button type="button" class="btn btn-info">View Profile</button></a>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="float-end">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <a href="/logout"><button type="button" class="btn btn-danger">Logout</button></a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         </div>
@@ -108,30 +128,43 @@
     </nav>
 
     
+    <!-- Page Content -->
+    <main class="flex-shrink-0">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{category}}" role="alert">
+                    {{message}}
+                </div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
 
-    <main class="container">
-  
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{category}}" role="alert">
-                {{message}}
-            </div>
-            {% endfor %}
-        {% endif %}
-        {% endwith %}
-
-        {% block content %}
-        {% endblock %}
+            {% block content %}
+            {% endblock %}
+            <div class="mb-3" style="clear: both;"></div>
+        </div>
     </main>
     
-    <div class="mb-3" style="clear: both;"></div>
 
+    <!-- Footer -->
+    {% if user is defined and user.is_authenticated  and user.theme == "light" %}
     <footer class="footer mt-auto py-3 bg-light">
+    {% else %}
+    <footer class="footer mt-auto py-3 bg-dark">
+    {% endif %}
         <div class="container">
-            <a href="{{config.GOODVOTEX_IMPRINT_URL}}" style="color:rgb(83, 83, 83)">Impressum/Imprint</a>
-            &nbsp;&nbsp;&nbsp;&nbsp;        
-            <a href="{{config.GOODVOTEX_PRIVACY_URL}}" style="color:rgb(83, 83, 83)">Datenschutz/Privacy</a>
+            <div class="row mt-3 mb-3">
+                <div class="col">
+                    <a href="{{config.GOODVOTEX_IMPRINT_URL}}">Impressum/Imprint</a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;        
+                    <a href="{{config.GOODVOTEX_PRIVACY_URL}}">Datenschutz/Privacy</a>
+                </div>
+                <div class="col text-end">
+                    <a href="https://github.com/claussmann/GoodVoteX">GoodVoteX on GitHub</a>
+                </div>
+            </div>
         </div>
     </footer>
 

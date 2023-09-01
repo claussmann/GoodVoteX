@@ -3,33 +3,20 @@
 
 {%block votingguide%}
 
-  <div class="accordion" id="faq">
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headinghowitworks">
-        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapsehowitworks" aria-expanded="false" aria-controls="collapsehowitworks">
-            How It Works
-        </button>
-      </h2>
-      <div id="collapsehowitworks" class="accordion-collapse collapse show" aria-labelledby="headinghowitworks" data-bs-parent="#faq">
-        <div class="accordion-body">
-          Voting works in two steps.
-          <ol>
-            <li><b>Select all candidates you approve.</b> More precisely: Select each candidate for which you think there exists a committee (of the size given in the description above) where this candidate is part of, and you find it good that the candidate is part of it.</li>
-            <br>
-            <li>
-              <b>Refine your ballot</b> by stating under which conditions you like each candidate.
-              <ul>
-                <li><i>Unconditional approval:</i> The candidates are good regardless of other candidates in the committee.</li>
-                <li><i>Substitution:</i> Having one of these candidates is good, but having more than one is just as good as having only one.</li>
-                <li><i>Dependency:</i> These candidates only make sense when they are together in the committee. Any subset of them is useless.</li>
-                <li><i>Incompatibility:</i> Having exactly one of these candidates is good, but there shouldn't be more than one of them.</li>
-              </ul>
-            </li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </div>
+  Voting works in two steps.
+  <ol>
+    <li><b>Select all candidates you approve.</b> More precisely: Select each candidate for which you think there exists a committee (of the size given in the description above) where this candidate is part of, and you find it good that the candidate is part of it.</li>
+    <br>
+    <li>
+      <b>Refine your ballot</b> by stating under which conditions you like each candidate.
+      <ul>
+        <li><i>Unconditional approval:</i> The candidates are good regardless of other candidates in the committee.</li>
+        <li><i>Substitution:</i> Having one of these candidates is good, but having more than one is just as good as having only one.</li>
+        <li><i>Dependency:</i> These candidates only make sense when they are together in the committee. Any subset of them is useless.</li>
+        <li><i>Incompatibility:</i> Having exactly one of these candidates is good, but there shouldn't be more than one of them.</li>
+      </ul>
+    </li>
+  </ol>
 
 {% endblock %}
 
@@ -57,16 +44,14 @@
 
     <div id="allbins" class="row mb-3 mt-2">
       <!-- Bin 1 -->
-      <div class="card text-light bg-dark" style="width: 30%; margin-left: 1%; margin-right: 2%;">
+      <div class="card" style="width: 32%; margin-left: 1%;">
         <div class="card-header">
           <h2>Bin 1</h2>
-          <hr>
         </div>
         <div class="card-body">
           <div id="bin1items"></div>
         </div>
         <div class="card-footer">
-          <hr>
           <form>
             <input type="radio" id="bin1approval" name="bin1type"> &nbsp; Approval<br>
             <input type="radio" id="bin1substitution" name="bin1type" checked="checked"> &nbsp; Substitution<br>
@@ -77,16 +62,14 @@
       </div>
 
       <!-- Bin 2 -->
-      <div class="card text-light bg-dark" style="width: 30%; margin-left: 1%; margin-right: 2%;">
+      <div class="card" style="width: 32%; margin-left: 1%;">
         <div class="card-header">
           <h2>Bin 2</h2>
-          <hr>
         </div>
         <div class="card-body">
           <div id="bin2items"></div>
         </div>
         <div class="card-footer">
-          <hr>
           <form>
             <input type="radio" id="bin2approval" name="bin1type" checked="checked"> &nbsp; Approval<br>
             <input type="radio" id="bin2substitution" name="bin1type"> &nbsp; Substitution<br>
@@ -97,16 +80,14 @@
       </div>
 
       <!-- Bin 3 -->
-      <div class="card text-light bg-dark" style="width: 30%; margin-left: 1%;">
+      <div class="card" style="width: 33%; margin-left: 1%;">
         <div class="card-header">
           <h2>Bin 3</h2>
-          <hr>
         </div>
         <div class="card-body">
           <div id="bin3items"></div>
         </div>
         <div class="card-footer">
-          <hr>
           <form>
             <input type="radio" id="bin3approval" name="bin1type"> &nbsp; Approval<br>
             <input type="radio" id="bin3substitution" name="bin1type"> &nbsp; Substitution<br>
@@ -209,14 +190,14 @@
 
         var left_btn = document.createElement("BUTTON");
         left_btn.id = candidateid + "_controls_left"
-        left_btn.setAttribute('class', 'btn btn-light mr-2 btn-lg');  
-        left_btn.textContent = '<';
+        left_btn.setAttribute('class', 'btn btn-outline-secondary mr-2 btn-lg');  
+        left_btn.textContent = '←';
         left_btn.onclick = move_candidate_left;
 
         var right_btn = document.createElement("BUTTON");
         right_btn.id = candidateid + "_controls_right"
-        right_btn.setAttribute('class', 'btn btn-light ml-2 btn-lg');  
-        right_btn.textContent = '>';
+        right_btn.setAttribute('class', 'btn btn-outline-secondary ml-2 btn-lg');  
+        right_btn.textContent = '→';
         right_btn.onclick = move_candidate_right;
         
         html_candidate_with_controls.appendChild(left_btn);

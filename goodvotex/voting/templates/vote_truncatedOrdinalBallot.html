@@ -3,23 +3,11 @@
 
 {%block votingguide%}
 
-  <div class="accordion" id="faq">
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headinghowitworks">
-        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapsehowitworks" aria-expanded="false" aria-controls="collapsehowitworks">
-            How It Works
-        </button>
-      </h2>
-      <div id="collapsehowitworks" class="accordion-collapse collapse show" aria-labelledby="headinghowitworks" data-bs-parent="#faq">
-        <div class="accordion-body">
-          In the first step, you select all candidates you like.
-          In the second step, by clicking on the arrow buttons you can move the candidates up or down in the order.
-          Place your most liked candidate on the top, and your least liked (though still approved) candidate at the bottom.
-          When you're finished, click the submit button.
-        </div>
-      </div>
-    </div>
-  </div>
+  In the first step, you select all candidates you like.
+  In the second step, by clicking on the arrow buttons you can move the candidates up or down in the order.
+  Place your most liked candidate on the top, and your least liked (though still approved) candidate at the bottom.
+  When you're finished, click the submit button.
+
 
 {% endblock %}
 
@@ -131,14 +119,14 @@
 
         var up_btn = document.createElement("BUTTON");
         up_btn.id = candidateid + "_controls_up"
-        up_btn.setAttribute('class', 'btn btn-light mr-2 btn-lg');  
-        up_btn.textContent = 'up';
+        up_btn.setAttribute('class', 'btn btn-outline-secondary mr-2 btn-lg');  
+        up_btn.textContent = "↑";
         up_btn.onclick = move_up;
 
         var down_btn = document.createElement("BUTTON");
         down_btn.id = candidateid + "_controls_right"
-        down_btn.setAttribute('class', 'btn btn-light ml-2 btn-lg');  
-        down_btn.textContent = 'down';
+        down_btn.setAttribute('class', 'btn btn-outline-secondary ml-2 btn-lg');  
+        down_btn.textContent = '↓';
         down_btn.onclick = move_down;
         
         html_candidate_with_controls.appendChild(up_btn);

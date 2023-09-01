@@ -34,6 +34,12 @@ def register():
     return render_template('register.html')
 
 
+@auth.route('/userinfo', methods=['GET'])
+@login_required
+def userinfo():
+    return render_template('userinfo.html', user=current_user)
+
+
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -69,3 +75,10 @@ def change_password():
     flash("Password changed successfully!", "info")
 
     return redirect(url_for('voting.start_page'))
+
+
+@auth.route('/toggletheme', methods=['POST'])
+@login_required
+def toggle_theme():
+    service.toggle_theme(current_user)
+    return redirect(url_for('auth.userinfo'))
