@@ -20,7 +20,8 @@ def get_all_users():
 
     :return: All user objects, sorted by username.
     """
-    return User.query.all()
+    ret = User.query.all()
+    return sorted(ret, key=lambda u: u.username)
 
 def register_user(username, name, email, password):
     """
