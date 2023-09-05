@@ -12,16 +12,10 @@ from . import service
 def add_user(username, name, email, password, admin):
     if service.get_user(username) is None:
         print("Creating user '{}' (email: {}) with login '{} : {}'".format(name, username, email, password))
+        service.register_user(username, name, email, password)
+        service.update_user_permissions(username, vote=True, create=True)
         if admin:
-            usergroup = service.get_group("admin")
-            if usergroup is None:
-                usergroup = service.register_group("admin", "Administrator")
-            service.register_user(username, name, email, password, usergroup)
-        else:
-            usergroup = service.get_group("user")
-            if usergroup is None:
-                usergroup = service.register_group("user", "User")
-            service.register_user(username, name, email, password, usergroup)
+            service.update_user_permissions(username, admin=True)
     else:
         print("A user with username '{}' already exists. Consider running 'change-pass' instead?".format(username))
 

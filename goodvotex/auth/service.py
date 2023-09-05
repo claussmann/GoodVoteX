@@ -3,7 +3,7 @@ from flask import flash
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash
 
-from .models import User, Usergroup
+from .models import User
 from .. import db
 
 
@@ -15,15 +15,14 @@ def get_user(username):
     """
     return User.query.filter_by(username=username).first()
 
-def get_group(groupname):
+def get_all_users():
     """
 
-    :param groupname:
-    :return: The usergroup object with the given name (if exists).
+    :return: All user objects, sorted by username.
     """
-    return Usergroup.query.filter_by(name=groupname).first()
+    return User.query.all()
 
-def register_user(username, name, email, password, group):
+def register_user(username, name, email, password):
     """
     Registers a new user.
 
@@ -33,7 +32,7 @@ def register_user(username, name, email, password, group):
     :param password:
     :return: When registration successful, returns the user object.
     """
-    u = User(username=username, name=name, email=email, group=group,
+    u = User(username=username, name=name, email=email,
              password_hash=generate_password_hash(password, method='pbkdf2:sha512'))
     db.session.add(u)
     try:
@@ -44,23 +43,19 @@ def register_user(username, name, email, password, group):
         raise Exception
     return u
 
-def register_group(groupname, displayname):
+def update_user_permissions(username, admin=None, create=None, vote=None):
     """
-    Registers a new group.
+    Update permissions of username.
 
-    :param groupname:
-    :param displayname:
-    :return: When registration successful, returns the group object.
+    :param admin: Set admin permission True/False (Optional)
+    :param create: Set ability to create and manage own elections True/False (Optional)
+    :param vote: Set voting ability to True/False (Optional)
     """
-    group = Usergroup(name=groupname, displayname=displayname)
-    db.session.add(group)
-    try:
-        db.session.commit()
-    except IntegrityError:
-        db.session.rollback()
-        flash("The group name is already taken")
-        raise Exception
-    return group
+    u = get_user(username)
+    u.update_permissions(admin=admin, create=create, vote=vote)
+    db.session.add(u)
+    db.session.commit()
+    return u
 
 def change_password(user, password, new_password, confirm_password, force=False):
     """
