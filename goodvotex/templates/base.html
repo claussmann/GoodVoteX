@@ -85,7 +85,10 @@
                                 <div class="row">
                                     <div class="col">
                                         <div class="float-start">
-                                            <a href="/userinfo"><button type="button" class="btn btn-info">View Profile</button></a>
+                                            <a href="/userinfo"><button type="button" class="btn btn-info">Profile</button></a>
+                                            {% if user.is_admin() %}
+                                                <a href="/adminpanel"><button type="button" class="btn btn-warning">Admin Space</button></a>
+                                            {% endif %}
                                         </div>
                                     </div>
                                     <div class="col">

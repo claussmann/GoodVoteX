@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Admin Page</h1>
+
+<p>Welcome {{user.name}}!</p>
+
+<hr>
+
+<h4>Registered Users</h4>
+<table class="table">
+    <tr>
+        <th>Username</th>
+        <th>Name</th>
+        <th>Mail</th>
+        <th>Permissions</th>
+        <th>Elections</th>
+        <th>Edit</th>
+    </tr>
+    {% for u in allusers %}
+        <tr>
+            <td>{{u.username}}</td>
+            <td>{{u.name}}</td>
+            <td>{{u.email}}</td>
+            <td>{{u.permissions}}</td>
+            <td>{{u.elections | length}}</td>
+            <td>(n/a)</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<hr>
+
+
+{% endblock %}

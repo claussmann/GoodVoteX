@@ -20,15 +20,11 @@ def register():
             flash("Passwords do not match.", "danger")
         else:
             try:
-                usergroup = service.get_group("user")
-                if usergroup is None:
-                    usergroup = service.register_group("user", "User")
                 service.register_user(
                     request.form.get('username'),
                     request.form.get('name'),
                     request.form.get('email'),
-                    request.form.get('passwd'),
-                    usergroup
+                    request.form.get('passwd')
                 )
                 flash("Registration successful.", "info")
             except:
@@ -41,6 +37,15 @@ def register():
 @auth.route('/userinfo', methods=['GET'])
 @login_required
 def userinfo():
+    return render_template('userinfo.html', user=current_user)
+
+
+@auth.route('/adminpanel', methods=['GET'])
+@login_required
+def adminpanel():
+    if current_user.is_admin():
+        return render_template('admin_page.html', user=current_user, allusers=service.get_all_users())
+    flash("you need to login as admin to view the admin page.", "danger")
     return render_template('userinfo.html', user=current_user)
 
 
