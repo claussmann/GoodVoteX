@@ -49,6 +49,15 @@ def adminpanel():
     return render_template('userinfo.html', user=current_user)
 
 
+@auth.route('/useredit/<username>', methods=['GET'])
+@login_required
+def useredit(username):
+    if current_user.is_admin():
+        return render_template('useredit.html', user=current_user, edituser=service.get_user(username))
+    flash("you need to login as admin to edit a user.", "danger")
+    return render_template('userinfo.html', user=current_user)
+
+
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:

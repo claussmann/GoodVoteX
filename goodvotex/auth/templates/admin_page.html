@@ -15,7 +15,7 @@
         <th>Mail</th>
         <th>Permissions</th>
         <th>Elections</th>
-        <th>Edit</th>
+        <th></th>
     </tr>
     {% for u in allusers %}
         <tr>
@@ -24,7 +24,7 @@
             <td>{{u.email}}</td>
             <td>{{u.permissions}}</td>
             <td>{{u.elections | length}}</td>
-            <td>(n/a)</td>
+            <td class="text-end"><a href="/useredit/{{u.username}}"><button type="button" class="btn btn-info">Edit User</button></a></td>
         </tr>
     {% endfor %}
 </table>

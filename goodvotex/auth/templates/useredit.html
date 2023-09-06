@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Edit User:</h1>
+
+<hr>
+<h4>User Information</h4>
+<b>{{edituser.name}}</b>
+<br>
+<b>Username:</b> {{edituser.username}}
+<br>
+<b>Mail:</b> {{edituser.email}}
+<br>
+<b>Elections created by this user:</b>
+<table class="table">
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th></th>
+    </tr>
+    {% for e in edituser.elections %}
+        <tr>
+            <td>{{e.id}}</td>
+            <td>{{e.title}}</td>
+            <td>{% if e.is_stopped %} Stopped {% else %} Active {% endif %}</td>
+            <td class="text-end"><a href="/details/{{e.id}}"><button type="button" class="btn btn-info">View</button></a></td>
+        </tr>
+    {% endfor %}
+</table>
+
+<hr>
+<h4>Permissions</h4>
+<p>
+    Click to toggle permissions on and off.
+</p>
+{% if edituser.can_vote() %}
+    <button type="button" class="btn btn-success">Voting Allowed</button>
+{% else %}
+    <button type="button" class="btn btn-danger">Voting Disallowed</button>
+{% endif %}
+{% if edituser.can_create() %}
+    <button type="button" class="btn btn-success">Create Allowed</button>
+{% else %}
+    <button type="button" class="btn btn-danger">Create Disallowed</button>
+{% endif %}
+
+<hr>
+<h4>Reset Password</h4>
+
+
+<hr>
+<h4>Danger Zone</h4>
+<button type="button" class="btn btn-danger">Delete User</button>
+
+{% endblock %}
