@@ -44,6 +44,10 @@ def register_user(username, name, email, password):
         raise Exception
     return u
 
+def delete_user(username):
+    User.query.filter_by(username=username).delete()
+    db.session.commit()
+
 def update_user_permissions(username, admin=None, create=None, vote=None):
     """
     Update permissions of username.

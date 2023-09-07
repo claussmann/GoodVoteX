@@ -57,6 +57,45 @@ def useredit(username):
     flash("you need to login as admin to edit a user.", "danger")
     return render_template('userinfo.html', user=current_user)
 
+@auth.route('/useredit/permissions/<username>', methods=['POST'])
+@login_required
+def user_permissions_edit(username):
+    if current_user.is_admin():
+        if request.form.get('vote') == "true":
+            service.update_user_permissions(username, vote=True)
+        if request.form.get('vote') == "false":
+            service.update_user_permissions(username, vote=False)
+        if request.form.get('create') == "true":
+            service.update_user_permissions(username, create=True)
+        if request.form.get('create') == "false":
+            service.update_user_permissions(username, create=False)
+        return redirect(url_for('auth.useredit', username=username))
+    flash("you need to login as admin to edit a user.", "danger")
+    return render_template('userinfo.html', user=current_user)
+
+
+@auth.route('/useredit/resetpassword/<username>', methods=['POST'])
+@login_required
+def password_reset(username):
+    if current_user.is_admin():
+        password = request.form.get('passwd_reset')
+        service.change_password(service.get_user(username), "", password, "", force=True)
+        flash("Password reset successfully.", "success")
+        return redirect(url_for('auth.useredit', username=username))
+    flash("you need to login as admin to edit a user.", "danger")
+    return render_template('userinfo.html', user=current_user)
+
+
+@auth.route('/useredit/delete/<username>', methods=['POST'])
+@login_required
+def delete_user(username):
+    if current_user.is_admin():
+        service.delete_user(username)
+        flash("User deleted successfully.", "success")
+        return redirect(url_for('auth.adminpanel'))
+    flash("you need to login as admin to edit a user.", "danger")
+    return render_template('userinfo.html', user=current_user)
+
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
