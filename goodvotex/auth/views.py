@@ -49,6 +49,23 @@ def adminpanel():
     return render_template('userinfo.html', user=current_user)
 
 
+@auth.route('/adminpanel/createuser', methods=['POST'])
+def admin_create_user():
+    if request.form.get('tnc_accept') != "accept":
+        flash("You must inform the users about our Terms and Conditions.", "danger")
+    else:
+        try:
+            service.register_user(
+                request.form.get('username'),
+                request.form.get('name'),
+                request.form.get('email'),
+                request.form.get('passwd')
+            )
+            flash("User %s successfully created." % request.form.get('username'), "success")
+        except:
+            flash("Something went wrong. Maybe username is already taken?") 
+    return redirect(url_for('auth.adminpanel'))
+
 @auth.route('/useredit/<username>', methods=['GET'])
 @login_required
 def useredit(username):

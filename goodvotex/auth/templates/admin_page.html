@@ -34,6 +34,21 @@
 </table>
 
 <hr>
+<h4>Create a New User</h4>
+
+<form action="/adminpanel/createuser" method="post">
+    <input type="text" id="name" name="name" class="form-control" placeholder="Display Name" class="textfield" required>
+    <input type="text" id="username" name="username" class="form-control" placeholder="Username" required>
+    <input type="email" id="email" name="email" class="form-control" placeholder="E-Mail" class="textfield" required>
+    <input type="password" id="passwd" name="passwd" class="form-control" placeholder="Password" class="textfield" required autocomplete="new-password">
+    <br>
+    <input class="form-check-input" type="checkbox" value="accept" id="tnc_accept" name="tnc_accept" required>
+    <label class="form-check-label" for="tnc_accept">
+           I have informed the user about our <a href="{{config.GOODVOTEX_TERMS_CONDITIONS_URL}}">Terms and Conditions</a> and confirm that the user agrees.
+    </label>
+    <br><br>
+    <input type="submit" id="registerbtn" value="Register" class="btn btn-success">
+</form>
 
 
 {% endblock %}
