@@ -24,7 +24,11 @@
             <td>{{u.email}}</td>
             <td>{{u.permissions}}</td>
             <td>{{u.elections | length}}</td>
-            <td class="text-end"><a href="/useredit/{{u.username}}"><button type="button" class="btn btn-info">Edit User</button></a></td>
+            {% if u.is_admin() %}
+                <td class="text-end"><button type="button" class="btn btn-secondary" disabled>Edit User</button></td>
+            {% else %}
+                <td class="text-end"><a href="/useredit/{{u.username}}"><button type="button" class="btn btn-info">Edit User</button></a></td>
+            {% endif %}
         </tr>
     {% endfor %}
 </table>
