@@ -39,6 +39,15 @@ class Election(db.Model):
             return self.id == other.id
         except:
             return False
+    
+    def get_candidates_random_order(self):
+        """
+        This will return the candidates of this election in random order. This
+        is helpful when the voter is confronted with the candidates to avoid bias.
+        """
+        ret = list(self.candidates)
+        random.shuffle(ret)
+        return ret
 
     def add_ballot(self, ballot):
         """

@@ -14,7 +14,7 @@
     <h2>Please select all candidates you like.</h2>
     
     <div id="candidateSelection" class="mb-3">
-      {% for candidate in election.candidates %}
+      {% for candidate in election.get_candidates_random_order() %}
         <button id="{{candidate.id}}" type="button" class="btn btn-outline-primary" data-bs-toggle="button" autocomplete="off">{{candidate.name}}</button>
       {% endfor %}
     </div>
