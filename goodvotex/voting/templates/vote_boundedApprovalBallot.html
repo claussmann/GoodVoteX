@@ -29,7 +29,7 @@
     <br>
     
     <div id="candidateSelection" class="mb-3">
-      {% for candidate in election.candidates %}
+      {% for candidate in election.get_candidates_random_order() %}
         <button id="{{candidate.id}}" type="button" class="btn btn-outline-primary btn-lg" style="margin-left : 5px; margin-right : 5px;" data-bs-toggle="button" autocomplete="off">{{candidate.name}}</button>
       {% endfor %}
     </div>

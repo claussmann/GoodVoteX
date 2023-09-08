@@ -16,7 +16,7 @@
 
   <div class="mb-2 mt-5">
     <div id="all_candidates" class="mb-2">
-    {% for candidate in election.candidates %}
+    {% for candidate in election.get_candidates_random_order() %}
     <div class="candidate mb-1" id="{{candidate.id}}">
       <button id="{{candidate.id}}_up" type="button" class="btn mr-2 btn-outline-secondary btn-lg" onclick="move_up(this)">&uarr;</button>
       <button type="button" class="btn btn-primary btn-lg" disabled>{{candidate.name}}</button>

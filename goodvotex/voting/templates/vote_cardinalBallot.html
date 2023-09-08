@@ -26,7 +26,7 @@
     <div style="height:5px; width:13.5%; background-color: rgb(92, 138, 6); display:inline-block"></div>
     <div style="clear: both;" class="mb-3"></div>
     <div id="all_candidates" class="mb-2">
-    {% for candidate in election.candidates %}
+    {% for candidate in election.get_candidates_random_order() %}
     <label for="{{candidate.id}}" class="form-label">{{candidate.name}}: <span id="{{candidate.id}}-valuefield">Neutral</span></label>
     <input type="range" class="form-range candidate" min="-10" max="10" step="1" id="{{candidate.id}}" onchange="updateSliderValue(this.id, this.value)">
     {% endfor %}
