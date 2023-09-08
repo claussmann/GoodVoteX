@@ -82,6 +82,7 @@ def change_password(user, password, new_password, confirm_password, force=False)
     db.session.add(user)
     db.session.commit()
 
+
 def toggle_theme(user):
     """
     Changes a user's theme from light to dark or vice versa.
