@@ -751,9 +751,11 @@ class BoundedApprovalBallot(Ballot):
         bounds = json_content["bounds"]
         re_encoded = []
         for name,s in sets.items():
-            s = list(set(s)) # make sure no element is dublicate
-            re_encoded.append([s, bounds[name]])
+            if len(s) > 0:
+                s = list(set(s)) # make sure no element is dublicate
+                re_encoded.append([s, bounds[name]])
         self.json_encoded = json.dumps(re_encoded)
+        print(self.json_encoded)
     
     def get_involved_candidates(self):
         pairs = self._decode()
