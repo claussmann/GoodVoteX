@@ -29,6 +29,11 @@
             </p>
 
             <p>
+                <b>Creator/Owner:</b>
+                {{ election.owner.name }}
+            </p>
+
+            <p>
                 <b>Election Type:</b>
                 {% if election.committeesize == 1 %} 
                     Single-Winner Election.

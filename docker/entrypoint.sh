@@ -7,6 +7,6 @@ HOST=0.0.0.0
 
 
 flask goodvotex create-db
-flask auth add-user admin "Armin Admin" "${GOODVOTX_ADMIN_EMAIL}" "${GOODVOTEX_ADMIN_PASSWORD}"
+flask auth add-user admin "Armin Admin" "${GOODVOTX_ADMIN_EMAIL}" "${GOODVOTEX_ADMIN_PASSWORD}" True
 
 waitress-serve --host "${HOST}" --port "${HOST_PORT}" --call goodvotex:create_app

@@ -15,6 +15,13 @@ def get_user(username):
     """
     return User.query.filter_by(username=username).first()
 
+def get_all_users():
+    """
+
+    :return: All user objects, sorted by username.
+    """
+    ret = User.query.all()
+    return sorted(ret, key=lambda u: u.username)
 
 def register_user(username, name, email, password):
     """
@@ -24,7 +31,7 @@ def register_user(username, name, email, password):
     :param username:
     :param name:
     :param password:
-    :return: When registration successful, returns the election object.
+    :return: When registration successful, returns the user object.
     """
     u = User(username=username, name=name, email=email,
              password_hash=generate_password_hash(password, method='pbkdf2:sha512'))
@@ -37,6 +44,23 @@ def register_user(username, name, email, password):
         raise Exception
     return u
 
+def delete_user(username):
+    User.query.filter_by(username=username).delete()
+    db.session.commit()
+
+def update_user_permissions(username, admin=None, create=None, vote=None):
+    """
+    Update permissions of username.
+
+    :param admin: Set admin permission True/False (Optional)
+    :param create: Set ability to create and manage own elections True/False (Optional)
+    :param vote: Set voting ability to True/False (Optional)
+    """
+    u = get_user(username)
+    u.update_permissions(admin=admin, create=create, vote=vote)
+    db.session.add(u)
+    db.session.commit()
+    return u
 
 def change_password(user, password, new_password, confirm_password, force=False):
     """

@@ -25,8 +25,8 @@ class Election(db.Model):
     is_stopped = db.Column(db.Boolean, default=False)
     last_votetime = db.Column(db.Integer, default=0)
     votecount = db.Column(db.Integer, default=0)
-    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    owner = db.relationship('User', backref=db.backref('elections', lazy=True))
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
+    owner = db.relationship('User', backref=db.backref('elections', passive_deletes=True))
     type: Mapped[str]
 
     __mapper_args__ = {

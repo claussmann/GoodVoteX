@@ -122,7 +122,7 @@ def delete_election(election_id, user):
     :return:
     """
     e = get_election(election_id)
-    if not user.owns_election(e):
+    if not (user.owns_election(e) or user.is_admin()):
         raise Exception("You need to login!")
     Election.query.filter_by(id=election_id).delete()
     db.session.commit()
@@ -137,7 +137,7 @@ def evaluate(election_id, user):
     :return:
     """
     e = get_election(election_id)
-    if not user.owns_election(e):
+    if not (user.owns_election(e) or user.is_admin()):
         raise Exception("You need to login!")
     e.recompute_current_winner()
     db.session.add(e)
@@ -153,7 +153,7 @@ def stop_election(election_id, user):
     :return:
     """
     e = get_election(election_id)
-    if not user.owns_election(e):
+    if not (user.owns_election(e) or user.is_admin()):
         raise Exception("You need to login!")
     e.stop()
     db.session.add(e)
