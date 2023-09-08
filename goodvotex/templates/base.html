@@ -54,32 +54,57 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <h4>Userinfo:</h4>
-                                <b>Username:</b> {{user.username}}
-                                <br>
-                                <b>Mail:</b> {{user.email}}
-                                <br>
-                                <hr>
-                                <h4>Your elections:</h4>
-                                {% if user.elections|length > 0 %}
-                                    {% if user.elections|length < 6 %}
-                                        <ul>
-                                            {% for e in user.elections %}
-                                                <li><a href="/details/{{ e.id }}">{{ e.title }}</a></li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% else %}
-                                        <ul>
-                                            <li><a href="/details/{{ user.elections[0].id }}">{{ user.elections[0].title }}</a></li>
-                                            <li><a href="/details/{{ user.elections[1].id }}">{{ user.elections[1].title }}</a></li>
-                                            <li><a href="/details/{{ user.elections[2].id }}">{{ user.elections[2].title }}</a></li>
-                                            <li><a href="/details/{{ user.elections[3].id }}">{{ user.elections[3].title }}</a></li>
-                                            <li><a href="/details/{{ user.elections[4].id }}">{{ user.elections[4].title }}</a></li>
-                                            <li><a href="/userinfo">...</a></li>
-                                        </ul>
-                                    {% endif %}
+                                {% if user.elections|length == 0 %}
+                                    <table class="table">
+                                        <tr>
+                                            <th>Your Elections</th>
+                                            <th></th>
+                                        </tr>
+                                        <tr>
+                                            <td>No elections yet.</td>
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                {% elif user.elections|length < 5 %}
+                                    <table class="table">
+                                        <tr>
+                                            <th>Your Elections</th>
+                                            <th></th>
+                                        </tr>
+                                        {% for e in user.elections %}
+                                            <tr>
+                                                <td>{{e.title}}</td>
+                                                <td class="text-end"><a href="/details/{{e.id}}"><button type="button" class="btn btn-info">View</button></a></td>
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
                                 {% else %}
-                                    <p>You don't have elections yet.</p>
+                                    <table class="table">
+                                        <tr>
+                                            <th>Your Elections</th>
+                                            <th></th>
+                                        </tr>
+                                        <tr>
+                                            <td>{{user.elections[0].title}}</td>
+                                            <td class="text-end"><a href="/details/{{user.elections[0].id}}"><button type="button" class="btn btn-info">View</button></a></td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{user.elections[1].title}}</td>
+                                            <td class="text-end"><a href="/details/{{user.elections[1].id}}"><button type="button" class="btn btn-info">View</button></a></td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{user.elections[2].title}}</td>
+                                            <td class="text-end"><a href="/details/{{user.elections[2].id}}"><button type="button" class="btn btn-info">View</button></a></td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{user.elections[3].title}}</td>
+                                            <td class="text-end"><a href="/details/{{user.elections[3].id}}"><button type="button" class="btn btn-info">View</button></a></td>
+                                        </tr>
+                                        <tr>
+                                            <td>...</td>
+                                            <td class="text-end"><a href="/userinfo"><button type="button" class="btn btn-info">View All</button></a></td>
+                                        </tr>
+                                    </table>
                                 {% endif %}
                                 <hr>
                                 <div class="row">
