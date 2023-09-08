@@ -1,0 +1,67 @@
+{%extends "base.html" %}
+
+{% block head %}
+{% endblock %}
+
+{%block content%}
+
+  <div class="mb-3">
+    <div class="card">
+      <div class="card-header">
+          <div class="row">
+              <div class="col">
+                  <h1 class="display-6">{{ election.title }}</h1>
+              </div>
+              <div class="col">
+                  <div class="float-end">
+                      <a href="/details/{{ election.id }}"><button class="btn btn-secondary">Details</button></a>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="card-body">
+          <p>
+              <b>Description:</b>
+              {% for line in election.description.split("\n") %}
+                  {{ line }}<br>
+              {% endfor %}
+          </p>
+
+          <p>
+              <b>Election Type:</b>
+              {% if election.committeesize == 1 %} 
+                  Single-Winner Election.
+              {% else %}
+                  Committee Election (target size: {{election.committeesize}})
+              {% endif %}
+          </p>
+      </div>
+  </div>
+  </div>
+
+  <div class="accordion" id="faq">
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headinghowitworks">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapsehowitworks" aria-expanded="false" aria-controls="collapsehowitworks">
+            How It Works
+        </button>
+      </h2>
+      <div id="collapsehowitworks" class="accordion-collapse collapse show" aria-labelledby="headinghowitworks" data-bs-parent="#faq">
+        <div class="accordion-body">
+            {% block votingguide %}
+            {% endblock %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if election.is_stopped %} 
+    <div class="alert alert-danger" role="alert">
+      This election was closed already.
+    </div>
+  {% else %}
+    {% block votingprocess %}
+    {% endblock %}
+  {% endif %} 
+
+{% endblock %}

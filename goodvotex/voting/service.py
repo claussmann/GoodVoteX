@@ -1,9 +1,11 @@
+import time
+
 from ..auth.service import get_user
 from .models import *
 from .. import db
 
 
-def register_election(ballot_type, title, description, candidates, K, user_owner):
+def register_election(election_type, title, description, candidates, K, user_owner):
     """
     Registers a new election.
 
@@ -14,7 +16,20 @@ def register_election(ballot_type, title, description, candidates, K, user_owner
     :param user_owner:
     :return: When registration successful, returns the election object.
     """
-    e = Election(ballot_type=ballot_type, title=title, description=description, committeesize=K)
+    constructors = {
+        "approvalElection": ApprovalElection,
+        "bordaElection": BordaElection,
+        "bordaCCElection": BordaCCElection,
+        "stvElection": STVElection,
+        "savElection": SAVElection,
+        "copelandElection": CopelandElection,
+        "pavElection": PAVElection,
+        "bucklinElection": BucklinElection,
+        "fallbackElection": FallbackElection,
+        "boundedApprovalElection": BoundedApprovalElection,
+        "utilitarianElection": UtilitarianElection
+    }
+    e = constructors[election_type](title=title, description=description, committeesize=K)
     for c in candidates:
         e.candidates.append(Candidate(name=c))
     user_owner.elections.append(e)
@@ -40,6 +55,22 @@ def get_all_elections():
     :return:
     """
     return Election.query.all()
+
+def get_trending_elections():
+    """
+    Get up to 5 elections which received a lot of attention recently.
+
+    :return:
+    """
+    active_elections = Election.query.filter(Election.is_stopped == False).all()
+    i = 1024
+    current_time = int(time.time())
+    ret = list()
+    while len(ret) < min(len(active_elections), 15):
+        ret = [e for e in active_elections if e.last_votetime >= current_time - i]
+        i = i*2
+    ret = sorted(ret, key=lambda x: x.votecount, reverse=True)
+    return ret[:min(len(ret), 5)]
 
 
 def search(search_string):
@@ -67,8 +98,11 @@ def add_vote_from_json(election_id, json_content):
     """
     e = get_election(election_id)
     constructors = {
-        "boundedApprovalBallot" : BoundedApprovalBallot,
-        "approvalBallot" : ApprovalBallot
+        "boundedApprovalBallot": BoundedApprovalBallot,
+        "approvalBallot": ApprovalBallot,
+        "cardinalBallot": CardinalBallot,
+        "truncatedOrdinalBallot": TruncatedOrdinalBallot,
+        "ordinalBallot": OrdinalBallot
     }
     if json_content["type"] in constructors:
         ballot = constructors[json_content["type"]](json_content)
@@ -88,7 +122,7 @@ def delete_election(election_id, user):
     :return:
     """
     e = get_election(election_id)
-    if not user.owns_election(e):
+    if not (user.owns_election(e) or user.is_admin()):
         raise Exception("You need to login!")
     Election.query.filter_by(id=election_id).delete()
     db.session.commit()
@@ -103,7 +137,7 @@ def evaluate(election_id, user):
     :return:
     """
     e = get_election(election_id)
-    if not user.owns_election(e):
+    if not (user.owns_election(e) or user.is_admin()):
         raise Exception("You need to login!")
     e.recompute_current_winner()
     db.session.add(e)
@@ -119,7 +153,7 @@ def stop_election(election_id, user):
     :return:
     """
     e = get_election(election_id)
-    if not user.owns_election(e):
+    if not (user.owns_election(e) or user.is_admin()):
         raise Exception("You need to login!")
     e.stop()
     db.session.add(e)

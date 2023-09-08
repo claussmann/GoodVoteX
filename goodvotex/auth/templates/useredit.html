@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Edit User:</h1>
+
+<hr>
+<h4>User Information</h4>
+<b>{{edituser.name}}</b>
+<br>
+<b>Username:</b> {{edituser.username}}
+<br>
+<b>Mail:</b> {{edituser.email}}
+
+<hr>
+<h4>Settings</h4>
+<table class="table">
+    <tr>
+        <td><b>Voting Permission</b></td>
+        {% if edituser.can_vote() %}
+            <td>This user is allowed to vote. Click to toggle voting permission off.</td>
+            <td class="text-end">
+                <form action="/useredit/permissions/{{edituser.username}}" method="post">
+                    <button type="submit" class="btn btn-success" name="vote" value="false">Allowed</button>
+                </form>
+            </td>
+        {% else %}
+            <td>This user is not allowed to vote. Click to toggle voting permission on.</td>
+            <td class="text-end">
+                <form action="/useredit/permissions/{{edituser.username}}" method="post">
+                    <button type="submit" class="btn btn-danger" name="vote" value="true">Disallowed</button>
+                </form>
+            </td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td><b>Create Election</b></td>
+        {% if edituser.can_create() %}
+            <td>This user is allowed to create elections. Click to toggle permission off.</td>
+            <td class="text-end">
+                <form action="/useredit/permissions/{{edituser.username}}" method="post">
+                    <button type="submit" class="btn btn-success" name="create" value="false">Allowed</button>
+                </form>
+            </td>
+        {% else %}
+            <td>This user is not allowed to create elections. Click to toggle permission on.</td>
+            <td class="text-end">
+                <form action="/useredit/permissions/{{edituser.username}}" method="post">
+                    <button type="submit" class="btn btn-danger" name="create" value="true">Disallowed</button>
+                </form>
+            </td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td><b>Reset Password</b></td>
+        <td>Assign a new password to the user.</td>
+        <td>
+            <form action="/useredit/resetpassword/{{edituser.username}}" method="post" class="d-flex flex-row text-end">
+                <input type="password" id="passwd_reset" name="passwd_reset" class="form-control" autocomplete="new-password" placeholder="New Password" required>
+                &nbsp;
+                <input type="submit" value="Change Password" class="btn btn-info">
+            </form>
+        </td>
+    </tr>
+    <tr>
+        <td><b>Delete User</b></td>
+        <td>This will permanently delete the user <b>{{edituser.username}}</b> and all elections created by this user.</td>
+        <td class="text-end">
+            <form action="/useredit/delete/{{edituser.username}}" method="post">
+                <input type="submit" value="Delete" class="btn btn-danger" onclick="return confirm('This user will be deleted. This cannot be undone. Do you want to continue?')">
+            </form>
+        </td>
+    </tr>
+</table>
+
+<hr>
+<h4>Elections</h4>
+<table class="table">
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th></th>
+    </tr>
+    {% for e in edituser.elections %}
+        <tr>
+            <td>{{e.id}}</td>
+            <td>{{e.title}}</td>
+            <td>{% if e.is_stopped %} Stopped {% else %} Active {% endif %}</td>
+            <td class="text-end"><a href="/details/{{e.id}}"><button type="button" class="btn btn-info">View</button></a></td>
+        </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

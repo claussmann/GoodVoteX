@@ -8,10 +8,14 @@ from . import service
 @click.argument("name")
 @click.argument("email")
 @click.argument("password")
-def add_user(username, name, email, password):
+@click.argument("admin")
+def add_user(username, name, email, password, admin):
     if service.get_user(username) is None:
         print("Creating user '{}' (email: {}) with login '{} : {}'".format(name, username, email, password))
         service.register_user(username, name, email, password)
+        service.update_user_permissions(username, vote=True, create=True)
+        if admin:
+            service.update_user_permissions(username, admin=True)
     else:
         print("A user with username '{}' already exists. Consider running 'change-pass' instead?".format(username))
 

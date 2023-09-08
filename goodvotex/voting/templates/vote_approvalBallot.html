@@ -1,42 +1,20 @@
-{%extends "base.html" %}
+{%extends "vote.html" %}
 
-{% block head %}
+
+{%block votingguide%}
+
+  Simply click all the candidates you like.
+
 {% endblock %}
 
-{%block content%}
 
-<div class="col-sm-8 mx-auto mb-3">
-  <div class="card text-dark bg-light">
-      <div class="card-header">
-          <b>{{ election.title }}</b>
-      </div>
-      <div class="card-body">
-          <b>Description:</b>
-          <p>
-              {% for line in election.description.split("\n") %}
-                  {{ line }}<br>
-              {% endfor %}
-          </p>
-          <br>
-          <b>Committee Size:</b> {{election.committeesize}}
-      </div>
-  </div>
-</div>
-
-
-{% if election.is_stopped %} 
-
-  <div class="alert alert-danger" role="alert">
-    This election was closed already.
-  </div>
-
-{% else %}
+{%block votingprocess%}
 
   <div class="mb-2" id="step0">
     <h2>Please select all candidates you like.</h2>
     
     <div id="candidateSelection" class="mb-3">
-      {% for candidate in election.candidates %}
+      {% for candidate in election.get_candidates_random_order() %}
         <button id="{{candidate.id}}" type="button" class="btn btn-outline-primary" data-bs-toggle="button" autocomplete="off">{{candidate.name}}</button>
       {% endfor %}
     </div>
@@ -45,10 +23,6 @@
     
   </div>
 
-{% endif %} 
-
-
-    
 {% endblock %}
 
 

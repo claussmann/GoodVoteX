@@ -1,0 +1,119 @@
+{%extends "vote.html" %}
+
+
+{%block votingguide%}
+
+  For each candidate move the slider to indicate how much you like or hate them.
+  The middle indicates you neither hate nor like them.
+  The further right you draw the slider, the more you like them.
+  Sliding left indicates a dislike.
+
+
+{% endblock %}
+
+
+{%block votingprocess%}
+
+  <div class="mb-2 mt-5">
+    <div style="height:5px; width:12%; background-color: rgb(163, 0, 0); display:inline-block;"></div>
+    <div style="height:5px; width:14%; background-color: rgb(212, 10, 10); display:inline-block"></div>
+    <div style="height:5px; width:10%; background-color: rgb(216, 80, 2); display:inline-block"></div>
+    <div style="height:5px; width:10%; background-color: rgb(231, 209, 8); display:inline-block"></div>
+    <div style="height:5px; width:6%; background-color: rgb(145, 145, 145); display:inline-block"></div>
+    <div style="height:5px; width:9%; background-color: rgb(204, 255, 108); display:inline-block"></div>
+    <div style="height:5px; width:10%; background-color: rgb(174, 243, 47); display:inline-block"></div>
+    <div style="height:5px; width:13%; background-color: rgb(145, 212, 18); display:inline-block"></div>
+    <div style="height:5px; width:13.5%; background-color: rgb(92, 138, 6); display:inline-block"></div>
+    <div style="clear: both;" class="mb-3"></div>
+    <div id="all_candidates" class="mb-2">
+    {% for candidate in election.get_candidates_random_order() %}
+    <label for="{{candidate.id}}" class="form-label">{{candidate.name}}: <span id="{{candidate.id}}-valuefield">Neutral</span></label>
+    <input type="range" class="form-range candidate" min="-10" max="10" step="1" id="{{candidate.id}}" onchange="updateSliderValue(this.id, this.value)">
+    {% endfor %}
+    </div>
+    <div style="height:5px; width:12%; background-color: rgb(163, 0, 0); display:inline-block;"></div>
+    <div style="height:5px; width:14%; background-color: rgb(212, 10, 10); display:inline-block"></div>
+    <div style="height:5px; width:10%; background-color: rgb(216, 80, 2); display:inline-block"></div>
+    <div style="height:5px; width:10%; background-color: rgb(231, 209, 8); display:inline-block"></div>
+    <div style="height:5px; width:6%; background-color: rgb(145, 145, 145); display:inline-block"></div>
+    <div style="height:5px; width:9%; background-color: rgb(204, 255, 108); display:inline-block"></div>
+    <div style="height:5px; width:10%; background-color: rgb(174, 243, 47); display:inline-block"></div>
+    <div style="height:5px; width:13%; background-color: rgb(145, 212, 18); display:inline-block"></div>
+    <div style="height:5px; width:13.5%; background-color: rgb(92, 138, 6); display:inline-block"></div>
+    <div style="clear: both;" class="mb-3"></div>
+    <button class="btn btn-success" onclick="sendBallot()">Submit</button>
+  </div>
+    
+{% endblock %}
+
+
+
+
+{%block scripts%}
+  <!-- This is the required script for drag and drop actions, and the form filling and sending. -->
+  <script>
+    var url = "/vote/{{election.id}}";    
+
+    function sendBallot(){
+      var json_to_send = JSON.stringify({"type" : "cardinalBallot",
+                                         "ratings" : get_rating()});
+      console.log("sending ballot:");
+      console.log(json_to_send);
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onreadystatechange = function() { 
+        if (this.readyState == 4) {
+          if(this.status == 200){
+            window.location.href = '/done';
+          }
+          else{
+            console.log(this.responseText)
+            alert("Something went wrong. Please reload the page and try again.");
+          }
+        } 
+      };
+      xhr.send(json_to_send);
+    }
+
+    function get_rating(){
+      var values={};
+      $(".candidate").each(
+        function(){
+          values[this.id] = this.value;
+        })
+        return values;
+    }
+
+    function updateSliderValue(sliderID, value){
+          textfield = document.getElementById(sliderID + "-valuefield")
+          if (value <= -8){
+            textfield.textContent = "The worst candidate ever!"
+          }
+          else if (value <= -5){
+            textfield.textContent = "Very bad candidate."
+          }
+          else if (value <= -3){
+            textfield.textContent = "Bad candidate."
+          }
+          else if (value < 0){
+            textfield.textContent = "I tend to not include the candidate."
+          }
+          else if (value == 0){
+            textfield.textContent = "Neutral."
+          }
+          else if (value < 3){
+            textfield.textContent = "I tend to vote for that candidate."
+          }
+          else if (value < 5){
+            textfield.textContent = "Good candidate."
+          }
+          else if (value < 8){
+            textfield.textContent = "Very good candidate."
+          }
+          else{
+            textfield.textContent = "Best candidate ever!"
+          }
+        }
+  </script>
+{% endblock %}

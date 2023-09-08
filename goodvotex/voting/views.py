@@ -7,19 +7,23 @@ from . import service, voting, logger
 
 @voting.route('/', methods=['GET'])
 def start_page():
-    return render_template('start.html', trending_elections=service.get_all_elections())
+    return render_template('start.html', trending_elections=service.get_trending_elections())
 
 @voting.route('/create', methods=['GET', 'POST'])
+@login_required
 def create_election_page():
     if request.method == 'POST':
         ballot_type = request.form.get('type')
         candidates = set(filter(len, request.form.getlist('candidates[]')))
-        if len(candidates) != len(list(filter(len, request.form.getlist('candidates[]')))):
+        if not current_user.can_create():
+            # User cannot create an election.
+            flash("You don't have permission to create an election.", "danger")
+        elif len(candidates) != len(list(filter(len, request.form.getlist('candidates[]')))):
             # at least one name was present twice
-            flash("Candidate names must be unique. Creation failed.", "error")
-        if len(candidates) <= int(request.form.get('committeesize')):
+            flash("Candidate names must be unique. Creation failed.", "danger")
+        elif len(candidates) <= int(request.form.get('committeesize')):
             # candidate set must be larger than committee-size.
-            flash("Candidate set must be larger than committee-size.", "error")
+            flash("Candidate set must be larger than committee-size.", "danger")
         else:
             # we can continue creation with the given candidate set.
             election = service.register_election(
@@ -54,7 +58,7 @@ def search_election():
 @voting.route('/details/<electionID>', methods=['GET', 'POST'])
 def details_page(electionID):
     election = service.get_election(electionID)
-    if current_user.is_authenticated and current_user.owns_election(election):
+    if current_user.is_authenticated and (current_user.owns_election(election) or current_user.is_admin()):
         service.evaluate(electionID, current_user)
         return render_template('details.html', election=election, admin=True)
     return render_template('details.html', election=election, admin=False)
@@ -63,7 +67,7 @@ def details_page(electionID):
 @voting.route('/vote/<electionID>')
 def voting_page(electionID):
     election=service.get_election(electionID)
-    return render_template('vote_%s.html' % election.ballot_type, election=election)
+    return render_template('vote_%s.html' % election.get_ballot_type(), election=election)
 
 
 @voting.route('/vote/<electionID>', methods=['POST'])
@@ -100,7 +104,7 @@ def page_not_found(e):
 
 
 @voting.errorhandler(400)
-def page_not_found(e):
+def error(e):
     return render_template('errors/400.html'), 400
 
 

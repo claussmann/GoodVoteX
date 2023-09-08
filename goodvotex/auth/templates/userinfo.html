@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="mb-5">
+    <h4>Settings</h4>
+    <table class="table">
+        <tr>
+            <td><b>Display Name</b></td>
+            <td>{{user.name}}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><b>Username</b></td>
+            <td>{{user.username}}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><b>Mail</b></td>
+            <td>{{user.email}}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><b>Theme</b></td>
+            <td>You are currently using {% if user.theme == "dark" %}dark{% else %}light{% endif %} theme.</td>
+            <td class="text-end">
+                <form action="/toggletheme" method="post">
+                    <button class="btn btn-info">Use {% if user.theme == "dark" %}Light{% else %}Dark{% endif %} Theme</button>
+                </form>
+            </td>
+        </tr>
+    </table>
+    <form action="/changepasswd" method="post" class="d-flex flex-row">
+        <input type="password" id="passwd_old" name="passwd" class="form-control" placeholder="Password" required>
+        &nbsp;
+        <input type="password" id="passwd_new" name="new_passwd" class="form-control" placeholder="New Password" required>
+        &nbsp;
+        <input type="password" id="passwd_confirm" name="confirm_passwd" class="form-control" placeholder="Confirm New Password" required>
+        &nbsp;
+        <input type="submit" value="Change Password" class="btn btn-info">
+    </form>
+</div>
+
+<div class="mb-5">
+    <h4>Elections</h4>
+    <table class="table">
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th class="text-end"><a href="/create"><button type="button" class="btn btn-warning">New Election</button></a></th>
+        </tr>
+        {% for e in user.elections %}
+            <tr>
+                <td>{{e.id}}</td>
+                <td>{{e.title}}</td>
+                <td>{% if e.is_stopped %} Stopped {% else %} Active {% endif %}</td>
+                <td class="text-end"><a href="/details/{{e.id}}"><button type="button" class="btn btn-info">View</button></a></td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}
