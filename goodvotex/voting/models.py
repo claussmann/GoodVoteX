@@ -39,6 +39,15 @@ class Election(db.Model):
             return self.id == other.id
         except:
             return False
+    
+    def get_candidates_random_order(self):
+        """
+        This will return the candidates of this election in random order. This
+        is helpful when the voter is confronted with the candidates to avoid bias.
+        """
+        ret = list(self.candidates)
+        random.shuffle(ret)
+        return ret
 
     def add_ballot(self, ballot):
         """
@@ -742,9 +751,11 @@ class BoundedApprovalBallot(Ballot):
         bounds = json_content["bounds"]
         re_encoded = []
         for name,s in sets.items():
-            s = list(set(s)) # make sure no element is dublicate
-            re_encoded.append([s, bounds[name]])
+            if len(s) > 0:
+                s = list(set(s)) # make sure no element is dublicate
+                re_encoded.append([s, bounds[name]])
         self.json_encoded = json.dumps(re_encoded)
+        print(self.json_encoded)
     
     def get_involved_candidates(self):
         pairs = self._decode()
