@@ -19,7 +19,7 @@
     {% for candidate in election.candidates %}
     <div class="candidate mb-1" id="{{candidate.id}}">
       <button id="{{candidate.id}}_up" type="button" class="btn mr-2 btn-outline-secondary btn-lg" onclick="move_up(this)">&uarr;</button>
-      <button type="button" class="btn btn-primary btn-lg" disabled>{{candidate.name}}</button>
+      <button type="button" class="btn btn-primary btn-lg overflow-hidden text-nowrap" style="min-width: 250px; max-width: 250px;" disabled>{{candidate.name}}</button>
       <button id="{{candidate.id}}_down" type="button" class="btn btn-outline-secondary mr-2 btn-lg" onclick="move_down(this)">&darr;</button>
     </div>
     {% endfor %}
