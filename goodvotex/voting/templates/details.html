@@ -42,11 +42,11 @@
                 {% endif %}
             </p>
             
-            <p>
+            <div class="row">
                 {% for candidate in election.candidates %}
-                    <button id="{{candidate.id}}" type="button" class="btn btn-primary mb-1 mr-1" disabled>{{candidate.name}}</button>
+                    <div class="col-3"><div class="card mb-2"><div class="card-header text-center text-nowrap overflow-hidden">{{candidate.name}}</div></div></div>
                 {% endfor %}
-            </p>
+            </div>
 
 
             {% if admin %}
@@ -58,9 +58,9 @@
                     A total of <b>{{election.votecount}} voters</b> participated (election is <b>closed</b>).
                     <br>
                     The winner committee is:
-                    <div>
+                    <div class="row">
                         {% for candidate in election.get_winners() %}
-                            <button id="{{candidate.id}}" type="button" class="btn btn-primary mb-1 mr-1" disabled>{{candidate.name}}</button>
+                            <div class="col-3"><div class="card mb-2"><div class="card-header text-center text-nowrap overflow-hidden">{{candidate.name}}</div></div></div>
                         {% endfor %}
                     </div>
                 {% else %}
@@ -68,9 +68,9 @@
                     Currently <b>{{election.votecount}} voters</b> participated (election is still <b>open</b>).
                     <br>
                     Currently, the winner(s) is (are):
-                    <div class="mb-2 mt-2">
+                    <div class="mb-2 mt-2 row">
                         {% for candidate in election.get_winners() %}
-                            <button id="{{candidate.id}}" type="button" class="btn btn-primary mb-1 mr-1" disabled>{{candidate.name}}</button>
+                            <div class="col-3"><div class="card mb-2"><div class="card-header text-center text-nowrap overflow-hidden">{{candidate.name}}</div></div></div>
                         {% endfor %}
                     </div>
                     Please note that some voting rules produce a smaller committee than the intended size, e.g., because there were not sufficiently many votes to construct a complete committee yet.
