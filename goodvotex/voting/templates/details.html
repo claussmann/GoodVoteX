@@ -42,27 +42,30 @@
                 {% endif %}
             </p>
             
-            <div class="row">
-                {% for candidate in election.candidates %}
-                    <div class="col-3"><div class="card mb-2"><div class="card-header text-center text-nowrap overflow-hidden">{{candidate.name}}</div></div></div>
-                {% endfor %}
-            </div>
+            {% if election.is_stopped %}
+                <b>The winner committee is:</b>
+                <div class="row">
+                    {% for candidate in election.get_winners() %}
+                        <div class="col-3"><div class="card mb-2"><div class="card-header text-center text-nowrap overflow-hidden">{{candidate.name}}</div></div></div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <b>The candidates are:</b>
+                <div class="row">
+                    {% for candidate in election.candidates %}
+                        <div class="col-3"><div class="card mb-2"><div class="card-header text-center text-nowrap overflow-hidden">{{candidate.name}}</div></div></div>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
 
             {% if admin %}
                 <hr>
-                <b>This information is only visible for the owner of the election.</b>
+                <b>The following information is only visible for the owner of the election.</b>
                 <br>
                 {% if election.is_stopped %}
                     <br>
                     A total of <b>{{election.votecount}} voters</b> participated (election is <b>closed</b>).
-                    <br>
-                    The winner committee is:
-                    <div class="row">
-                        {% for candidate in election.get_winners() %}
-                            <div class="col-3"><div class="card mb-2"><div class="card-header text-center text-nowrap overflow-hidden">{{candidate.name}}</div></div></div>
-                        {% endfor %}
-                    </div>
                 {% else %}
                     <br>
                     Currently <b>{{election.votecount}} voters</b> participated (election is still <b>open</b>).
