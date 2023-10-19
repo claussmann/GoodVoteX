@@ -131,7 +131,7 @@
                         <div class="clearfix"></div>
                     </div>
                     <div class="form-group mb-3">
-                        <select name="type" class="form-select">
+                        <select id="type-sw" name="type" class="form-select">
                             <option value="approvalElection">Approval Voting</option>
                             <option value="savElection">Satisfaction Approval Voting</option>
                             <option value="bordaElection">Borda Election</option>
@@ -141,7 +141,20 @@
                             <option value="stvElection">Single Transferable Vote</option>
                             <option value="utilitarianElection">Utilitarian Election</option>
                         </select>
-                        <small class="form-text text-muted">Select the voting method for your election. You can find descriptions below.</small>
+                        <small class="form-text text-muted">Select the voting method for your election.</small>
+                    </div>
+                    <div id="sw-approvalElection" style="display: none;">
+                        <p class="form-text text-muted">
+                            Approval elections are very simple and common.
+                            Every voter selects each alternative he/she likes (as many as they want).
+                            The winner(s) is/are the candidate(s) with highest number of approvals.
+                        </p>
+                        <ul class="form-text text-muted">
+                            <li><b>Ballots:</b> Approval Ballots</li>
+                            <li><b>Pros:</b> Simple and easy to understand</li>
+                            <li><b>Cons:</b> Not very expressive; no proportionality or diversity guarantees</li>
+                            <li><b>Use Cases:</b> Selecting an appointment</li>
+                        </ul>
                     </div>
                     <div class="form-group mb-3">
                         <select id="committeesize" name="committeesize" class="form-select" hidden>
@@ -455,5 +468,9 @@
             document.getElementById("nav-mw").classList.add('active');
             document.getElementById("nav-sw").classList.remove('active');
         }
+
+        document.getElementById("type-sw").addEventListener("change", (e) => {
+            $("div#sw-"+e.target.value).css('display', 'block');
+        });
     </script>
 {% endblock %}
