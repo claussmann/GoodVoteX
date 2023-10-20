@@ -44,21 +44,11 @@
                                             <a href="/details/{{ trending_elections[0].id }}">(read more)</a>
                                             <br>
                                         {% endif %}
+                                        <b>Candidates:</b>
+                                        {% for candidate in trending_elections[0].candidates %}
+                                            {{candidate.name}},
+                                        {% endfor %}
                                     </p>
-                                    <br>
-                                    <div class="row">
-                                        {% if trending_elections[0].candidates|length <= 7 %}
-                                            {% for candidate in trending_elections[0].candidates %}
-                                                <div class="col-3"><div class="card mb-2"><div class="card-header text-center text-nowrap overflow-hidden">{{candidate.name}}</div></div></div>
-                                            {% endfor %}
-                                        {% else %}
-                                            {% for candidate in trending_elections[0].candidates[:7] %}
-                                                <div class="col-3"><div class="card mb-2"><div class="card-header text-center text-nowrap overflow-hidden">{{candidate.name}}</div></div></div>
-                                            {% endfor %}
-                                            <div class="col-3"><div class="card"><div class="card-header text-center text-nowrap overflow-hidden"><a href="/details/{{ trending_elections[0].id }}">(more)</a></div></div></div>
-                                        {% endif %}
-                                    </div>
-                                    <div style="clear: both;"></div>
                                 </div>
                             </div>
                         </div>
@@ -97,21 +87,11 @@
                                                 <a href="/details/{{ e.id }}">(read more)</a>
                                                 <br>
                                             {% endif %}
+                                            <b>Candidates:</b>
+                                            {% for candidate in trending_elections[0].candidates %}
+                                                {{candidate.name}},
+                                            {% endfor %}
                                         </p>
-                                        <br>
-                                        <div class="row">
-                                            {% if e.candidates|length <= 7 %}
-                                                {% for candidate in e.candidates %}
-                                                    <div class="col-3"><div class="card mb-2"><div class="card-header text-center text-nowrap overflow-hidden">{{candidate.name}}</div></div></div>
-                                                {% endfor %}
-                                            {% else %}
-                                                {% for candidate in e.candidates[:7] %}
-                                                    <div class="col-3"><div class="card mb-2"><div class="card-header text-center text-nowrap overflow-hidden">{{candidate.name}}</div></div></div>
-                                                {% endfor %}
-                                                <div class="col-3"><div class="card"><div class="card-header text-center text-nowrap overflow-hidden"><a href="/details/{{ e.id }}">(more)</a></div></div></div>
-                                            {% endif %}
-                                        </div>
-                                        <div style="clear: both;"></div>
                                     </div>
                                 </div>
                             </div>
