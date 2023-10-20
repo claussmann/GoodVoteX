@@ -27,7 +27,7 @@
   <div id="step1" class="mb-2 mt-5">
     <div id="candidateSelection" class="mb-3">
       {% for candidate in election.get_candidates_random_order() %}
-        <button id="{{candidate.id}}" type="button" class="btn btn-outline-primary btn-lg overflow-hidden text-nowrap" style="margin-left : 5px; margin-right : 5px; max-width: 70%;" data-bs-toggle="button" autocomplete="off">{{candidate.name}}</button>
+        <button id="{{candidate.id}}" type="button" class="btn btn-outline-primary btn-lg overflow-hidden text-nowrap" style="margin-left : 5px; margin-right : 5px; margin-bottom: 2px; width: 12vw;" data-bs-toggle="button" autocomplete="off">{{candidate.name}}</button>
       {% endfor %}
     </div>
     <button class="btn btn-success" onclick="finishApproval()">Continue with Step 2</button>
